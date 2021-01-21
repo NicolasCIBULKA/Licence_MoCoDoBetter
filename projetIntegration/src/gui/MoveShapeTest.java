@@ -12,8 +12,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 
 public class MoveShapeTest extends JPanel {
 	private Rectangle2D.Float myRect = new Rectangle2D.Float(50, 50, 50, 50);
@@ -33,7 +36,7 @@ public class MoveShapeTest extends JPanel {
 	private JLabel jlaXR2 = new JLabel("X : 200");
 	private JLabel jlaYR2 = new JLabel("Y : 200");
 
-	public MouseMoveShapeTest1() {
+	public MoveShapeTest() {
 		addMouseMotionListener(ma);
 		addMouseListener(ma);
 		addMouseWheelListener(new ScaleHandler());
@@ -165,4 +168,23 @@ public class MoveShapeTest extends JPanel {
 				}
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		JFrame frame = new JFrame("Moving and Scaling");
+		MoveShapeTest m = new MoveShapeTest();
+		m.setDoubleBuffered(true);
+		m.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		GridLayout gl = new GridLayout(2, 1);
+		frame.setLayout(gl);
+		frame.add(m);
+		frame.add(jpl);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(PANEL_SIZE);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+
+	}
 }
+
+
