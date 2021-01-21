@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -17,8 +18,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-
-public class MoveShapeTest extends JPanel {
+/**
+ * Will surely become the main GUI class after many crash tests
+ * 
+ * @author Yann Barrachina
+ *
+ */
+public class MoveShapeTest extends JFrame {
 	private Rectangle2D.Float myRect = new Rectangle2D.Float(50, 50, 50, 50);
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200, 200, 50, 50);
 	private MovingAdapter ma = new MovingAdapter();
@@ -27,7 +33,9 @@ public class MoveShapeTest extends JPanel {
 
 	private static final Dimension PANEL_SIZE = new Dimension(300, 600);
 
-	private static JPanel jpl = new JPanel();
+	private JFrame theFrame;
+	private ShapePanel sp;
+	private JPanel jpl = new JPanel();
 
 	private JLabel jlaR1 = new JLabel("Rect1");
 	private JLabel jlaR2 = new JLabel("Rect2");
@@ -37,6 +45,20 @@ public class MoveShapeTest extends JPanel {
 	private JLabel jlaYR2 = new JLabel("Y : 200");
 
 	public MoveShapeTest() {
+		theFrame = this;
+		initLayout();
+	}
+
+	public void initLayout() {
+		setTitle("Moving and Scaling");
+
+		GridLayout gl = new GridLayout(2, 1);
+		Container contentPane = getContentPane();
+		contentPane.setLayout(gl);
+
+		sp = new ShapePanel();
+		sp.addShape(myRect);
+
 		addMouseMotionListener(ma);
 		addMouseListener(ma);
 		addMouseWheelListener(new ScaleHandler());
@@ -50,26 +72,12 @@ public class MoveShapeTest extends JPanel {
 		jpl.add(jlaYR1);
 		jpl.add(jlaYR2);
 
-	}
-
-	public void paint(Graphics g) {
-		super.paint(g);
-
-		Graphics2D g2d = (Graphics2D) g;
-
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-		g2d.setColor(new Color(0, 0, 200));
-		g2d.fill(myRect);
-
-		Graphics2D g2d2 = (Graphics2D) g;
-
-		g2d2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-		g2d2.setColor(new Color(100, 0, 100));
-		g2d2.fill(myRect2);
+		contentPane.add(sp);
+		contentPane.add(jpl);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setSize(PANEL_SIZE);
+		setLocationRelativeTo(null);
+		setVisible(true);
 	}
 
 	/**
@@ -103,13 +111,13 @@ public class MoveShapeTest extends JPanel {
 
 		public void mouseDragged(MouseEvent e) {
 
-			int dx = e.getX() - x;
-			int dy = e.getY() - y;
-
-			float newX = tempRect.x + dx;
-			float newY = tempRect.y + dy;
-
 			if (tempRect != null) {
+				int dx = e.getX() - x;
+				int dy = e.getY() - y;
+
+				float newX = tempRect.x + dx;
+				float newY = tempRect.y + dy;
+
 				if (newX > 0 && newX < 250) {
 					tempRect.x += dx;
 				}
@@ -122,6 +130,9 @@ public class MoveShapeTest extends JPanel {
 				jlaXR2.setText("X : " + myRect2.x);
 				jlaYR2.setText("Y : " + myRect2.y);
 				repaint();
+
+				x += dx;
+				y += dy;
 			}
 
 			/*
@@ -136,8 +147,7 @@ public class MoveShapeTest extends JPanel {
 			 * position du rectangle en conséquence myRect.x += dx; myRect.y += dy;
 			 * repaint(); }
 			 */
-			x += dx;
-			y += dy;
+
 		}
 
 	}
@@ -169,22 +179,9 @@ public class MoveShapeTest extends JPanel {
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) {
-		JFrame frame = new JFrame("Moving and Scaling");
-		MoveShapeTest m = new MoveShapeTest();
-		m.setDoubleBuffered(true);
-		m.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		GridLayout gl = new GridLayout(2, 1);
-		frame.setLayout(gl);
-		frame.add(m);
-		frame.add(jpl);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(PANEL_SIZE);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		new MoveShapeTest();
 
 	}
 }
-
-
