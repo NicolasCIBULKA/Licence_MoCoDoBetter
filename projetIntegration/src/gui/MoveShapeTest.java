@@ -1,19 +1,15 @@
 package gui;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,15 +21,19 @@ import javax.swing.JPanel;
  *
  */
 public class MoveShapeTest extends JFrame {
-	private Rectangle2D.Float myRect = new Rectangle2D.Float(50, 50, 50, 50);
-	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200, 200, 50, 50);
-	private MovingAdapter ma = new MovingAdapter();
+	private Rectangle2D.Float myRect = new Rectangle2D.Float(50.0f, 50.0f, 50.0f, 50.0f);
 
-	private Rectangle2D.Float tempRect;
+	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
+
+	private ShapeGroup selectedComponent;
+
+	private Line2D.Float line = new Line2D.Float(20.0f, 20.0f, 80.0f, 80.0f);
+
+	private MovingAdapter ma = new MovingAdapter();
 
 	private static final Dimension PANEL_SIZE = new Dimension(300, 600);
 
-	private JFrame theFrame;
+//	private JFrame theFrame;
 	private ShapePanel sp;
 	private JPanel jpl = new JPanel();
 
@@ -45,7 +45,7 @@ public class MoveShapeTest extends JFrame {
 	private JLabel jlaYR2 = new JLabel("Y : 200");
 
 	public MoveShapeTest() {
-		theFrame = this;
+//		theFrame = this;
 		initLayout();
 	}
 
@@ -57,11 +57,11 @@ public class MoveShapeTest extends JFrame {
 		contentPane.setLayout(gl);
 
 		sp = new ShapePanel();
-		sp.addShape(myRect);
+		sp.addShape(50.0f, 50.0f, true);
 
 		addMouseMotionListener(ma);
 		addMouseListener(ma);
-		addMouseWheelListener(new ScaleHandler());
+//		addMouseWheelListener(new ScaleHandler());
 
 		GridLayout glInfo = new GridLayout(3, 2);
 		jpl.setLayout(glInfo);
@@ -81,7 +81,7 @@ public class MoveShapeTest extends JFrame {
 	}
 
 	/**
-	 * Fait bouger le rectangle à partir des coordonnées du curseur
+	 * Moves shqpes from cursor coordinates
 	 *
 	 */
 	class MovingAdapter extends MouseAdapter {
@@ -94,39 +94,50 @@ public class MoveShapeTest extends JFrame {
 			x = e.getX();
 			y = e.getY();
 
-			if (myRect2.getBounds2D().contains(x, y)) {
-				tempRect = myRect2;
-				jlaR1.setText("Rect1");
-				jlaR2.setText(">>>Rect2<<<");
+			for (ShapeGroup component : sp.getAlComponents()) {
+				if (component.getMainShape().contains(x, y)) {
 
-			} else if (myRect.getBounds2D().contains(x, y)) {
-				tempRect = myRect;
-				jlaR2.setText("Rect2");
-				jlaR1.setText(">>>Rect1<<<");
+					selectedComponent = component;
+					jlaR2.setText("Rect2");
+					jlaR1.setText(">>>Rect1<<<");
 
-			} else {
-				tempRect = null;
+				} else {
+
+					selectedComponent = null;
+					jlaR1.setText("Rect1");
+					jlaR2.setText("Rect2");
+				}
 			}
+
 		}
 
 		public void mouseDragged(MouseEvent e) {
 
-			if (tempRect != null) {
+			if (selectedComponent != null) {
+
 				int dx = e.getX() - x;
 				int dy = e.getY() - y;
 
-				float newX = tempRect.x + dx;
-				float newY = tempRect.y + dy;
+				float newX = selectedComponent.getX() + dx;
+				float newY = selectedComponent.getY() + dy;
 
-				if (newX > 0 && newX < 250) {
-					tempRect.x += dx;
+				// Checking if component is at the border of the frame
+				Dimension currentPanelSize = new Dimension(sp.getSize());
+				float componentXLimit = (float) currentPanelSize.getWidth() - selectedComponent.getWidth();
+				float componentYLimit = (float) currentPanelSize.getHeight() - selectedComponent.getHeight();
+
+				if (newX > 0 && newX < componentXLimit) {
+
+					selectedComponent.setGroupAbscissa(newX);
+
 				}
-				if (newY > 0 && newY < 250) {
-					tempRect.y += dy;
+				if (newY > 0 && newY < componentYLimit) {
+					selectedComponent.setGroupOrdinate(newY);
+
 				}
 
-				jlaXR1.setText("X : " + myRect.x);
-				jlaYR1.setText("Y : " + myRect.y);
+				jlaXR1.setText("X : " + selectedComponent.getX());
+				jlaYR1.setText("Y : " + selectedComponent.getY());
 				jlaXR2.setText("X : " + myRect2.x);
 				jlaYR2.setText("Y : " + myRect2.y);
 				repaint();
@@ -134,19 +145,6 @@ public class MoveShapeTest extends JFrame {
 				x += dx;
 				y += dy;
 			}
-
-			/*
-			 * // Le curseur est-il dans le rectangle ? if
-			 * (myRect2.getBounds2D().contains(x, y)) {
-			 * 
-			 * // Modifier la position du rectangle en conséquence myRect2.x += dx;
-			 * myRect2.y += dy; repaint();
-			 * 
-			 * } // Agir sur la position du second rectabgle en premier car il est au
-			 * premier plan else if(myRect.getBounds2D().contains(x, y)){ // Modifier la
-			 * position du rectangle en conséquence myRect.x += dx; myRect.y += dy;
-			 * repaint(); }
-			 */
 
 		}
 
@@ -156,29 +154,29 @@ public class MoveShapeTest extends JFrame {
 	 * Modifie la taille du rectangle selon le mouvement de la molette
 	 *
 	 */
-	class ScaleHandler implements MouseWheelListener {
-		public void mouseWheelMoved(MouseWheelEvent e) {
-
-			int x = e.getX();
-			int y = e.getY();
-
-			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
-			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-
-				// Le curseur est-il dans le rectangle ?
-				if (myRect.getBounds2D().contains(x, y)) {
-
-					// Récupérer la quantité de rotation
-					float amount = e.getWheelRotation() * 5f;
-
-					// Modifier les dimension du rectangle en conséquence
-					myRect.width += amount;
-					myRect.height += amount;
-					repaint();
-				}
-			}
-		}
-	}
+//	class ScaleHandler implements MouseWheelListener {
+//		public void mouseWheelMoved(MouseWheelEvent e) {
+//
+//			int x = e.getX();
+//			int y = e.getY();
+//
+//			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
+//			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+//
+//				// Le curseur est-il dans le rectangle ?
+//				if (myRect.getBounds2D().contains(x, y)) {
+//
+//					// Récupérer la quantité de rotation
+//					float amount = e.getWheelRotation() * 5f;
+//
+//					// Modifier les dimension du rectangle en conséquence
+//					myRect.width += amount;
+//					myRect.height += amount;
+//					repaint();
+//				}
+//			}
+//		}
+//	}
 
 	public static void main(String[] args) {
 		new MoveShapeTest();
