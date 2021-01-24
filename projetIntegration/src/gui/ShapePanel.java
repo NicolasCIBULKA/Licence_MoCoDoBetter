@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -23,13 +24,15 @@ public class ShapePanel extends JPanel {
 
 	private ArrayList<ShapeGroup> alComponents = new ArrayList<ShapeGroup>();
 
-	private Color entityHeadColor = new Color(0, 100, 100);
-	private Color entityBodyColor = new Color(60, 170, 170);
+	private Color entityHeadColor = new Color(0, 150, 150);
+	private Color entitySplitColor = new Color(0, 100, 100);
+	private Color entityBodyColor = new Color(60, 190, 190);
 	private Color entityBoundColor = new Color(0, 75, 75);
 
-	private Color AssociationHeadColor = new Color(170, 30, 160);
-	private Color AssociationBodyColor = new Color(210, 110, 200);
-	private Color AssociationBoundColor = new Color(100, 50, 100);
+	private Color associationHeadColor = new Color(160, 30, 150);
+	private Color associationSplitColor = new Color(140, 50, 140);
+	private Color associationBodyColor = new Color(210, 110, 200);
+	private Color associationBoundColor = new Color(100, 50, 100);
 
 	private Graphics2D g2d;
 
@@ -53,8 +56,8 @@ public class ShapePanel extends JPanel {
 
 			} else {
 				drawAssociation(component);
-				g2d.setColor(AssociationHeadColor);
 			}
+			
 
 		}
 
@@ -118,35 +121,66 @@ public class ShapePanel extends JPanel {
 	 * @param y          the Y coordinate of the new component
 	 * @param entityType defines if the component is an entity or an association
 	 */
-	public void addShape(float x, float y, boolean entityType) {
-		ShapeGroup component = new ShapeGroup(x, y, entityType);
+	public void addShape(float x, float y, boolean entityType, String name) {
+		ShapeGroup component = new ShapeGroup(x, y, entityType, name);
 		alComponents.add(0, component);
 	}
 
 	public void drawEntity(ShapeGroup component) {
 
-		BasicStroke stroke = new BasicStroke(5);
-		g2d.setColor(entityBoundColor);
-		g2d.setStroke(stroke);
-		g2d.draw(new Rectangle2D.Double(component.getMainShape().getBounds2D().getX() - 1, component.getMainShape().getBounds2D().getY() - 1,
-				component.getMainShape().getBounds2D().getWidth() + 1, component.getMainShape().getBounds2D().getHeight() + 1));
-		
-		g2d.setColor(entityHeadColor);
+		g2d.setColor(entityBodyColor);
 		g2d.fill(component.getMainShape());
 
-		g2d.setColor(entityBodyColor);
-		g2d.fill(component.getBodyShape());
+		g2d.setColor(entityHeadColor);
+		g2d.fill(component.getHeadShape());
+
+		BasicStroke headStroke = new BasicStroke(3);
+		g2d.setColor(entitySplitColor);
+		g2d.setStroke(headStroke);
+		g2d.draw(new Rectangle2D.Double(component.getHeadShape().getBounds2D().getX() - 1,
+				component.getHeadShape().getBounds2D().getY() - 1,
+				component.getHeadShape().getBounds2D().getWidth() + 1,
+				component.getHeadShape().getBounds2D().getHeight() + 1));
+
+		BasicStroke boundStroke = new BasicStroke(3);
+		g2d.setColor(entityBoundColor);
+		g2d.setStroke(boundStroke);
+		g2d.draw(new Rectangle2D.Double(component.getMainShape().getBounds2D().getX() - 1,
+				component.getMainShape().getBounds2D().getY() - 1,
+				component.getMainShape().getBounds2D().getWidth() + 1,
+				component.getMainShape().getBounds2D().getHeight() + 1));
+		
+		g2d.setColor(Color.black);
+		g2d.drawString(component.getGroupName(), component.getX()+70.0f, component.getY()+30.0f);
 
 	}
 
 	public void drawAssociation(ShapeGroup component) {
 
-		g2d.setColor(AssociationHeadColor);
+		g2d.setColor(associationBodyColor);
 		g2d.fill(component.getMainShape());
 
-		g2d.setColor(AssociationBodyColor);
-		g2d.fill(component.getBodyShape());
+		g2d.setColor(associationHeadColor);
+		g2d.fill(component.getHeadShape());
 
+		BasicStroke headStroke = new BasicStroke(3);
+		g2d.setColor(associationSplitColor);
+		g2d.setStroke(headStroke);
+		g2d.draw(new RoundRectangle2D.Double(component.getHeadShape().getBounds2D().getX() - 1,
+				component.getHeadShape().getBounds2D().getY() - 1,
+				component.getHeadShape().getBounds2D().getWidth() + 1,
+				component.getHeadShape().getBounds2D().getHeight() + 1, 20.0f, 20.0f));
+
+		BasicStroke boundStroke = new BasicStroke(3);
+		g2d.setColor(associationBoundColor);
+		g2d.setStroke(boundStroke);
+		g2d.draw(new RoundRectangle2D.Double(component.getMainShape().getBounds2D().getX() - 1,
+				component.getMainShape().getBounds2D().getY() - 1,
+				component.getMainShape().getBounds2D().getWidth() + 1,
+				component.getMainShape().getBounds2D().getHeight() + 1, 20.0f, 20.0f));
+
+		g2d.setColor(Color.black);
+		g2d.drawString(component.getGroupName(), component.getX()+60.0f, component.getY()+30.0f);
 	}
 
 	/**
@@ -202,27 +236,27 @@ public class ShapePanel extends JPanel {
 	 * @return the associationHeadColor
 	 */
 	public Color getAssociationHeadColor() {
-		return AssociationHeadColor;
+		return associationHeadColor;
 	}
 
 	/**
 	 * @param associationHeadColor the associationHeadColor to set
 	 */
 	public void setAssociationHeadColor(Color associationHeadColor) {
-		AssociationHeadColor = associationHeadColor;
+		this.associationHeadColor = associationHeadColor;
 	}
 
 	/**
 	 * @return the associationBodyColor
 	 */
 	public Color getAssociationBodyColor() {
-		return AssociationBodyColor;
+		return associationBodyColor;
 	}
 
 	/**
 	 * @param associationBodyColor the associationBodyColor to set
 	 */
 	public void setAssociationBodyColor(Color associationBodyColor) {
-		AssociationBodyColor = associationBodyColor;
+		this.associationBodyColor = associationBodyColor;
 	}
 }

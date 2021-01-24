@@ -31,7 +31,7 @@ public class MoveShapeTest extends JFrame {
 
 	private MovingAdapter ma = new MovingAdapter();
 
-	private static final Dimension PANEL_SIZE = new Dimension(300, 600);
+	private static final Dimension PANEL_SIZE = new Dimension(800, 600);
 
 //	private JFrame theFrame;
 	private ShapePanel sp;
@@ -57,7 +57,10 @@ public class MoveShapeTest extends JFrame {
 		contentPane.setLayout(gl);
 
 		sp = new ShapePanel();
-		sp.addShape(50.0f, 50.0f, true);
+		
+		// TODO : remove fourth parameter, name will be selected after, not here
+		sp.addShape(50.0f, 50.0f, true, "Entity");
+		sp.addShape(400.0f, 100.0f, false, "Association");
 
 		addMouseMotionListener(ma);
 		addMouseListener(ma);
@@ -76,6 +79,7 @@ public class MoveShapeTest extends JFrame {
 		contentPane.add(jpl);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(PANEL_SIZE);
+		setResizable(false);
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
@@ -93,19 +97,22 @@ public class MoveShapeTest extends JFrame {
 		public void mousePressed(MouseEvent e) {
 			x = e.getX();
 			y = e.getY();
-
+			
+			selectedComponent = null;
+			
+			int index = 0 ;
 			for (ShapeGroup component : sp.getAlComponents()) {
+				System.out.println("Comp " + index + " entity ? " + component.isAnEntity());
+				index++ ;
+				
 				if (component.getMainShape().contains(x, y)) {
 
 					selectedComponent = component;
-					jlaR2.setText("Rect2");
 					jlaR1.setText(">>>Rect1<<<");
 
-				} else {
-
-					selectedComponent = null;
+				}
+				if(selectedComponent == null){
 					jlaR1.setText("Rect1");
-					jlaR2.setText("Rect2");
 				}
 			}
 
@@ -150,6 +157,7 @@ public class MoveShapeTest extends JFrame {
 
 	}
 
+	// TODO : scaling global du schéma de conception
 	/**
 	 * Modifie la taille du rectangle selon le mouvement de la molette
 	 *

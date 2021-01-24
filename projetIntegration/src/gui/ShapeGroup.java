@@ -7,7 +7,8 @@ import java.util.ArrayList;
 
 public class ShapeGroup {
 	private Shape mainShape;
-	private Shape bodyShape;
+	private Shape headShape;
+	private String groupName ;
 	private ArrayList<String> alEntries = new ArrayList<String>();
 
 	private float x;
@@ -17,37 +18,71 @@ public class ShapeGroup {
 
 	private boolean isAnEntity;
 
-	public ShapeGroup(float x, float y, boolean entityType) {
+	public ShapeGroup(float x, float y, boolean entityType, String groupName) {
 		this.x = x;
 		this.y = y;
 		this.isAnEntity = entityType;
+		this.groupName = groupName;
 
 		if (isAnEntity) {
 
 			mainShape = new Rectangle2D.Float(x, y, width, height);
-			bodyShape = new Rectangle2D.Float(x, x + height / 2, width, height / 2);
-			
+			headShape = new Rectangle2D.Float(x, y, width, height / 2);
+
 		} else {
 
-			mainShape = new RoundRectangle2D.Float(x, y, width, height, 10.0f, 10.0f);
-			bodyShape = new RoundRectangle2D.Float(x, x + height / 2, width, height / 2, 10.0f, 10.0f);
+			mainShape = new RoundRectangle2D.Float(x, y, width, height, 20.0f, 20.0f);
+			headShape = new RoundRectangle2D.Float(x, y, width, height / 2, 20.0f, 20.0f);
 		}
 
 	}
 
+	// TODO : update height operations, only suitable for empty entities
 	public void setGroupAbscissa(float newX) {
-		setX(newX) ;
-		((Rectangle2D) mainShape).setRect(newX, y, width, height);
+		setX(newX);
 		
-		((Rectangle2D) bodyShape).setRect(newX, y + height / 2, width, height / 2);
-		
+		if (isAnEntity) {
+			
+			((Rectangle2D) mainShape).setRect(newX, y, width, height);
+			((Rectangle2D) headShape).setRect(newX, y, width, height / 2);
+			
+		} else {
+			
+			((RoundRectangle2D) mainShape).setRoundRect(newX, y, width, height, 20.0f, 20.0f);
+			((RoundRectangle2D) headShape).setRoundRect(newX, y, width, height / 2, 20.0f, 20.0f);
+			
+		}
+
 	}
 
 	public void setGroupOrdinate(float newY) {
-		setY(newY) ;
-		((Rectangle2D) mainShape).setRect(x, newY, width, height);
+		setY(newY);
 		
-		((Rectangle2D) bodyShape).setRect(x, newY + height / 2, width, height / 2);
+		if (isAnEntity) {
+			
+			((Rectangle2D) mainShape).setRect(x, newY, width, height);
+			((Rectangle2D) headShape).setRect(x, newY, width, height / 2);
+			
+		} else {
+			
+			((RoundRectangle2D) mainShape).setRoundRect(x, newY, width, height, 20.0f, 20.0f);
+			((RoundRectangle2D) headShape).setRoundRect(x, newY, width, height / 2, 20.0f, 20.0f);
+
+		}
+	}
+
+	/**
+	 * @return the groupName
+	 */
+	public String getGroupName() {
+		return groupName;
+	}
+
+	/**
+	 * @param groupName the groupName to set
+	 */
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 	/**
@@ -130,8 +165,8 @@ public class ShapeGroup {
 	/**
 	 * @return the bodyShape
 	 */
-	public Shape getBodyShape() {
-		return bodyShape;
+	public Shape getHeadShape() {
+		return headShape;
 	}
 
 	/**
