@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class ShapeGroup {
 	private Shape mainShape;
 	private Shape headShape;
-	private String groupName ;
+	private String groupName;
 	private ArrayList<String> alEntries = new ArrayList<String>();
 
 	private float x;
@@ -40,31 +40,31 @@ public class ShapeGroup {
 	// TODO : update height operations, only suitable for empty entities
 	public void setGroupAbscissa(float newX) {
 		setX(newX);
-		
+
 		if (isAnEntity) {
-			
+
 			((Rectangle2D) mainShape).setRect(newX, y, width, height);
 			((Rectangle2D) headShape).setRect(newX, y, width, height / 2);
-			
+
 		} else {
-			
+
 			((RoundRectangle2D) mainShape).setRoundRect(newX, y, width, height, 20.0f, 20.0f);
 			((RoundRectangle2D) headShape).setRoundRect(newX, y, width, height / 2, 20.0f, 20.0f);
-			
+
 		}
 
 	}
 
 	public void setGroupOrdinate(float newY) {
 		setY(newY);
-		
+
 		if (isAnEntity) {
-			
+
 			((Rectangle2D) mainShape).setRect(x, newY, width, height);
 			((Rectangle2D) headShape).setRect(x, newY, width, height / 2);
-			
+
 		} else {
-			
+
 			((RoundRectangle2D) mainShape).setRoundRect(x, newY, width, height, 20.0f, 20.0f);
 			((RoundRectangle2D) headShape).setRoundRect(x, newY, width, height / 2, 20.0f, 20.0f);
 
