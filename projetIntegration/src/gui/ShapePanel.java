@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class ShapePanel extends JPanel {
 	private JPanel mainPanel;
 
 	private ArrayList<ShapeGroup> alComponents = new ArrayList<ShapeGroup>();
+	private ArrayList<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
 
 	private Color entityHeadColor = new Color(0, 150, 150);
 	private Color entitySplitColor = new Color(0, 100, 100);
@@ -49,6 +51,10 @@ public class ShapePanel extends JPanel {
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+		for (Line2D.Float line : alLines) {
+			g2d.draw(line);
+		}
+
 		System.out.println("---- " + alComponents.size() + " component(s)");
 		for (ShapeGroup component : alComponents) {
 			if (component.isAnEntity()) {
@@ -57,7 +63,6 @@ public class ShapePanel extends JPanel {
 			} else {
 				drawAssociation(component);
 			}
-			
 
 		}
 
@@ -121,9 +126,14 @@ public class ShapePanel extends JPanel {
 	 * @param y          the Y coordinate of the new component
 	 * @param entityType defines if the component is an entity or an association
 	 */
-	public void addShape(float x, float y, boolean entityType, String name) {
+	public void addShapeGroup(float x, float y, boolean entityType, String name) {
 		ShapeGroup component = new ShapeGroup(x, y, entityType, name);
 		alComponents.add(0, component);
+	}
+
+	public void addLine(float startX, float startY, float endX, float endY) {
+		Line2D.Float line = new Line2D.Float(startX, startY, endX, endY);
+		alLines.add(line);
 	}
 
 	public void drawEntity(ShapeGroup component) {
@@ -149,9 +159,9 @@ public class ShapePanel extends JPanel {
 				component.getMainShape().getBounds2D().getY() - 1,
 				component.getMainShape().getBounds2D().getWidth() + 1,
 				component.getMainShape().getBounds2D().getHeight() + 1));
-		
+
 		g2d.setColor(Color.black);
-		g2d.drawString(component.getGroupName(), component.getX()+70.0f, component.getY()+30.0f);
+		g2d.drawString(component.getGroupName(), component.getX() + 70.0f, component.getY() + 30.0f);
 
 	}
 
@@ -180,7 +190,7 @@ public class ShapePanel extends JPanel {
 				component.getMainShape().getBounds2D().getHeight() + 1, 20.0f, 20.0f));
 
 		g2d.setColor(Color.black);
-		g2d.drawString(component.getGroupName(), component.getX()+60.0f, component.getY()+30.0f);
+		g2d.drawString(component.getGroupName(), component.getX() + 60.0f, component.getY() + 30.0f);
 	}
 
 	/**
@@ -188,6 +198,13 @@ public class ShapePanel extends JPanel {
 	 */
 	public ArrayList<ShapeGroup> getAlComponents() {
 		return alComponents;
+	}
+
+	/**
+	 * @return the alComponents
+	 */
+	public ArrayList<Line2D.Float> getAlLines() {
+		return alLines;
 	}
 
 	/**

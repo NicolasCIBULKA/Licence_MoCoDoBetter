@@ -21,13 +21,9 @@ import javax.swing.JPanel;
  *
  */
 public class MoveShapeTest extends JFrame {
-	private Rectangle2D.Float myRect = new Rectangle2D.Float(50.0f, 50.0f, 50.0f, 50.0f);
-
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
 
 	private ShapeGroup selectedComponent;
-
-	private Line2D.Float line = new Line2D.Float(20.0f, 20.0f, 80.0f, 80.0f);
 
 	private MovingAdapter ma = new MovingAdapter();
 
@@ -57,10 +53,11 @@ public class MoveShapeTest extends JFrame {
 		contentPane.setLayout(gl);
 
 		sp = new ShapePanel();
-		
+
 		// TODO : remove fourth parameter, name will be selected after, not here
-		sp.addShape(50.0f, 50.0f, true, "Entity");
-		sp.addShape(400.0f, 100.0f, false, "Association");
+		sp.addShapeGroup(50.0f, 50.0f, true, "Entity");
+		sp.addShapeGroup(400.0f, 100.0f, false, "Association");
+		sp.addLine(70.0f, 70.0f, 110.0f, 20.0f);
 
 		addMouseMotionListener(ma);
 		addMouseListener(ma);
@@ -96,24 +93,26 @@ public class MoveShapeTest extends JFrame {
 
 		public void mousePressed(MouseEvent e) {
 			x = e.getX();
-			y = e.getY();
-			
-			selectedComponent = null;
-			
-			int index = 0 ;
-			for (ShapeGroup component : sp.getAlComponents()) {
-				System.out.println("Comp " + index + " entity ? " + component.isAnEntity());
-				index++ ;
-				
-				if (component.getMainShape().contains(x, y)) {
+			// TODO : y coordinate is offset about 23 to 25 pixels, may include the titlebar
+			// of the frame
+			y = e.getY() - 23;
+			System.out.println("X : " + x + " Y : " + y);
 
+			selectedComponent = null;
+
+			for (ShapeGroup component : sp.getAlComponents()) {
+
+				if (component.getMainShape().contains(x, y)) {
+					System.out.println(" >> Table selected");
 					selectedComponent = component;
 					jlaR1.setText(">>>Rect1<<<");
 
 				}
-				if(selectedComponent == null){
-					jlaR1.setText("Rect1");
-				}
+			}
+
+			if (selectedComponent == null) {
+				jlaR1.setText("Rect1");
+				Line2D.Float clickedLine = getClickedLine(x, y);
 			}
 
 		}
@@ -123,7 +122,7 @@ public class MoveShapeTest extends JFrame {
 			if (selectedComponent != null) {
 
 				int dx = e.getX() - x;
-				int dy = e.getY() - y;
+				int dy = e.getY() - y - 23;
 
 				float newX = selectedComponent.getX() + dx;
 				float newY = selectedComponent.getY() + dy;
@@ -153,6 +152,27 @@ public class MoveShapeTest extends JFrame {
 				y += dy;
 			}
 
+		}
+
+		/**
+		 * Returns the first line in the collection of lines that is close enough to
+		 * where the user clicked, or null if no such line exists
+		 *
+		 */
+
+		public Line2D.Float getClickedLine(int x, int y) {
+//		int boxX = x - HIT_BOX_SIZE / 2;
+//		int boxY = y - HIT_BOX_SIZE / 2 + 12;
+			double boxX = x;
+			double boxY = y;
+
+			for (Line2D.Float line : sp.getAlLines()) {
+				if (line.ptSegDist(boxX, boxY) < 10.0d) {
+					System.out.println("--- " + line.x1 + " " + line.y1 + " " + line.x2 + " " + line.y2 + " ---");
+					return line;
+				}
+			}
+			return null;
 		}
 
 	}
