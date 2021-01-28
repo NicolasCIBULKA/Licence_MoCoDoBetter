@@ -1,7 +1,9 @@
 package data;
 
 import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.AsUndirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
 
 public class MCD {
 
@@ -13,20 +15,23 @@ public class MCD {
 
 	// Data
 
-	private UndirectedGraph<Entity, DefaultEdge> MCDGraph;
+	private UndirectedGraph<Node, DefaultEdge> MCDGraph;
 
 	// Methods
 
-	public MCD(UndirectedGraph<Entity, DefaultEdge> mCDGraph) {
-		super();
+	public MCD(UndirectedGraph<Node, DefaultEdge> mCDGraph) {
 		MCDGraph = mCDGraph;
 	}
+	
+	public MCD() {
+		this.MCDGraph = new SimpleGraph<Node, DefaultEdge>(DefaultEdge.class);
+	}
 
-	public UndirectedGraph<Entity, DefaultEdge> getMCDGraph() {
+	public UndirectedGraph<Node, DefaultEdge> getMCDGraph() {
 		return MCDGraph;
 	}
 
-	public void setMCDGraph(UndirectedGraph<Entity, DefaultEdge> mCDGraph) {
+	public void setMCDGraph(UndirectedGraph<Node, DefaultEdge> mCDGraph) {
 		MCDGraph = mCDGraph;
 	}
 
