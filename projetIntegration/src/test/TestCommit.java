@@ -1,10 +1,42 @@
 package test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
+
+import data.*;
+import exceptions.ExistingEdgeException;
+import exceptions.NullNodeException;
+import process.MCDManaging;
+
 public class TestCommit {
 	
 	public static void main(String[] args) {
 		
-		System.out.println("Je suis un Git");
+		UndirectedGraph<Node, DefaultEdge> MCDGraph = new SimpleGraph<Node, DefaultEdge>(DefaultEdge.class);
+		MCD mcd = new MCD(MCDGraph);
+		MCDManaging manager = new MCDManaging();
 		
+		
+		// Entities
+		Entity e1 = new Entity("Entité 1", new ArrayList<Attribute>());
+		Entity e2 = new Entity("Entité 2", new ArrayList<Attribute>());
+		Association a1 = new Association("Assiciation", new ArrayList<Attribute>(), new HashMap<String, Cardinality>());
+	
+		manager.addNode(e1);
+		manager.addNode(e2);
+		manager.addNode(a1);
+		try {
+			manager.connectNodes(e1, a1);
+			manager.connectNodes(e2, a1);
+			manager.connectNodes(e2, e1);
+		} catch (NullNodeException | ExistingEdgeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(manager.isCorrectlyBuild());
 	}
 }

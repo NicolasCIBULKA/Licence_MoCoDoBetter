@@ -3,7 +3,11 @@ package process;
 import java.util.List;
 import java.util.Set;
 
+import org.jgrapht.Graphs;
+import org.jgrapht.alg.*;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.AbstractGraphIterator;
+import org.jgrapht.traverse.BreadthFirstIterator;
 
 import data.*;
 import exceptions.*;
@@ -98,6 +102,30 @@ public class MCDManaging {
 				return false;
 			}
 			i++;
+		}
+		return true;
+	}
+	
+	// testing if the MCD Graph is well build, ie correctly alternate entities and associations
+	// return true if graph is correct, false if not
+	public boolean isCorrectlyBuild() {
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		while(iterator.hasNext()) {
+			Node currentNode = iterator.next();
+			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
+			for(Node connectedNode : connectedNodes) {
+				if(connectedNode instanceof Entity) {
+					if(currentNode instanceof Entity) {
+						return false;
+					}
+				}
+				else if(connectedNode instanceof Association) {
+					if(currentNode instanceof Association) {
+						return false;
+					}
+				}
+			}
+				
 		}
 		return true;
 	}
