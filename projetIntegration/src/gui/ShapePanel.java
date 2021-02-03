@@ -9,6 +9,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -23,8 +24,10 @@ import javax.swing.JPanel;
 public class ShapePanel extends JPanel {
 	private JPanel mainPanel;
 
-	private ArrayList<ShapeGroup> alComponents = new ArrayList<ShapeGroup>();
-	private ArrayList<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
+	private List<ShapeGroup> alComponents = new ArrayList<ShapeGroup>();
+	private List<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
+//	private Map<ShapeGroup, ArrayList<Line2D.Float>> mapRelation = new HashMap<ShapeGroup, ArrayList<Line2D.Float>>();
+	private List<ShapeGroup[]> alRelations = new ArrayList<ShapeGroup[]>();
 
 	private Color entityHeadColor = new Color(0, 150, 150);
 	private Color entitySplitColor = new Color(0, 100, 100);
@@ -42,6 +45,7 @@ public class ShapePanel extends JPanel {
 		mainPanel = this;
 		mainPanel.setDoubleBuffered(true);
 		mainPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
 		// TODO : colorChooser (if still exist...)
 	}
 
@@ -55,6 +59,19 @@ public class ShapePanel extends JPanel {
 		for (Line2D.Float line : alLines) {
 			g2d.draw(line);
 		}
+		
+		System.out.println("---- " + alRelations.size() + " line(s)");
+		for (ShapeGroup[] relation : alRelations) {
+			
+			float entityCenterX = (float) relation[0].getMainShape().getBounds2D().getCenterX();
+			float entityCenterY = (float) relation[0].getMainShape().getBounds2D().getCenterX();
+			
+			float associationCenterX = (float) relation[1].getMainShape().getBounds2D().getCenterX();
+			float associationCenterY = (float) relation[1].getMainShape().getBounds2D().getCenterX();
+			
+			g2d.draw(new Line2D.Float(entityCenterX, entityCenterY, associationCenterX, associationCenterY));
+		}
+		
 
 		System.out.println("---- " + alComponents.size() + " component(s)");
 		for (ShapeGroup component : alComponents) {
@@ -127,9 +144,10 @@ public class ShapePanel extends JPanel {
 	 * @param y          the Y coordinate of the new component
 	 * @param entityType defines if the component is an entity or an association
 	 */
-	public void addShapeGroup(float x, float y, boolean entityType, String name) {
-		ShapeGroup component = new ShapeGroup(x, y, entityType, name);
+	public void addShapeGroup(float x, float y, boolean entityType) {
+		ShapeGroup component = new ShapeGroup(x, y, entityType);
 		alComponents.add(0, component);
+		repaint();
 	}
 
 	public void addLine(float startX, float startY, float endX, float endY) {
@@ -197,14 +215,21 @@ public class ShapePanel extends JPanel {
 	/**
 	 * @return the alComponents
 	 */
-	public ArrayList<ShapeGroup> getAlComponents() {
+	public List<ShapeGroup> getAlComponents() {
 		return alComponents;
 	}
 
 	/**
-	 * @return the alComponents
+	 * @return the alRelations
 	 */
-	public ArrayList<Line2D.Float> getAlLines() {
+	public List<ShapeGroup[]> getAlRelations() {
+		return alRelations;
+	}
+
+	/**
+	 * @return the alLines
+	 */
+	public List<Line2D.Float> getAlLines() {
 		return alLines;
 	}
 
