@@ -1,5 +1,6 @@
 package process;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -128,6 +129,37 @@ public class MCDManaging {
 				
 		}
 		return true;
+	}
+	//This function test the fact if all the Nodes are well formed in term of attributes.
+	//It returns a list a non conform Nodes
+	public List<Node> thereIsPrimaryKeyInTheRightPlaceSoNotInTheAssociationButThereIsOnlyOneInTheEntities() {
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		List<Node> notWellFormed = new ArrayList<Node>();
+		while(iterator.hasNext()) {
+			Node currentNode = iterator.next();
+			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
+			for(Node connectedNode : connectedNodes) {
+				//Checking the existence of PK in the current node and acting depending of the type
+				int nbPK=0;
+				for(Attribute attributVerif : connectedNode.getListAttribute()) {
+					if(attributVerif.isPrimaryKey()) {
+						nbPK+=1;
+					}
+				}
+				if(connectedNode instanceof Entity) {
+					if((nbPK>1)&&(nbPK==0)){
+						notWellFormed.add(connectedNode);
+					}
+				}
+				else if(connectedNode instanceof Association) {
+					if(nbPK>0){
+						notWellFormed.add(connectedNode);
+					}
+				}
+			}
+				
+		}
+		return notWellFormed;
 	}
 	
 }
