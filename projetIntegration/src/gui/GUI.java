@@ -11,6 +11,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -39,13 +41,16 @@ public class GUI extends JFrame {
 	private JPanel jpl = new JPanel();
 
 	private JLabel jlaR1 = new JLabel("Rect1");
-	private JLabel jlaR2 = new JLabel("Rect2");
+//	private JLabel jlaR2 = new JLabel("Rect2");
 	private JLabel jlaXR1 = new JLabel("X : 50");
 	private JLabel jlaYR1 = new JLabel("Y : 50");
 	private JLabel jlaXR2 = new JLabel("X : 200");
 	private JLabel jlaYR2 = new JLabel("Y : 200");
+	private JButton testButton = new JButton("test");
 	private JButton newEntityButton = new JButton("nouv. entité");
 	private JButton newAssociationButton = new JButton("nouv. asso.");
+	
+	private Icon testIcon = new ImageIcon("");
 
 	// menuBar objects
 	private JMenuBar jmb = new JMenuBar();
@@ -95,7 +100,7 @@ public class GUI extends JFrame {
 		GridLayout glInfo = new GridLayout(3, 2);
 		jpl.setLayout(glInfo);
 		jpl.add(jlaR1);
-		jpl.add(jlaR2);
+		jpl.add(testButton);
 		jpl.add(jlaXR1);
 		jpl.add(newEntityButton);
 		jpl.add(jlaYR1);
@@ -148,6 +153,7 @@ public class GUI extends JFrame {
 		// Buttons actions
 		newEntityButton.addActionListener(new AddEntityAction());
 		newAssociationButton.addActionListener(new AddAssociationAction());
+		testButton.addActionListener(new testAction());
 		
 	}
 
@@ -291,6 +297,13 @@ public class GUI extends JFrame {
 			sp.addShapeGroup(50.0f, 50.0f, false);
 
 	    }
+	}
+	
+	public class testAction implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			testButton.setPressedIcon(null);
+		}
 	}
 	
 	public class MinimizeAction implements ActionListener {
