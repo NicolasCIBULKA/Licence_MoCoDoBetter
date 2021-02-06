@@ -3,6 +3,7 @@ package gui;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -31,7 +32,7 @@ public class GUI extends JFrame {
 
 	private MovingAdapter ma = new MovingAdapter();
 
-	private static final Dimension PANEL_SIZE = new Dimension(1920, 1080);
+	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();;
 
 //	private JFrame theFrame;
 	private ShapePanel sp;

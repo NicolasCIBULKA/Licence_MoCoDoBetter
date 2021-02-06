@@ -130,6 +130,7 @@ public class MCDManaging {
 		}
 		return true;
 	}
+	
 	//This function test the fact if all the Nodes are well formed in term of attributes.
 	//It returns a list a non conform Nodes
 	public List<Node> thereIsPrimaryKeyInTheRightPlaceSoNotInTheAssociationButThereIsOnlyOneInTheEntities() {
