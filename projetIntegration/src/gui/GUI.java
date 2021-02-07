@@ -32,7 +32,7 @@ public class GUI extends JFrame {
 
 	private MovingAdapter ma = new MovingAdapter();
 
-	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();;
+	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
 //	private JFrame theFrame;
 	private ShapePanel sp;

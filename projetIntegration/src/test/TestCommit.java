@@ -16,15 +16,13 @@ public class TestCommit {
 	
 	public static void main(String[] args) {
 		
-		UndirectedGraph<Node, DefaultEdge> MCDGraph = new SimpleGraph<Node, DefaultEdge>(DefaultEdge.class);
-		MCD mcd = new MCD(MCDGraph);
 		MCDManaging manager = new MCDManaging();
 		
 		
 		// Entities
 		Entity e1 = new Entity("Entité 1", new ArrayList<Attribute>());
 		Entity e2 = new Entity("Entité 2", new ArrayList<Attribute>());
-		Association a1 = new Association("Assiciation", new ArrayList<Attribute>(), new HashMap<String, Cardinality>());
+		Association a1 = new Association("Association", new ArrayList<Attribute>(), new HashMap<String, Cardinality>());
 	
 		manager.addNode(e1);
 		manager.addNode(e2);
