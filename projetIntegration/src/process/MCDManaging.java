@@ -140,7 +140,7 @@ public class MCDManaging {
 	
 	//This function test the fact if all the Nodes are well formed in term of attributes.
 	//It returns a list a non conform Nodes
-	public List<Node> thereIsPrimaryKeyInTheRightPlaceSoNotInTheAssociationButThereIsOnlyOneInTheEntities() {
+	public List<Node> correctKeyMCD() {
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		List<Node> notWellFormed = new ArrayList<Node>();
 		while(iterator.hasNext()) {
