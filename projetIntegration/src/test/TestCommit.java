@@ -9,6 +9,7 @@ import org.jgrapht.graph.SimpleGraph;
 
 import data.*;
 import exceptions.ExistingEdgeException;
+import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import process.MCDManaging;
 
@@ -32,6 +33,9 @@ public class TestCommit {
 			manager.connectNodes(e2, a1);
 			manager.connectNodes(e2, e1);
 		} catch (NullNodeException | ExistingEdgeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidNodeLinkException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
