@@ -36,13 +36,19 @@ public class MCDManaging {
 	}
 
 	// Connect two Nodes
-	public void connectNodes(Node firstNode, Node secondNode) throws NullNodeException,ExistingEdgeException {
+	public void connectNodes(Node firstNode, Node secondNode) throws NullNodeException,ExistingEdgeException,InvalidNodeLinkException{
 		if (mcd.getMCDGraph().containsVertex(firstNode) && mcd.getMCDGraph().containsVertex(secondNode)) {
 			if (mcd.getMCDGraph().containsEdge(firstNode, secondNode)) {
 				// Error - Edge already exists
 				throw new ExistingEdgeException("Error - Edge already exists between those two Nodes");
 			}
-			mcd.getMCDGraph().addEdge(firstNode, secondNode);
+			if((firstNode instanceof Entity && secondNode instanceof Association) || (firstNode instanceof Association && secondNode instanceof Entity)) {
+				mcd.getMCDGraph().addEdge(firstNode, secondNode);
+			}
+			else {
+				throw new InvalidNodeLinkException("Error - Tried to link 2 Entities or 2 Associations together !");
+			}
+			
 		} else {
 			// Error - nodes aren't in the MCD Graph
 			throw new NullNodeException("Error - One of the Nodes called for connecting does not exists");
