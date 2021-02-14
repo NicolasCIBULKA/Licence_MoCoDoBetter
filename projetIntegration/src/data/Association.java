@@ -12,21 +12,20 @@ public class Association extends Node {
 	 */
 
 	// Data
-
-	private HashMap<String, Cardinality> cardinalityMap;
+	private ArrayList<Cardinality> cardinalityList;
 
 	// Methods
-	public Association(String name, ArrayList<Attribute> listAttribute, HashMap<String, Cardinality> cardinalityMap) {
+	public Association(String name, ArrayList<Attribute> listAttribute, ArrayList<Cardinality> cardinalityList) {
 		super(name, listAttribute);
-		this.cardinalityMap = cardinalityMap;
+		this.cardinalityList = cardinalityList;
 	}
 
-	public HashMap<String, Cardinality> getCardinalityMap() {
-		return cardinalityMap;
+	public ArrayList<Cardinality> getCardinalityList() {
+		return cardinalityList;
 	}
 
-	public void setCardinalityMap(HashMap<String, Cardinality> cardinalityMap) {
-		this.cardinalityMap = cardinalityMap;
+	public void setCardinalityMap(ArrayList<Cardinality> cardinalityList) {
+		this.cardinalityList = cardinalityList;
 	}
 
 }

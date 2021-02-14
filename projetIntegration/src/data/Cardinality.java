@@ -7,15 +7,16 @@ public class Cardinality {
 	 */
 
 	// Datas
-
+	private String nomEntity;
 	private int lowValue;
 	private int highValue;
 
 	// Methods
 
-	public Cardinality(int lowValue, int highValue) {
+	public Cardinality(int lowValue, int highValue, String nowEntity) {
 		this.highValue = highValue;
 		this.lowValue = lowValue;
+		this.nomEntity=nomEntity;
 	}
 
 	public int getLowValue() {
@@ -34,6 +35,13 @@ public class Cardinality {
 		this.highValue = highValue;
 	}
 	
+	public String getNomEntity() {
+		return nomEntity;
+	}
+	
+	public void setNomEntity(String nomEntity) {
+		this.nomEntity=nomEntity;
+	}
 	
 	
 	
