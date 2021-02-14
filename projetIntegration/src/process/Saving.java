@@ -118,9 +118,9 @@ public class Saving {
 			writer.write("<Cardinalities>");
 			for(Association association : listAssociation) {
 				writer.write("<Cardinality>");
-				for (Map.Entry<String, Cardinality> card : association.getCardinalityMap().entrySet()) { 
-					writer.write(association.getName()+","+card.getKey()+","+card.getValue().getLowValue()+","+
-				card.getValue().getHighValue());
+				for(Cardinality card : association.getCardinalityList()) {
+					writer.write(association.getName()+","+card.getNomEntity()+","+card.getLowValue()+","+
+				card.getHighValue());
 				}
 				writer.write("</Cardinality>");
 			}
