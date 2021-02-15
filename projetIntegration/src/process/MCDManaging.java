@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.*;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;

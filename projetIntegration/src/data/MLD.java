@@ -17,6 +17,11 @@ public class MLD {
 		super();
 		this.entityList = entityList;
 	}
+	
+	public MLD() {
+		super();
+		this.entityList = new ArrayList<Entity>();
+	}
 
 	public ArrayList<Entity> getEntityList() {
 		return entityList;

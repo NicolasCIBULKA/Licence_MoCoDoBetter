@@ -111,7 +111,7 @@ public class MLDManaging {
 					}
 				}
 				if(addfk==true) {
-					//ArrayList<Attribute> newAttribute=new ArrayList<MLDAttribute>();
+					List<Attribute> newAttribute=new ArrayList<Attribute>();
 					for(int i = 0 ; i < connectedNodes.size(); i++) {
 						ArrayList<Attribute> liste = new ArrayList<Attribute>();
 						Node n=connectedNodes.get(i);

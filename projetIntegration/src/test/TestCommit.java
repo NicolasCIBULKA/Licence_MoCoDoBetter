@@ -23,7 +23,7 @@ public class TestCommit {
 		// Entities
 		Entity e1 = new Entity("Entité 1", new ArrayList<Attribute>());
 		Entity e2 = new Entity("Entité 2", new ArrayList<Attribute>());
-		Association a1 = new Association("Association", new ArrayList<Attribute>(), new HashMap<String, Cardinality>());
+		Association a1 = new Association("Association", new ArrayList<Attribute>(), new ArrayList<Cardinality>());
 	
 		manager.addNode(e1);
 		manager.addNode(e2);

@@ -8,30 +8,30 @@ public class Cardinality {
 
 	// Datas
 	private String nomEntity;
-	private int lowValue;
-	private int highValue;
+	private String lowValue;
+	private String highValue;
 
 	// Methods
 
-	public Cardinality(int lowValue, int highValue, String nowEntity) {
+	public Cardinality(String lowValue, String highValue, String nowEntity) {
 		this.highValue = highValue;
 		this.lowValue = lowValue;
 		this.nomEntity=nomEntity;
 	}
 
-	public int getLowValue() {
+	public String getLowValue() {
 		return lowValue;
 	}
 
-	public void setLowValue(int lowValue) {
+	public void setLowValue(String lowValue) {
 		this.lowValue = lowValue;
 	}
 
-	public int getHighValue() {
+	public String getHighValue() {
 		return highValue;
 	}
 
-	public void setHighValue(int highValue) {
+	public void setHighValue(String highValue) {
 		this.highValue = highValue;
 	}
 	
