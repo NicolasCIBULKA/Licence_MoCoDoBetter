@@ -9,6 +9,7 @@ import org.jgrapht.alg.*;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.UndirectedGraph;
 
 import data.*;
 import exceptions.*;
