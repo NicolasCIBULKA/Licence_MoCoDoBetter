@@ -95,6 +95,7 @@ public class MCDManaging {
 			// Adding Association to the MCD
 			addNode(association);
 			for(Entity entity : entityList) {
+				//TODO
 				mcd.getMCDGraph().addEdge(entity, association);
 			}
 		}
@@ -172,8 +173,8 @@ public class MCDManaging {
 		return notWellFormed;
 	}
 	
-	public UndirectedGraph<Node, DefaultEdge> getMCDGraph() {
-		return mcd.getMCDGraph();
+	public MCD getMCDGraph() {
+		return mcd;
 	}
-	
+
 }
