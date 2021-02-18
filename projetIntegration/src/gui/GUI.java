@@ -304,7 +304,7 @@ public class GUI extends JFrame {
 				break;
 				
 			case "association" :
-				Node newNodeAssociation = new Association("Association",null,null);
+				Node newNodeAssociation = new Association("Association",null);
 				mcdManager.addNode(newNodeAssociation);
 				
 				sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);

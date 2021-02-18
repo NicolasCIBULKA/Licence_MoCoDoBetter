@@ -38,7 +38,7 @@ public class MCDManaging {
 	}
 
 	// Connect two Nodes
-	public void connectNodes(Node firstNode, Node secondNode) throws NullNodeException,ExistingEdgeException,InvalidNodeLinkException{
+	public void connectNodes(Node firstNode, Node secondNode, Cardinality cardinality) throws NullNodeException,ExistingEdgeException,InvalidNodeLinkException{
 		if (mcd.getMCDGraph().containsVertex(firstNode) && mcd.getMCDGraph().containsVertex(secondNode)) {
 			if (mcd.getMCDGraph().containsEdge(firstNode, secondNode)) {
 				// Error - Edge already exists
@@ -46,6 +46,12 @@ public class MCDManaging {
 			}
 			if((firstNode instanceof Entity && secondNode instanceof Association) || (firstNode instanceof Association && secondNode instanceof Entity)) {
 				mcd.getMCDGraph().addEdge(firstNode, secondNode);
+				if(secondNode instanceof Association) {
+					((Association) secondNode).getCardinalityList().add(cardinality);
+				}
+				else {
+					((Association) firstNode).getCardinalityList().add(cardinality);
+				}
 			}
 			else {
 				throw new InvalidNodeLinkException("Error - Tried to link 2 Entities or 2 Associations together !");
@@ -65,6 +71,24 @@ public class MCDManaging {
 					throw new EdgesNotLinkedException("Error - No Edge between those two Nodes");
 				}
 				mcd.getMCDGraph().removeEdge(firstNode, secondNode);
+				Cardinality card = null;
+				if(secondNode instanceof Association) {
+					
+					for(Cardinality cardinality : ((Association) secondNode).getCardinalityList()){
+						if(cardinality.getNomEntity() == firstNode.getName()){
+							card = cardinality;
+						}
+					}
+					((Association) secondNode).getCardinalityList().remove(card);
+				}
+				else {
+					for(Cardinality cardinality : ((Association) firstNode).getCardinalityList()){
+						if(cardinality.getNomEntity() == secondNode.getName()){
+							card = cardinality;
+						}
+					}
+					((Association) firstNode).getCardinalityList().remove(card);
+				}
 			}
 			else {
 				// Error - nodes aren't in the MCD Graph
@@ -89,21 +113,7 @@ public class MCDManaging {
 	}
 	
 	
-	// Create an association between all Entities of a List
-	public void createAssociation(List<Entity> entityList, Association association) throws NullNodeException{
-		if(!(entityList.isEmpty()) && nodeListContainedInMCD(entityList)) {
-			// Adding Association to the MCD
-			addNode(association);
-			for(Entity entity : entityList) {
-				//TODO
-				mcd.getMCDGraph().addEdge(entity, association);
-			}
-		}
-		else {
-			// Error - No entities have been given to the method or one of the entities wasn't in MCD
-			throw new NullNodeException("Error - Not enough entities have been given to the method");
-		}
-	}
+	
 	
 	// Testing the existence of all the entities in the list
 	public boolean nodeListContainedInMCD(List<Entity> entityList) {
