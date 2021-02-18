@@ -9,10 +9,14 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+
+import data.Node;
 
 /**
  * ShapePanel contains all the graphical objects to paint and manage their
@@ -23,8 +27,8 @@ import javax.swing.JPanel;
  */
 public class ShapePanel extends JPanel {
 	private JPanel mainPanel;
-
 	private List<ShapeGroup> alComponents = new ArrayList<ShapeGroup>();
+	private Map<ShapeGroup, Node> componentMap = new HashMap<ShapeGroup, Node>();
 	private List<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
 //	private Map<ShapeGroup, ArrayList<Line2D.Float>> mapRelation = new HashMap<ShapeGroup, ArrayList<Line2D.Float>>();
 	private List<ShapeGroup[]> alRelations = new ArrayList<ShapeGroup[]>();
@@ -73,8 +77,8 @@ public class ShapePanel extends JPanel {
 		}
 		
 
-		System.out.println("---- " + alComponents.size() + " component(s)");
-		for (ShapeGroup component : alComponents) {
+		System.out.println("---- " + componentMap.size() + " component(s)");
+		for (ShapeGroup component : componentMap.keySet()) {
 			if (component.isAnEntity()) {
 				drawEntity(component);
 
@@ -137,17 +141,17 @@ public class ShapePanel extends JPanel {
 	}
 
 	/**
-	 * Creates a new component to display and appends it to the end of the
-	 * ArrayList.
+	 * Creates a new component to display and puts it into the hashMap.
 	 * 
 	 * @param x          the X coordinate of the new component
 	 * @param y          the Y coordinate of the new component
 	 * @param entityType defines if the component is an entity or an association
 	 */
-	public void addShapeGroup(float x, float y, boolean entityType) {
+	public ShapeGroup addShapeGroup(float x, float y, boolean entityType) {
 		ShapeGroup component = new ShapeGroup(x, y, entityType);
-		alComponents.add(0, component);
+//		alComponents.add(0, component);
 		repaint();
+		return component;
 	}
 
 	public void addLine(float startX, float startY, float endX, float endY) {
@@ -217,6 +221,13 @@ public class ShapePanel extends JPanel {
 	 */
 	public List<ShapeGroup> getAlComponents() {
 		return alComponents;
+	}
+
+	/**
+	 * @return the componentMap
+	 */
+	public Map<ShapeGroup, Node> getComponentMap() {
+		return componentMap;
 	}
 
 	/**

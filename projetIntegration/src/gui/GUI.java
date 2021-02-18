@@ -1,7 +1,9 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -21,6 +23,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import data.Association;
+import data.Entity;
+import data.Node;
+import process.MCDManaging;
+
 /**
  * Will surely become the main GUI class after many crash tests
  * 
@@ -28,17 +35,24 @@ import javax.swing.JPanel;
  *
  */
 public class GUI extends JFrame {
+	
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
-
+	
+	private MCDManaging mcdManager = new MCDManaging();
 	private ShapeGroup selectedComponent;
+	private String cursorState = new String("selection");
 
 	private MovingAdapter ma = new MovingAdapter();
 
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
+	private static final Dimension ICONPANEL_SIZE = new Dimension(PANEL_SIZE.width,60);
+	private static final Dimension ICONBUTTON_SIZE = new Dimension(50,50);
+	private static final int HEIGHT_DIFFERENCE = ICONPANEL_SIZE.height + 24;
 
 //	private JFrame theFrame;
 	private ShapePanel sp;
 	private JPanel jpl = new JPanel();
+	private JPanel iconPanel = new JPanel();
 
 	private JLabel jlaR1 = new JLabel("Rect1");
 //	private JLabel jlaR2 = new JLabel("Rect2");
@@ -47,8 +61,10 @@ public class GUI extends JFrame {
 	private JLabel jlaXR2 = new JLabel("X : 200");
 	private JLabel jlaYR2 = new JLabel("Y : 200");
 	private JButton testButton = new JButton("test");
-	private JButton newEntityButton = new JButton("nouv. entité");
-	private JButton newAssociationButton = new JButton("nouv. asso.");
+	private JButton selectionButton = new JButton("S");
+	private JButton handButton = new JButton("H");
+	private JButton newEntityButton = new JButton("+E");
+	private JButton newAssociationButton = new JButton("+A");
 	
 	private Icon testIcon = new ImageIcon("");
 
@@ -80,6 +96,7 @@ public class GUI extends JFrame {
 
 	public GUI() {
 //		theFrame = this;
+		
 		initLayout();
 		initActions();
 	}
@@ -87,9 +104,9 @@ public class GUI extends JFrame {
 	public void initLayout() {
 		setTitle("Mocodo Better");
 
-		GridLayout gl = new GridLayout(2, 1);
+		BorderLayout bl = new BorderLayout(3, 1);
 		Container contentPane = getContentPane();
-		contentPane.setLayout(gl);
+		contentPane.setLayout(bl);
 
 		sp = new ShapePanel();
 
@@ -97,17 +114,40 @@ public class GUI extends JFrame {
 		addMouseListener(ma);
 //		addMouseWheelListener(new ScaleHandler());
 
+		FlowLayout flIcon = new FlowLayout(FlowLayout.LEADING);
+		iconPanel.setLayout(flIcon);
+		
+		iconPanel.setPreferredSize(ICONPANEL_SIZE);
+		
+		selectionButton.setPreferredSize(ICONBUTTON_SIZE);
+		handButton.setPreferredSize(ICONBUTTON_SIZE);
+		newEntityButton.setPreferredSize(ICONBUTTON_SIZE);
+		newAssociationButton.setPreferredSize(ICONBUTTON_SIZE);
+		selectionButton.setToolTipText("Selection");
+		handButton.setToolTipText("Hand");
+		newEntityButton.setToolTipText("New entity tool");
+		newAssociationButton.setToolTipText("New association tool");
+		iconPanel.add(selectionButton);
+		iconPanel.add(handButton);
+		iconPanel.add(newEntityButton);
+		iconPanel.add(newAssociationButton);
+		
 		GridLayout glInfo = new GridLayout(3, 2);
 		jpl.setLayout(glInfo);
+		
+		Dimension TEST_SIZE = new Dimension(PANEL_SIZE.width,200);
+		jpl.setPreferredSize(TEST_SIZE);
+		
 		jpl.add(jlaR1);
 		jpl.add(testButton);
 		jpl.add(jlaXR1);
-		jpl.add(newEntityButton);
+//		jpl.add(newEntityButton);
 		jpl.add(jlaYR1);
-		jpl.add(newAssociationButton);
+//		jpl.add(newAssociationButton);
 
-		contentPane.add(sp);
-		contentPane.add(jpl);
+		contentPane.add(iconPanel, BorderLayout.NORTH);
+		contentPane.add(sp, BorderLayout.CENTER);
+		contentPane.add(jpl, BorderLayout.SOUTH);
 		
 		options.add(about) ;
 		options.addSeparator();
@@ -139,7 +179,7 @@ public class GUI extends JFrame {
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(PANEL_SIZE);
-		setResizable(false);
+		setResizable(true);
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
@@ -151,6 +191,8 @@ public class GUI extends JFrame {
 		fullScreen.addActionListener(new FullScreenAction());
 		
 		// Buttons actions
+		selectionButton.addActionListener(new SelectionAction());
+		handButton.addActionListener(new DragAction());
 		newEntityButton.addActionListener(new AddEntityAction());
 		newAssociationButton.addActionListener(new AddAssociationAction());
 		testButton.addActionListener(new testAction());
@@ -171,19 +213,36 @@ public class GUI extends JFrame {
 			x = e.getX();
 			// TODO : y coordinate is offset about 23 to 25 pixels, may include the titlebar
 			// of the frame
-			y = e.getY() - 23;
+			y = e.getY() - HEIGHT_DIFFERENCE;
 			System.out.println("X : " + x + " Y : " + y);
 
 			selectedComponent = null;
+			switch(cursorState) {
+			case "entity" :
+				Node newNodeEntity = new Entity("Entite",null);
+				mcdManager.addNode(newNodeEntity);
+				
+				sp.getComponentMap().put(sp.addShapeGroup(x, y, true), newNodeEntity);
+				break;
+				
+			case "association" :
+				Node newNodeAssociation = new Association("Association",null,null);
+				mcdManager.addNode(newNodeAssociation);
+				
+				sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);
+				break;
+				
+			default :
+				for (ShapeGroup component : sp.getComponentMap().keySet()) {
 
-			for (ShapeGroup component : sp.getAlComponents()) {
-
-				if (component.getMainShape().contains(x, y)) {
-					System.out.println(" >> Table selected");
-					selectedComponent = component;
-					jlaR1.setText(">>>Rect1<<<");
-
-				}
+					if (component.getMainShape().contains(x, y)) {
+						System.out.println(" >> Table selected");
+						selectedComponent = component;
+						jlaR1.setText(">>>Rect1<<<");
+						jlaXR1.setText("X : " + selectedComponent.getX());
+						jlaYR1.setText("Y : " + selectedComponent.getY());
+					}
+				}	
 			}
 
 			if (selectedComponent == null) {
@@ -195,10 +254,10 @@ public class GUI extends JFrame {
 
 		public void mouseDragged(MouseEvent e) {
 
-			if (selectedComponent != null) {
+			if (selectedComponent != null && cursorState.equals("hand")) {
 
 				int dx = e.getX() - x;
-				int dy = e.getY() - y - 23;
+				int dy = e.getY() - y - HEIGHT_DIFFERENCE;
 
 				float newX = selectedComponent.getX() + dx;
 				float newY = selectedComponent.getY() + dy;
@@ -282,11 +341,38 @@ public class GUI extends JFrame {
 //		}
 //	}
 	
+	public class SelectionAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e){
+			cursorState = "selection";
+			selectionButton.setEnabled(false);
+			handButton.setEnabled(true);
+			newEntityButton.setEnabled(true);
+			newAssociationButton.setEnabled(true);
+	    }
+	}
+	
+	public class DragAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e){
+			cursorState = "hand";
+			selectionButton.setEnabled(true);
+			handButton.setEnabled(false);
+			newEntityButton.setEnabled(true);
+			newAssociationButton.setEnabled(true);
+			
+	    }
+	}
 	
 	public class AddEntityAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e){
-			sp.addShapeGroup(50.0f, 50.0f, true);
+			cursorState = "entity";
+			selectionButton.setEnabled(true);
+			handButton.setEnabled(true);
+			newEntityButton.setEnabled(false);
+			newAssociationButton.setEnabled(true);
+			
 	    }
 	}
 
@@ -294,7 +380,11 @@ public class GUI extends JFrame {
 	public class AddAssociationAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e){
-			sp.addShapeGroup(50.0f, 50.0f, false);
+			cursorState = "association";
+			selectionButton.setEnabled(true);
+			handButton.setEnabled(true);
+			newEntityButton.setEnabled(true);
+			newAssociationButton.setEnabled(false);
 
 	    }
 	}
@@ -332,6 +422,5 @@ public class GUI extends JFrame {
 	
 	public static void main(String[] args) {
 		new GUI();
-
 	}
 }
