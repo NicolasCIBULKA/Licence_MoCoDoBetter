@@ -1,97 +1,55 @@
 package process;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.*;
+import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 import data.*;
-import exceptions.*;
 
 public class MLDManaging {
 
 	private MLD mld;
 	private MCDManaging mcdM;
+	private ArrayList<Entity> entityListToMld;
+	private MCD mcd;
 
 
 	public MLDManaging() {
 		this.mcdM = new MCDManaging();
-		this.mld = new MLD();
-	}
-
-/**
-	public void  addEntity(MCDManaging mcdM) {
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph());
-		while(iterator.hasNext()) {
-			Node currentNode = iterator.next();
-			if (currentNode instanceof Entity) {
-				mld.getEntityList().add((Entity) currentNode);
-			}
-		}
-		for(int i = 0 ; i < mld.getEntityList().size(); i++) {
-			
-			Entity n=mld.getEntityList().get(i);
-			System.out.println(n.getName());
-		}
-		System.out.println(mld.getEntityList().isEmpty());
-		
-	}*/
-	
-	public ArrayList<Entity>  ListOfAllEntities(MCDManaging mcdM) {
-		ArrayList<Entity> listEntity= new ArrayList<Entity>();
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph().getMCDGraph());
-		while(iterator.hasNext()) {
-			Node currentNode = iterator.next();
-			if (currentNode instanceof Entity) {
-				listEntity.add((Entity) currentNode);
-			}
-		}
-		return listEntity;
-		
-		
+		this.entityListToMld = new ArrayList<Entity>();
+		this.mcd = new MCD();
 	}
 	
-	
-	public ArrayList<Attribute> ListOfPk(Entity e1){
-		ArrayList<Attribute> listepk = new ArrayList<Attribute>();
-		ArrayList<Attribute> listeAttribute = new ArrayList<Attribute>();
-		listeAttribute=e1.getListAttribute();
-		for (Attribute attpk : listeAttribute) {
-			if(attpk.isPrimaryKey()) {
-				listepk.add(attpk);
-				System.out.println(attpk.getName()+",");
-			}
-		}
-		return listepk;
-
+	public MLDManaging(ArrayList<Entity> entityListToMld) {
+		this.entityListToMld = entityListToMld;
 	}
+	
 	
 	//This function add key put foreing keys
 	public ArrayList<Entity>  addAssociationToMLD(MCDManaging mcdM) {
+		MCD mcd=mcdM.getMCDGraph();
+		UndirectedGraph<Node, DefaultEdge> graph=mcd.getMCDGraph();
 		ArrayList<Entity> ListOfAllEntities = new ArrayList<Entity>();
 		boolean addfk=true;
+		MLDAttribute mldA;
 		String nameE;
 		String high;
 		List<String> listCard = new ArrayList<String>();
 		List<String> listName = new ArrayList<String>();
 		Association association;
 		List<Cardinality> Card;
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph().getMCDGraph());
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while(iterator.hasNext()) {
 			Node currentNode = iterator.next();
-			List<Node> connectedNodes = Graphs.neighborListOf(mcdM.getMCDGraph().getMCDGraph(), currentNode);
+			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
 			//Verify the type of Cardinality
 			if (currentNode instanceof Association) {
-				System.out.println("yaya:"+currentNode.getName());
 				association=(Association)currentNode;
 				Card=association.getCardinalityList();
 				ListIterator<Cardinality> lItr = Card.listIterator();
@@ -102,33 +60,26 @@ public class MLDManaging {
 				    listName.add(nameE);
 				}
 				for(String str:listCard) {
-					if(str.equals("N")) {
-						
-					}
-					else {
-						addfk=false;
-						break;
-					}
-				}
-				if(addfk==true) {
-					List<Attribute> newAttribute=new ArrayList<Attribute>();
+					if(str.equals("N")) {}
+					else {addfk=false;break;}
+				}if(addfk==true) {
+					ArrayList<Attribute> newAttribute=new ArrayList<Attribute>();
 					for(int i = 0 ; i < connectedNodes.size(); i++) {
 						ArrayList<Attribute> liste = new ArrayList<Attribute>();
 						Node n=connectedNodes.get(i);
-						System.out.println("neud actuel:"+n.getName());
 						liste=n.getListAttribute();
 						//put the pk first
 						for (Attribute attpk : liste) {
 							if(attpk.isPrimaryKey()) {
-								MLDAttribute mldA = new MLDAttribute(attpk.getName(),
+								mldA = new MLDAttribute(attpk.getName(),
 										attpk.getType(), attpk.isNullable(), attpk.isPrimaryKey(),
 										attpk.isUnique(), true, n, attpk);	
-								//newAttribute.add(mldA);
+								newAttribute.add(mldA);
 							}
 						}
 					}
-					//Entity e = new Entity(currentNode.getName(),newAttribute);
-					//ListOfAllEntities.add(e);
+					Entity e = new Entity(currentNode.getName(),newAttribute);
+					ListOfAllEntities.add(e);
 				}
 				else {
 					System.out.println("on ajoute pas");
@@ -139,96 +90,138 @@ public class MLDManaging {
 		return ListOfAllEntities;
 	}
 	
+
 	
-	public void test(MCDManaging mcdM) {
-		ArrayList<Entity> ListOfAllEntities = addAssociationToMLD(mcdM);
-		for(int i = 0 ; i < ListOfAllEntities.size(); i++) {
-			Node n=ListOfAllEntities.get(i);
-			ArrayList<Attribute> liste = new ArrayList<Attribute>();
-			System.out.println("neud actuel:"+n.getName());
-			liste=n.getListAttribute();
-			for (Attribute attpk : liste) {
-				//System.out.println("narggh:"+attpk.isForeignKey());
+	public ArrayList<Entity>  addEntitiesToMLD(MCDManaging mcdM) {
+		MCD mcd=mcdM.getMCDGraph();
+		UndirectedGraph<Node, DefaultEdge> graph=mcd.getMCDGraph();
+		ArrayList<Attribute> liste;
+		String high1,high2,low1,low2;
+		Entity e1,e2;
+		ArrayList<Entity> ListOfAllEntities = new ArrayList<Entity>();
+		Association association;
+		List<Cardinality> Card;
+		int nb_neighbor;
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		while(iterator.hasNext()) {
+			Node currentNode = iterator.next();
+			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
+			nb_neighbor=connectedNodes.size();
+			//Verify the type of Cardinality
+			if ((currentNode instanceof Association)&&(nb_neighbor==2)) {
+				association=(Association)currentNode;
+				Card=association.getCardinalityList();
+				e1=(Entity) connectedNodes.get(0);e2=(Entity) connectedNodes.get(1);
+				high1=Card.get(0).getHighValue();high2=Card.get(1).getHighValue();
+				low1=Card.get(0).getLowValue();low2=Card.get(1).getLowValue();
+				//Case where one of max card is "N" and the other one is something else
+				if(((high1.equals("N"))&&(!high2.equals("N")))||(high2.equals("N"))&&(!high1.equals("N"))) {
+					if((high1.equals("N"))&&(!high2.equals("N"))) {
+						System.out.println(e2.getName());
+						liste = new ArrayList<Attribute>();
+						System.out.println("size début:"+e2.getListAttribute().size());
+						liste=e1.getListAttribute();
+						for (Attribute attpk1 : liste) {
+							if(attpk1.isPrimaryKey()) {
+								MLDAttribute mldA = new MLDAttribute(attpk1.getName(),
+										attpk1.getType(), attpk1.isNullable(), attpk1.isPrimaryKey(),
+										attpk1.isUnique(), true, e1, attpk1);	
+								e1.getListAttribute().add(mldA);
+								System.out.println("size début:"+e1.getListAttribute().size());
+								ListOfAllEntities.add(e2);
+								ListOfAllEntities.add(e1);
+							}
+						}
+					}
+					else if ((high2.equals("N"))&&(!high1.equals("N"))){
+						liste = new ArrayList<Attribute>();
+						System.out.println("size début:"+e1.getListAttribute().size());
+						liste=e2.getListAttribute();
+						for (Attribute attpk : liste) {
+							if(attpk.isPrimaryKey()) {
+								MLDAttribute mldA = new MLDAttribute(attpk.getName(),
+										attpk.getType(), attpk.isNullable(), attpk.isPrimaryKey(),
+										attpk.isUnique(), true, e2, attpk);	
+								e1.getListAttribute().add(mldA);
+								System.out.println("size début:"+e1.getListAttribute().size());
+								ListOfAllEntities.add(e2);
+								ListOfAllEntities.add(e1);
+							}
+						}
+					}
 				}
+				//Case where we have (0,1) and (1,1)
+				else if((high1.equals("1"))&&(low1.equals("0"))&&(high2.equals("1"))&&(low2.equals("1"))){
+					liste = new ArrayList<Attribute>();
+					System.out.println("size début:"+e1.getListAttribute().size());
+					liste=e2.getListAttribute();
+					for (Attribute attpk : liste) {
+						if(attpk.isPrimaryKey()) {
+							MLDAttribute mldA = new MLDAttribute(attpk.getName(),
+									attpk.getType(), attpk.isNullable(), attpk.isPrimaryKey(),
+									attpk.isUnique(), true, e2, attpk);	
+							e1.getListAttribute().add(mldA);
+							System.out.println("size début:"+e1.getListAttribute().size());
+							ListOfAllEntities.add(e2);
+							ListOfAllEntities.add(e1);
+						}
+					}
+				}
+				else if((high2.equals("1"))&&(low2.equals("0"))&&(high1.equals("1"))&&(low1.equals("1"))){
+					System.out.println(e2.getName());
+					liste = new ArrayList<Attribute>();
+					System.out.println("size début:"+e2.getListAttribute().size());
+					liste=e1.getListAttribute();
+					for (Attribute attpk1 : liste) {
+						if(attpk1.isPrimaryKey()) {
+							MLDAttribute mldA = new MLDAttribute(attpk1.getName(),
+									attpk1.getType(), attpk1.isNullable(), attpk1.isPrimaryKey(),
+									attpk1.isUnique(), true, e1, attpk1);	
+							e1.getListAttribute().add(mldA);
+							System.out.println("size début:"+e1.getListAttribute().size());
+							ListOfAllEntities.add(e2);
+							ListOfAllEntities.add(e1);
+						}
+					}
+				}
+				else {
+					ListOfAllEntities.add(e2);
+					ListOfAllEntities.add(e1);
+				}
+			}
+			else if ((currentNode instanceof Association)&&(nb_neighbor==3)) {
+				//ajout d'entité dans le cas avec 3 association
+			}
+			else {
+				//Imposible
+			}
 			
 		}
+		return ListOfAllEntities;
 	}
 	
 	
+	public ArrayList<Entity> ListForMld(MCDManaging mcdM){
+		MLD data = new MLD();
+		ArrayList<Entity> ListOfAllAssociation = new ArrayList<Entity>();
+		ArrayList<Entity> ListOf2Entities = new ArrayList<Entity>();
+		ListOf2Entities=addEntitiesToMLD(mcdM);
+		ListOfAllAssociation=addAssociationToMLD(mcdM);
+		entityListToMld.addAll(ListOfAllAssociation);
+		entityListToMld.addAll(ListOf2Entities);
+		data.setEntityList(entityListToMld);
+		return entityListToMld;
+		
+	}
 	
 	
-	
-	
-	
-	
-	
-	
-
-	
-	
-/**	
-	public void  test(MCDManaging mcdM) {
-		String n="";
-		ArrayList<Attribute> liste = new ArrayList<Attribute>();
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph());
-		while(iterator.hasNext()) {
-			Node currentNode = iterator.next();
-			liste=currentNode.getListAttribute();
-			System.out.print("\n"+currentNode.getName()+":");
-			//put the pk first
-			for (Attribute attpk : liste) {
-				if(attpk.isPrimaryKey()) {
-					System.out.print(attpk.getName()+",");
-				}
-			}
-			for (Attribute att : liste) {
-				if(!att.isPrimaryKey()) {
-					System.out.print(att.getName()+",");
-				}
-			}
-		}
-	}*/
-	
-/**	public String  test2(MCDManaging mcdM) {
-		String n="";
-		String low="";
-		String high="";
-		HashMap<String, Cardinality> b;
-		Association a= new Association(n, null, null);
-		ArrayList<Attribute> liste = new ArrayList<Attribute>();
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph());
-		while(iterator.hasNext()) {
-			Node currentNode = iterator.next();
-			liste=currentNode.getListAttribute();
-			if (currentNode instanceof Entity) {
-				System.out.println("Entité");
-			}
-			else if (currentNode instanceof Association) {
-				System.out.println("Association");
-				a=(Association)currentNode;
-				b=a.getCardinalityMap();
-				System.out.println("Initial Mappings are: " + b);
-				System.out.println("Is the map empty? " + b.isEmpty());
-				for( Map.Entry<String, Cardinality> entry : b.entrySet() ){
-				    System.out.println( entry.getKey() + " => " + entry.getValue() );
-				    low=(entry.getValue()).getLowValue();
-				    high=(entry.getValue()).getHighValue();
-				    System.out.println( high + " => " + low );
-				}
-			}
-			else {
-				System.out.println("r");
-			}
-		}
-		return n;
-	}*/
-	
-	
-	
-	
-	
-
-
-
-
+	public MLD newMld(MCDManaging mcdM){
+		MLD mld = new MLD();
+		System.out.println(mld.getEntityList().size());
+		ArrayList<Entity> AllEntities = new ArrayList<Entity>();
+		AllEntities =ListForMld(mcdM);
+		mld = new MLD(AllEntities);
+		System.out.println(mld.getEntityList().size());
+		return mld;
+	}
 }
