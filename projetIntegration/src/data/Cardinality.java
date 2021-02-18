@@ -16,7 +16,7 @@ public class Cardinality {
 	public Cardinality(String lowValue, String highValue, String nowEntity) {
 		this.highValue = highValue;
 		this.lowValue = lowValue;
-		this.nomEntity=nomEntity;
+		this.nomEntity=nowEntity;
 	}
 
 	public String getLowValue() {

@@ -5,15 +5,20 @@ import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.Graphs;
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.alg.*;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
-import org.jgrapht.UndirectedGraph;
 
-import data.*;
-import exceptions.*;
+import data.Association;
+import data.Attribute;
+import data.Cardinality;
+import data.Entity;
+import data.MCD;
+import data.Node;
+import exceptions.EdgesNotLinkedException;
+import exceptions.ExistingEdgeException;
+import exceptions.InvalidNodeLinkException;
+import exceptions.NullNodeException;
 
 public class MCDManaging {
 
@@ -183,7 +188,7 @@ public class MCDManaging {
 		return notWellFormed;
 	}
 	
-	public MCD getMCDGraph() {
+	public MCD getMCD() {
 		return mcd;
 	}
 
