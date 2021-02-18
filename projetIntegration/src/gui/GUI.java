@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -21,12 +22,16 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import data.Association;
 import data.Entity;
+import data.MCD;
 import data.Node;
+import exceptions.SaveWasInteruptedException;
 import process.MCDManaging;
+import process.Saving;
 
 /**
  * Will surely become the main GUI class after many crash tests
@@ -48,11 +53,20 @@ public class GUI extends JFrame {
 	private static final Dimension ICONPANEL_SIZE = new Dimension(PANEL_SIZE.width,60);
 	private static final Dimension ICONBUTTON_SIZE = new Dimension(50,50);
 	private static final int HEIGHT_DIFFERENCE = ICONPANEL_SIZE.height + 24;
+	private static final Font APP_FONT = new Font(Font.DIALOG, Font.BOLD,15)  ;
 
-//	private JFrame theFrame;
+	private JFrame theFrame;
 	private ShapePanel sp;
 	private JPanel jpl = new JPanel();
 	private JPanel iconPanel = new JPanel();
+	private JPanel a1 = new JPanel() ;
+	private JPanel a2 = new JPanel() ;
+	private JPanel a3 = new JPanel() ;
+	private JPanel a4 = new JPanel() ;
+	private JPanel a5 = new JPanel() ;
+	private JPanel a6 = new JPanel() ;
+	private JPanel a7 = new JPanel() ;
+	private JPanel a8 = new JPanel() ;
 
 	private JLabel jlaR1 = new JLabel("Rect1");
 //	private JLabel jlaR2 = new JLabel("Rect2");
@@ -60,7 +74,14 @@ public class GUI extends JFrame {
 	private JLabel jlaYR1 = new JLabel("Y : 50");
 	private JLabel jlaXR2 = new JLabel("X : 200");
 	private JLabel jlaYR2 = new JLabel("Y : 200");
-	private JButton testButton = new JButton("test");
+	private JLabel jlaSoftwareName = new JLabel("Mocodo better") ;
+	private JLabel jlaVersion = new JLabel("Version 0.5-18.02.21") ;
+	private JLabel jlaDEV1 = new JLabel("Dev : Barrachina Yann") ;
+	private JLabel jlaDEV2 = new JLabel("	   Cibulka Nicolas") ;
+	private JLabel jlaDEV3 = new JLabel("      Coutenceau Etienne") ;
+	private JLabel jlaDEV4 = new JLabel("      Lekbour Fatia") ;
+	
+	private JButton testButton = new JButton("Ne pas toucher");
 	private JButton selectionButton = new JButton("S");
 	private JButton handButton = new JButton("H");
 	private JButton newEntityButton = new JButton("+E");
@@ -78,6 +99,7 @@ public class GUI extends JFrame {
 	private JMenu file = new JMenu("Fichier");
 	private JMenuItem newFile = new JMenuItem("Nouveau...");
 	private JMenuItem openFile = new JMenuItem("Ouvrir...");
+	private JMenuItem saveFile = new JMenuItem("Enregistrer...");
 	private JMenuItem exportFile = new JMenuItem("Exporter au format SQL...");
 	
 	private JMenu edit = new JMenu("Edition");
@@ -95,7 +117,7 @@ public class GUI extends JFrame {
 	private JMenuItem userGuide = new JMenuItem("Manuel de l'utilisateur");
 
 	public GUI() {
-//		theFrame = this;
+		theFrame = this;
 		
 		initLayout();
 		initActions();
@@ -155,6 +177,7 @@ public class GUI extends JFrame {
 		
 		file.add(newFile);
 		file.add(openFile);
+		file.add(saveFile);
 		file.addSeparator();
 		file.add(exportFile);
 		
@@ -184,9 +207,64 @@ public class GUI extends JFrame {
 		setVisible(true);
 	}
 	
+	/**
+	 * initialize the menu About
+	 */
+	public void initAbout() {
+		JFrame jfa = new JFrame("A propos") ;
+		GridLayout gla = new GridLayout(8,1);
+		
+		jfa.getContentPane().setLayout(gla) ;
+		
+		//GUI Name
+		a1.setSize(200, 30);
+		a1.setLayout(new FlowLayout(FlowLayout.CENTER)) ;
+		jlaSoftwareName.setFont(APP_FONT) ;
+		a1.add(jlaSoftwareName) ;
+		jfa.getContentPane().add(a1) ;
+		
+		a2.setSize(200, 30);
+		jfa.getContentPane().add(a2);
+		
+		//Version
+		a3.setSize(200, 30);
+		a3.setLayout(new FlowLayout(FlowLayout.CENTER)) ;
+		a3.add(jlaVersion) ;
+		jfa.getContentPane().add(a3) ;
+		
+		a4.setSize(200, 30);
+		jfa.getContentPane().add(a4);
+	
+		
+		//Dev Team
+		a5.setSize(200, 30);
+		a5.setLayout(new FlowLayout(FlowLayout.CENTER)) ;
+		a5.add(jlaDEV1) ;
+		jfa.getContentPane().add(a5) ;
+		a6.setSize(200, 30);
+		a6.setLayout(new FlowLayout(FlowLayout.CENTER)) ;
+		a6.add(jlaDEV2) ;
+		jfa.getContentPane().add(a6) ;
+		a7.setSize(200, 30);
+		a7.setLayout(new FlowLayout(FlowLayout.CENTER)) ;
+		a7.add(jlaDEV3) ;
+		jfa.getContentPane().add(a7) ;
+		a8.setSize(200, 30);
+		a8.setLayout(new FlowLayout(FlowLayout.CENTER)) ;
+		a8.add(jlaDEV4) ;
+		jfa.getContentPane().add(a8) ;
+		jfa.setSize(200, 240) ;
+		jfa.setResizable(false);
+		jfa.setLocationRelativeTo(null);
+		jfa.setVisible(true);
+	}
+	
+	
 	public void initActions(){
 		// Menu actions
+		about.addActionListener(new ActionAbout());
 		quit.addActionListener(new QuitAction());
+		saveFile.addActionListener(new ActionSave());
 		minimize.addActionListener(new MinimizeAction());
 		fullScreen.addActionListener(new FullScreenAction());
 		
@@ -226,7 +304,7 @@ public class GUI extends JFrame {
 				break;
 				
 			case "association" :
-				Node newNodeAssociation = new Association("Association",null,null);
+				Node newNodeAssociation = new Association("Association",null);
 				mcdManager.addNode(newNodeAssociation);
 				
 				sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);
@@ -392,7 +470,28 @@ public class GUI extends JFrame {
 	public class testAction implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			testButton.setPressedIcon(null);
+			JOptionPane.showMessageDialog(theFrame, "Je vous l'avait dit !","Petit margoulin", JOptionPane.ERROR_MESSAGE) ;
+		}
+	}
+	
+	/**
+	 * action of a button to know more about the program
+	 *
+	 */
+	class ActionAbout implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			initAbout();
+		}
+	}
+	
+	class ActionSave implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			try {
+				Saving save = new Saving("/Users/ryzentosh/Fac/Cours L3 I/Semestre 6/Projet d'intégration/essai",mcdManager.getMCDGraph());
+			} catch (SaveWasInteruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	

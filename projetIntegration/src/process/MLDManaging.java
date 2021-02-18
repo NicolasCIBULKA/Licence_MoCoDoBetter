@@ -48,7 +48,7 @@ public class MLDManaging {
 	
 	public ArrayList<Entity>  ListOfAllEntities(MCDManaging mcdM) {
 		ArrayList<Entity> listEntity= new ArrayList<Entity>();
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph());
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph().getMCDGraph());
 		while(iterator.hasNext()) {
 			Node currentNode = iterator.next();
 			if (currentNode instanceof Entity) {
@@ -85,10 +85,10 @@ public class MLDManaging {
 		List<String> listName = new ArrayList<String>();
 		Association association;
 		List<Cardinality> Card;
-		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph());
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcdM.getMCDGraph().getMCDGraph());
 		while(iterator.hasNext()) {
 			Node currentNode = iterator.next();
-			List<Node> connectedNodes = Graphs.neighborListOf(mcdM.getMCDGraph(), currentNode);
+			List<Node> connectedNodes = Graphs.neighborListOf(mcdM.getMCDGraph().getMCDGraph(), currentNode);
 			//Verify the type of Cardinality
 			if (currentNode instanceof Association) {
 				System.out.println("yaya:"+currentNode.getName());
