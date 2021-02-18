@@ -31,8 +31,6 @@ public class Saving {
 			writeAssociation();
 			writeCard();
 		}
-		
-		
 	}
 	
 	private void storeMCD(MCD mcd) {
@@ -69,6 +67,7 @@ public class Saving {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd"));
 			writer.write("<Entities>");
+			//null pointer probablement une lecture à vide
 			for(Node entity : listEntity) {
 				writer.write("<Entity>");
 				writer.write("<Name>");
@@ -93,6 +92,7 @@ public class Saving {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd"));
 			writer.write("<Associations>");
+			//null pointer probablement une lecture à vide
 			for(Node association : listAssociation) {
 				writer.write("<Entity>");
 				writer.write("<Name>");
@@ -116,6 +116,7 @@ public class Saving {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd"));
 			writer.write("<Cardinalities>");
+			//null pointer probablement une lecture à vide
 			for(Association association : listAssociation) {
 				writer.write("<Cardinality>");
 				for(Cardinality card : association.getCardinalityList()) {
