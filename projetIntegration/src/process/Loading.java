@@ -6,8 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import data.*;
+import exceptions.ExistingEdgeException;
+import exceptions.InvalidNodeLinkException;
+import exceptions.NullNodeException;
 
 public class Loading {
 	
@@ -25,12 +30,27 @@ public class Loading {
 
 	private void addNodes() {
 		// TODO Auto-generated method stub
-		
+		for (Entry<String, Node> set : listNode.entrySet()) { 
+			mcd.addNode(set.getValue());
+		}
 	}
 
 	private void addCardinality() {
-		// TODO Auto-generated method stub
-		
+		try {
+			// TODO Auto-generated method stub
+			for (Entry<String, Cardinality> set : listCard.entrySet()) { 
+					mcd.connectNodes(listNode.get(set.getKey()), listNode.get(set.getValue().getNomEntity()), set.getValue());
+			}
+		} catch (NullNodeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExistingEdgeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidNodeLinkException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void extract(String path) {
