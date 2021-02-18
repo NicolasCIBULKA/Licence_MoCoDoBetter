@@ -172,8 +172,8 @@ public class MCDManaging {
 		return notWellFormed;
 	}
 	
-	public UndirectedGraph<Node, DefaultEdge> getMCDGraph() {
-		return mcd.getMCDGraph();
+	public MCD getMCDGraph() {
+		return mcd;
 	}
 	
 }
