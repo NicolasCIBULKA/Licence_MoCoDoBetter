@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -17,7 +16,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -31,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import data.Association;
+import data.Attribute;
 import data.Cardinality;
 import data.Entity;
 import data.Node;
@@ -38,6 +37,7 @@ import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
+import gui.AttributePanel.AddAttributeAction;
 import process.MCDManaging;
 import process.Saving;
 
@@ -97,7 +97,6 @@ public class GUI extends JFrame {
 	private JLabel jlaDEV3 = new JLabel("      Coutenceau Etienne");
 	private JLabel jlaDEV4 = new JLabel("      Lekbour Fatia");
 	private JLabel nameConfigLabel = new JLabel("Nom :");
-	private JLabel testLabel = new JLabel("Test");
 
 	private JTextField jtfConfigName = new JTextField();
 
@@ -414,14 +413,16 @@ public class GUI extends JFrame {
 
 			switch (cursorState) {
 			case "entity":
-				Node newNodeEntity = new Entity("Entite", null);
+				ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
+				Node newNodeEntity = new Entity("Entite", entityAttributeList);
 				mcdManager.addNode(newNodeEntity);
 
 				sp.getComponentMap().put(sp.addShapeGroup(x, y, true), newNodeEntity);
 				break;
 
 			case "association":
-				Node newNodeAssociation = new Association("Association", null);
+				ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
+				Node newNodeAssociation = new Association("Association", associationAttributeList);
 				mcdManager.addNode(newNodeAssociation);
 
 				sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);
