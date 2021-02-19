@@ -1,5 +1,7 @@
 package data;
 
+import java.util.Vector;
+
 public class Attribute {
 	/*
 	 * Data class of the attributes, ie the columns in the tables resulting of the
@@ -65,7 +67,22 @@ public class Attribute {
 		this.isUnique = isUnique;
 	}
 	
-	
+	/**
+	 * Generates a vector composed of all attribute's datas.
+	 * 
+	 * @return attributeVector
+	 */
+	public Vector<Object> toVector(){
+		Vector<Object> attributeVector = new Vector<Object>();
+		
+		attributeVector.add(name);
+		attributeVector.add(type);
+		attributeVector.add(isNullable);
+		attributeVector.add(isPrimaryKey);
+		attributeVector.add(isUnique);
+		
+		return attributeVector;
+	}
 	
 	
 }
