@@ -33,7 +33,7 @@ public class MLDManaging {
 	
 	//This function add key put foreing keys
 	public ArrayList<Entity>  addAssociationToMLD(MCDManaging mcdM) {
-		MCD mcd=mcdM.getMCDGraph();
+		MCD mcd=mcdM.getMCD();
 		UndirectedGraph<Node, DefaultEdge> graph=mcd.getMCDGraph();
 		ArrayList<Entity> ListOfAllEntities = new ArrayList<Entity>();
 		boolean addfk=true;
@@ -93,7 +93,7 @@ public class MLDManaging {
 
 	
 	public ArrayList<Entity>  addEntitiesToMLD(MCDManaging mcdM) {
-		MCD mcd=mcdM.getMCDGraph();
+		MCD mcd=mcdM.getMCD();
 		UndirectedGraph<Node, DefaultEdge> graph=mcd.getMCDGraph();
 		ArrayList<Attribute> liste;
 		String high1,high2,low1,low2;
