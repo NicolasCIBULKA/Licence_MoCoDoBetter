@@ -61,6 +61,7 @@ public class ShapePanel extends JPanel {
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+		// Painting lines which links objects
 		System.out.println("[ShapeGroup]  ---- " + linkMap.size() + " link(s)");
 		g2d.setColor(Color.BLACK);
 		for (ShapeGroup shape : linkMap.keySet()) {
@@ -78,8 +79,15 @@ public class ShapePanel extends JPanel {
 
 		}
 
+		// Painting entities and associations
 		System.out.println("[ShapeGroup]  ---- " + componentMap.size() + " component(s)");
+		
 		for (ShapeGroup component : componentMap.keySet()) {
+			float nameWidth = g.getFontMetrics().stringWidth(componentMap.get(component).getName()) ;
+			if( nameWidth > component.getWidth()) {
+				component.setWidth(nameWidth);
+			}
+			float nameStartPosition = component.getWidth() - nameWidth;
 			if (component.isAnEntity()) {
 				drawEntity(component);
 

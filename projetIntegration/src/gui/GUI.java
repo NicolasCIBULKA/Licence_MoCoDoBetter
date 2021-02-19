@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -16,6 +17,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -26,6 +28,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import data.Association;
 import data.Cardinality;
@@ -48,8 +51,12 @@ public class GUI extends JFrame {
 
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
 
-	private MCDManaging mcdManager = new MCDManaging();
 	private ShapeGroup selectedComponent;
+	private ShapePanel sp;
+	private AttributePanel ap;
+	
+	private MCDManaging mcdManager = new MCDManaging();
+	
 	private String cursorState = new String("selection");
 
 	private MovingAdapter ma = new MovingAdapter();
@@ -61,7 +68,8 @@ public class GUI extends JFrame {
 	private static final Font APP_FONT = new Font(Font.DIALOG, Font.BOLD, 15);
 
 	private JFrame theFrame;
-	private ShapePanel sp;
+	private JFrame configFrame;
+
 	private JPanel jpl = new JPanel();
 	private JPanel iconPanel = new JPanel();
 	private JPanel a1 = new JPanel();
@@ -72,6 +80,9 @@ public class GUI extends JFrame {
 	private JPanel a6 = new JPanel();
 	private JPanel a7 = new JPanel();
 	private JPanel a8 = new JPanel();
+	private JPanel topConfigPanel = new JPanel();
+	private JPanel bodyConfigPanel = new JPanel();
+	private JPanel bottomConfigPanel = new JPanel();
 
 	private JLabel jlaR1 = new JLabel("Rect1");
 //	private JLabel jlaR2 = new JLabel("Rect2");
@@ -85,6 +96,10 @@ public class GUI extends JFrame {
 	private JLabel jlaDEV2 = new JLabel("	   Cibulka Nicolas");
 	private JLabel jlaDEV3 = new JLabel("      Coutenceau Etienne");
 	private JLabel jlaDEV4 = new JLabel("      Lekbour Fatia");
+	private JLabel nameConfigLabel = new JLabel("Nom :");
+	private JLabel testLabel = new JLabel("Test");
+
+	private JTextField jtfConfigName = new JTextField();
 
 	private JButton testButton = new JButton("Ne pas toucher");
 	private JButton selectionButton = new JButton("S");
@@ -92,6 +107,8 @@ public class GUI extends JFrame {
 	private JButton newEntityButton = new JButton("+E");
 	private JButton newAssociationButton = new JButton("+A");
 	private JButton newLinkButton = new JButton("E-A");
+	private JButton applyConfigButton = new JButton("Appliquer");
+	private JButton cancelConfigButton = new JButton("Annuler");
 
 	private Icon testIcon = new ImageIcon("");
 
@@ -129,6 +146,9 @@ public class GUI extends JFrame {
 		initActions();
 	}
 
+	/**
+	 * Initialize the main frame
+	 */
 	public void initLayout() {
 		setTitle("Mocodo Better");
 
@@ -217,7 +237,7 @@ public class GUI extends JFrame {
 	}
 
 	/**
-	 * initialize the menu About
+	 * Initialize the menu About
 	 */
 	public void initAbout() {
 		JFrame jfa = new JFrame("A propos");
@@ -267,6 +287,9 @@ public class GUI extends JFrame {
 		jfa.setVisible(true);
 	}
 
+	/**
+	 * Initialize the GUI actions
+	 */
 	public void initActions() {
 		// Menu actions
 		about.addActionListener(new ActionAbout());
@@ -280,9 +303,89 @@ public class GUI extends JFrame {
 		handButton.addActionListener(new DragAction());
 		newEntityButton.addActionListener(new AddEntityAction());
 		newAssociationButton.addActionListener(new AddAssociationAction());
-		newLinkButton.addActionListener(new AddLink());
+		newLinkButton.addActionListener(new AddLinkAction());
+		applyConfigButton.addActionListener(new ApplyConfigAction());
+		cancelConfigButton.addActionListener(new CancelConfigAction());
 		testButton.addActionListener(new testAction());
 
+	}
+
+	/**
+	 * Let's the user configure the parameters of an object through a dedicated
+	 * window. Uses cancel and applyConfiguration buttons
+	 * 
+	 * @param shapeToConfigure the entity or association to configure
+	 */
+	public void displayObjectConfiguration() {
+		if (selectedComponent.isAnEntity()) {
+			configFrame = new JFrame("Paramètres de l'entité");
+		} else {
+			configFrame = new JFrame("Paramètres de l'association");
+		}
+
+		ap = new AttributePanel(sp.getComponentMap().get(selectedComponent).getListAttribute());
+		
+		Container contentPane = configFrame.getContentPane();
+		contentPane.setLayout(new BorderLayout());
+
+		bottomConfigPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		topConfigPanel.setPreferredSize(new Dimension(400, 50));
+		bodyConfigPanel.setPreferredSize(new Dimension(400, 500));
+		bottomConfigPanel.setPreferredSize(new Dimension(400, 50));
+
+		jtfConfigName.setPreferredSize(new Dimension(150, 20));
+		jtfConfigName.setText(selectedComponent.getGroupName());
+		topConfigPanel.add(nameConfigLabel);
+		topConfigPanel.add(jtfConfigName);
+
+		contentPane.add(topConfigPanel, BorderLayout.PAGE_START);
+		
+		bodyConfigPanel.add(ap);
+		contentPane.add(bodyConfigPanel, BorderLayout.CENTER);
+		
+		
+		bottomConfigPanel.add(cancelConfigButton);
+		bottomConfigPanel.add(applyConfigButton);
+		contentPane.add(bottomConfigPanel, BorderLayout.PAGE_END);
+
+		configFrame.setSize(400, 600);
+		configFrame.setResizable(false);
+		configFrame.setLocationRelativeTo(null);
+		configFrame.setVisible(true);
+	}
+
+	/**
+	 * Connects nodes in the given List of ShapeGroup. These are corresponding to
+	 * the graphical shapes in the ShapePanel's componentMap. Fills the ShapePanel's
+	 * linkMap, which contains all graphical relations between objects for drawing
+	 * lines.
+	 * 
+	 * @param shapesToBeConnected List of shapes to connect
+	 */
+	public void linkTwoShapes(List<ShapeGroup> shapesToBeConnected) {
+		try {
+			// Connecting nodes, Jgraph part
+			mcdManager.connectNodes(sp.getComponentMap().get(shapesToBeConnected.get(0)),
+					sp.getComponentMap().get(shapesToBeConnected.get(1)),
+					new Cardinality("1", "0", shapesToBeConnected.get(0).getGroupName()));
+
+			// Connecting objects, graphical part
+			// Depends on existing entries in the linkMap
+			if (sp.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
+
+				System.out.println("[GUI]  Added a shape");
+				sp.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
+
+			} else {
+				System.out.println("[GUI]  Added a couple key-value");
+
+				List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
+				newLinkList.add(shapesToBeConnected.get(1));
+				sp.getLinkMap().put(shapesToBeConnected.get(0), newLinkList);
+			}
+		} catch (NullNodeException | ExistingEdgeException | InvalidNodeLinkException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	/**
@@ -334,33 +437,40 @@ public class GUI extends JFrame {
 						jlaYR1.setText("Y : " + selectedComponent.getY());
 					}
 				}
-
-				if (cursorState.equals("link")) {
-					if (shapesToConnect.size() < 2) {
-						shapesToConnect.add(selectedComponent);
+				if (selectedComponent == null) {
+					jlaR1.setText("NULL");
+				} else {
+					if (cursorState.equals("selection")) {
+						displayObjectConfiguration();
 					}
-					if (shapesToConnect.size() == 2) {
-						boolean fisrtObjectType = shapesToConnect.get(0).isAnEntity();
-						boolean secondObjectType = shapesToConnect.get(1).isAnEntity();
 
-						if (fisrtObjectType != secondObjectType) {
-							linkTwoShapes(shapesToConnect);
-
-						} else {
-							JOptionPane.showMessageDialog(theFrame,
-									"Vous ne pouvez pas associer deux objets de même type !", "Erreur d'association",
-									JOptionPane.WARNING_MESSAGE);
+					if (cursorState.equals("link")) {
+						if (shapesToConnect.size() < 2) {
+							shapesToConnect.add(selectedComponent);
+							repaint();
 						}
-						shapesToConnect.clear();
+						if (shapesToConnect.size() == 2) {
+							boolean fisrtObjectType = shapesToConnect.get(0).isAnEntity();
+							boolean secondObjectType = shapesToConnect.get(1).isAnEntity();
+
+							if (fisrtObjectType != secondObjectType) {
+								linkTwoShapes(shapesToConnect);
+								repaint();
+
+							} else {
+								JOptionPane.showMessageDialog(theFrame,
+										"Vous ne pouvez pas associer deux objets de même type !",
+										"Erreur d'association", JOptionPane.WARNING_MESSAGE);
+							}
+							shapesToConnect.clear();
+						}
 					}
 				}
+
 			}
 
 			System.out.println("[GUI]  Liste de connection : " + shapesToConnect.size());
-			if (selectedComponent == null) {
-				jlaR1.setText("NULL");
 
-			}
 //			else {
 //				List<Node> connectedNodes = Graphs.neighborListOf(mcdManager.getMCD().getMCDGraph(),
 //						sp.getComponentMap().get(selectedComponent));
@@ -467,29 +577,6 @@ public class GUI extends JFrame {
 //		}
 //	}
 
-	public void linkTwoShapes(List<ShapeGroup> shapesToBeConnected) {
-		try {
-			mcdManager.connectNodes(sp.getComponentMap().get(shapesToBeConnected.get(0)),
-					sp.getComponentMap().get(shapesToBeConnected.get(1)),
-					new Cardinality("1", "0", shapesToBeConnected.get(0).getGroupName()));
-
-			if (sp.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
-
-				System.out.println("[GUI]  Added a shape");
-				sp.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
-
-			} else {
-				System.out.println("[GUI]  Added a couple key-value");
-
-				List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
-				newLinkList.add(shapesToBeConnected.get(1));
-				sp.getLinkMap().put(shapesToBeConnected.get(0), newLinkList);
-			}
-		} catch (NullNodeException | ExistingEdgeException | InvalidNodeLinkException e1) {
-			e1.printStackTrace();
-		}
-	}
-
 	public class SelectionAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -541,7 +628,7 @@ public class GUI extends JFrame {
 		}
 	}
 
-	public class AddLink implements ActionListener {
+	public class AddLinkAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			cursorState = "link";
@@ -551,6 +638,24 @@ public class GUI extends JFrame {
 			newAssociationButton.setEnabled(true);
 			newLinkButton.setEnabled(false);
 
+		}
+	}
+
+	public class ApplyConfigAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			selectedComponent.setGroupName(jtfConfigName.getText());
+			sp.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
+			configFrame.dispose();
+			repaint();
+		}
+	}
+
+	public class CancelConfigAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+//			configFrame.setVisible(false);
+			configFrame.dispose();
 		}
 	}
 
