@@ -5,7 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -28,11 +28,12 @@ public class AttributePanel extends JPanel{
 	private Dimension d = new Dimension(350,400) ;
 	private String columnHeader[] = { "Nom", "Type", "is Null", "Primary Key", "is Unique"};
 	
-	private List<Attribute> attributeList;
+	private int index = 0;
 	
-	public AttributePanel(List<Attribute> attributeList) {
+	private ArrayList<Attribute> attributeList;
+	
+	public AttributePanel() {
 		mainPanel = this;
-		this.attributeList = attributeList;
 		
 		initActions();
 		
@@ -43,11 +44,6 @@ public class AttributePanel extends JPanel{
 		JPanel jpTable = new JPanel();
 		JPanel buttonPanel = new JPanel();
 		mainTable = new JTable(model) ;
-		for(Attribute attribute : attributeList) {
-			model.addRow(attribute.toVector());
-		}
-		// Notifying table that datas are uploaded into the table's model
-		model.fireTableDataChanged();
 		
 		jsp = new JScrollPane(mainTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) ;
 	   	jsp.setPreferredSize(d);
@@ -84,12 +80,33 @@ public class AttributePanel extends JPanel{
 	}
 	 
 	/**
+	 * @return the attributeList
+	 */
+	public ArrayList<Attribute> getAttributeList() {
+		return attributeList;
+	}
+
+	/**
+	 * @param attributeList the attributeList to set
+	 */
+	public void setAttributeList(ArrayList<Attribute> attributeList) {
+		this.attributeList = attributeList;
+		model.setRowCount(0);
+		for(Attribute attribute : attributeList) {
+			model.addRow(attribute.toVector());
+		}
+		// Notifying table that datas are uploaded into the table's model
+		model.fireTableDataChanged();
+	}
+
+	/**
 	 * Creates then adds a blank attribute to the attribute list and the mainTable.
 	 */
 	public class AddAttributeAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			Attribute newAttribute = new Attribute("", "", false, false, false);
+			String newName = ""+index++;
+			Attribute newAttribute = new Attribute(newName, "", false, false, false);
 			attributeList.add(newAttribute);
 			model.addRow(newAttribute.toVector());
 			model.fireTableDataChanged();

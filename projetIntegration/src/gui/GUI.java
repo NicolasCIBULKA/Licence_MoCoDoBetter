@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
-import gui.AttributePanel.AddAttributeAction;
 import process.MCDManaging;
 import process.Saving;
 
@@ -53,10 +53,10 @@ public class GUI extends JFrame {
 
 	private ShapeGroup selectedComponent;
 	private ShapePanel sp;
-	private AttributePanel ap;
-	
+	private AttributePanel ap = new AttributePanel();;
+
 	private MCDManaging mcdManager = new MCDManaging();
-	
+
 	private String cursorState = new String("selection");
 
 	private MovingAdapter ma = new MovingAdapter();
@@ -322,8 +322,8 @@ public class GUI extends JFrame {
 			configFrame = new JFrame("Paramètres de l'association");
 		}
 
-		ap = new AttributePanel(sp.getComponentMap().get(selectedComponent).getListAttribute());
-		
+		ap.setAttributeList(sp.getComponentMap().get(selectedComponent).getListAttribute());
+
 		Container contentPane = configFrame.getContentPane();
 		contentPane.setLayout(new BorderLayout());
 
@@ -338,11 +338,10 @@ public class GUI extends JFrame {
 		topConfigPanel.add(jtfConfigName);
 
 		contentPane.add(topConfigPanel, BorderLayout.PAGE_START);
-		
+
 		bodyConfigPanel.add(ap);
 		contentPane.add(bodyConfigPanel, BorderLayout.CENTER);
-		
-		
+
 		bottomConfigPanel.add(cancelConfigButton);
 		bottomConfigPanel.add(applyConfigButton);
 		contentPane.add(bottomConfigPanel, BorderLayout.PAGE_END);
@@ -350,6 +349,7 @@ public class GUI extends JFrame {
 		configFrame.setSize(400, 600);
 		configFrame.setResizable(false);
 		configFrame.setLocationRelativeTo(null);
+		configFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		configFrame.setVisible(true);
 	}
 
@@ -410,64 +410,67 @@ public class GUI extends JFrame {
 			System.out.println("[GUI]  X : " + x + " Y : " + y);
 
 			selectedComponent = null;
+			if (!cursorState.equals("none")) {
+				switch (cursorState) {
+				case "entity":
+					ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
+					Node newNodeEntity = new Entity("Entite", entityAttributeList);
+					mcdManager.addNode(newNodeEntity);
 
-			switch (cursorState) {
-			case "entity":
-				ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
-				Node newNodeEntity = new Entity("Entite", entityAttributeList);
-				mcdManager.addNode(newNodeEntity);
+					sp.getComponentMap().put(sp.addShapeGroup(x, y, true), newNodeEntity);
+					break;
 
-				sp.getComponentMap().put(sp.addShapeGroup(x, y, true), newNodeEntity);
-				break;
+				case "association":
+					ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
+					Node newNodeAssociation = new Association("Association", associationAttributeList);
+					mcdManager.addNode(newNodeAssociation);
 
-			case "association":
-				ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
-				Node newNodeAssociation = new Association("Association", associationAttributeList);
-				mcdManager.addNode(newNodeAssociation);
+					sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);
+					break;
 
-				sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);
-				break;
+				default:
+					for (ShapeGroup component : sp.getComponentMap().keySet()) {
 
-			default:
-				for (ShapeGroup component : sp.getComponentMap().keySet()) {
-
-					if (component.getMainShape().contains(x, y)) {
-						selectedComponent = component;
-						jlaR1.setText(">>> " + selectedComponent.getGroupName() + " <<<");
-						jlaXR1.setText("X : " + selectedComponent.getX());
-						jlaYR1.setText("Y : " + selectedComponent.getY());
-					}
-				}
-				if (selectedComponent == null) {
-					jlaR1.setText("NULL");
-				} else {
-					if (cursorState.equals("selection")) {
-						displayObjectConfiguration();
-					}
-
-					if (cursorState.equals("link")) {
-						if (shapesToConnect.size() < 2) {
-							shapesToConnect.add(selectedComponent);
-							repaint();
+						if (component.getMainShape().contains(x, y)) {
+							selectedComponent = component;
+							System.out.println("[GUI]  pointing another component");
+							System.out.println("[GUI]  Component entity type ? " + selectedComponent.isAnEntity());
+							jlaR1.setText(">>> " + selectedComponent.getGroupName() + " <<<");
+							jlaXR1.setText("X : " + selectedComponent.getX());
+							jlaYR1.setText("Y : " + selectedComponent.getY());
 						}
-						if (shapesToConnect.size() == 2) {
-							boolean fisrtObjectType = shapesToConnect.get(0).isAnEntity();
-							boolean secondObjectType = shapesToConnect.get(1).isAnEntity();
+					}
+					if (selectedComponent == null) {
+						jlaR1.setText("NULL");
+					} else {
+						if (cursorState.equals("selection")) {
+							displayObjectConfiguration();
+							cursorState = "none";
+						}
 
-							if (fisrtObjectType != secondObjectType) {
-								linkTwoShapes(shapesToConnect);
+						if (cursorState.equals("link")) {
+							if (shapesToConnect.size() < 2) {
+								shapesToConnect.add(selectedComponent);
 								repaint();
-
-							} else {
-								JOptionPane.showMessageDialog(theFrame,
-										"Vous ne pouvez pas associer deux objets de même type !",
-										"Erreur d'association", JOptionPane.WARNING_MESSAGE);
 							}
-							shapesToConnect.clear();
+							if (shapesToConnect.size() == 2) {
+								boolean fisrtObjectType = shapesToConnect.get(0).isAnEntity();
+								boolean secondObjectType = shapesToConnect.get(1).isAnEntity();
+
+								if (fisrtObjectType != secondObjectType) {
+									linkTwoShapes(shapesToConnect);
+									repaint();
+
+								} else {
+									JOptionPane.showMessageDialog(theFrame,
+											"Vous ne pouvez pas associer deux objets de même type !",
+											"Erreur d'association", JOptionPane.WARNING_MESSAGE);
+								}
+								shapesToConnect.clear();
+							}
 						}
 					}
 				}
-
 			}
 
 			System.out.println("[GUI]  Liste de connection : " + shapesToConnect.size());
@@ -647,7 +650,9 @@ public class GUI extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			selectedComponent.setGroupName(jtfConfigName.getText());
 			sp.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
+			sp.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
 			configFrame.dispose();
+			cursorState = "selection";
 			repaint();
 		}
 	}
@@ -657,6 +662,7 @@ public class GUI extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 //			configFrame.setVisible(false);
 			configFrame.dispose();
+			cursorState = "selection";
 		}
 	}
 

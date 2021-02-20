@@ -18,6 +18,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import data.Node;
+import data.Attribute;
 
 /**
  * ShapePanel contains all the graphical objects to paint and manage their
@@ -83,11 +84,10 @@ public class ShapePanel extends JPanel {
 		System.out.println("[ShapeGroup]  ---- " + componentMap.size() + " component(s)");
 		
 		for (ShapeGroup component : componentMap.keySet()) {
-			float nameWidth = g.getFontMetrics().stringWidth(componentMap.get(component).getName()) ;
-			if( nameWidth > component.getWidth()) {
-				component.setWidth(nameWidth);
-			}
-			float nameStartPosition = component.getWidth() - nameWidth;
+//			float nameWidth = g.getFontMetrics().stringWidth(componentMap.get(component).getName()) ;
+//			if( nameWidth > component.getWidth()) {
+//				component.setWidth(nameWidth);
+//			}
 			if (component.isAnEntity()) {
 				drawEntity(component);
 
@@ -191,9 +191,15 @@ public class ShapePanel extends JPanel {
 				component.getMainShape().getBounds2D().getY() - 1,
 				component.getMainShape().getBounds2D().getWidth() + 1,
 				component.getMainShape().getBounds2D().getHeight() + 1));
-
+		
+		// Drawing text
 		g2d.setColor(Color.black);
 		g2d.drawString(component.getGroupName(), component.getX() + 70.0f, component.getY() + 30.0f);
+		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
+		System.out.println("[ShapeGroup]  attributeList size : " + attributeList.size());
+		for(int index = 0 ; index < attributeList.size() ; index++) {
+			g2d.drawString(attributeList.get(index).getName(), component.getX() + 70.0f, component.getY() + 30.0f + 40.0f + (index*20.0f));
+		}
 
 	}
 
