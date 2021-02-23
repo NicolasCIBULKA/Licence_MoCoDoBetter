@@ -6,6 +6,7 @@ import data.Cardinality;
 import data.Entity;
 import data.MCD;
 import data.Node;
+import exceptions.FileAlreadyExistException;
 import exceptions.SaveWasInteruptedException;
 
 import java.io.*;
@@ -23,7 +24,7 @@ public class Saving {
 	private ArrayList<Entity> listEntity;
 	private ArrayList<Association> listAssociation;
 
-	public Saving(String path, MCD mcd) throws SaveWasInteruptedException {
+	public Saving(String path, MCD mcd) throws SaveWasInteruptedException, FileAlreadyExistException {
 		listEntity = new ArrayList<Entity>();
 		listAssociation = new ArrayList<Association>();
 		storeMCD(mcd);
@@ -54,13 +55,14 @@ public class Saving {
 		}
 	}
 	
-	private boolean creaFile(String path) throws SaveWasInteruptedException {
+	private boolean creaFile(String path) throws SaveWasInteruptedException, FileAlreadyExistException {
 		try {
 		      File initfile = new File(path+".stdd");
 		      if (initfile.createNewFile()) {
 		        System.out.println("File created: " + initfile.getName());
 		      } else {
 		        System.out.println("File already exists.");
+		        throw new FileAlreadyExistException("This file already exist");
 		      }
 		    } catch (IOException e) {
 		      throw new SaveWasInteruptedException("The file couldn't be opened");
