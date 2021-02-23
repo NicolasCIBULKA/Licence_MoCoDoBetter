@@ -101,6 +101,18 @@ public class MCDManaging {
 			}
 	}
 	
+	// get a Node from the name
+	public Node getNodeFromName(String name) {
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		while(iterator.hasNext()) {
+			Node currentNode = iterator.next();
+			if(currentNode.getName() == name) {
+				return currentNode;
+			}
+		}
+		return null;
+	}
+	
 	// Remove a Node of the MCD
 	public void removeNode(Node node) throws NullNodeException{
 		if(mcd.getMCDGraph().containsVertex(node)) {
