@@ -18,7 +18,8 @@ public class ShapeGroup {
 
 	private boolean isAnEntity;
 
-	public ShapeGroup(float x, float y, boolean entityType) {
+	public ShapeGroup(String groupName, float x, float y, boolean entityType) {
+		this.groupName = groupName;
 		this.x = x;
 		this.y = y;
 		this.isAnEntity = entityType;
@@ -27,13 +28,11 @@ public class ShapeGroup {
 
 			mainShape = new Rectangle2D.Float(x, y, width, height);
 			headShape = new Rectangle2D.Float(x, y, width, height / 2);
-			this.groupName = "Entity";
 
 		} else {
 
 			mainShape = new RoundRectangle2D.Float(x, y, width, height, 20.0f, 20.0f);
 			headShape = new RoundRectangle2D.Float(x, y, width, height / 2, 20.0f, 20.0f);
-			this.groupName = "Association";
 		}
 
 	}

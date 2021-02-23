@@ -157,8 +157,8 @@ public class ShapePanel extends JPanel {
 	 * @param y          the Y coordinate of the new component
 	 * @param entityType defines if the component is an entity or an association
 	 */
-	public ShapeGroup addShapeGroup(float x, float y, boolean entityType) {
-		ShapeGroup component = new ShapeGroup(x, y, entityType);
+	public ShapeGroup addShapeGroup(String newName, float x, float y, boolean entityType) {
+		ShapeGroup component = new ShapeGroup(newName, x, y, entityType);
 		repaint();
 		return component;
 	}

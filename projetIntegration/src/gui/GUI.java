@@ -35,6 +35,7 @@ import data.Cardinality;
 import data.Entity;
 import data.Node;
 import exceptions.ExistingEdgeException;
+import exceptions.FileAlreadyExistException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
@@ -60,6 +61,8 @@ public class GUI extends JFrame {
 	private String cursorState = new String("selection");
 
 	private MovingAdapter ma = new MovingAdapter();
+	
+	private int uniqueSuffix = 0;
 
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 	private static final Dimension ICONPANEL_SIZE = new Dimension(PANEL_SIZE.width, 60);
@@ -414,18 +417,18 @@ public class GUI extends JFrame {
 				switch (cursorState) {
 				case "entity":
 					ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
-					Node newNodeEntity = new Entity("Entite", entityAttributeList);
+					Node newNodeEntity = new Entity("Entite" + uniqueSuffix, entityAttributeList);
 					mcdManager.addNode(newNodeEntity);
-
-					sp.getComponentMap().put(sp.addShapeGroup(x, y, true), newNodeEntity);
+					sp.getComponentMap().put(sp.addShapeGroup("Entite" + uniqueSuffix, x, y, true), newNodeEntity);
+					uniqueSuffix++;
 					break;
 
 				case "association":
 					ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
-					Node newNodeAssociation = new Association("Association", associationAttributeList);
+					Node newNodeAssociation = new Association("Association" + uniqueSuffix, associationAttributeList);
 					mcdManager.addNode(newNodeAssociation);
-
-					sp.getComponentMap().put(sp.addShapeGroup(x, y, false), newNodeAssociation);
+					sp.getComponentMap().put(sp.addShapeGroup("Association" + uniqueSuffix, x, y, false), newNodeAssociation);
+					uniqueSuffix++;
 					break;
 
 				default:
@@ -648,9 +651,14 @@ public class GUI extends JFrame {
 	public class ApplyConfigAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			selectedComponent.setGroupName(jtfConfigName.getText());
+			System.out.println("selectedComponent.getGroupName() : " + selectedComponent.getGroupName());
+			mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
+			mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
+			
 			sp.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
 			sp.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
+			selectedComponent.setGroupName(jtfConfigName.getText());
+			
 			configFrame.dispose();
 			cursorState = "selection";
 			repaint();
@@ -690,6 +698,9 @@ public class GUI extends JFrame {
 				new Saving("/Users/ryzentosh/Fac/Cours L3 I/Semestre 6/Projet d'intégration/essai",
 						mcdManager.getMCD());
 			} catch (SaveWasInteruptedException e1) {
+				e1.printStackTrace();
+			} catch (FileAlreadyExistException e1) {
+				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}

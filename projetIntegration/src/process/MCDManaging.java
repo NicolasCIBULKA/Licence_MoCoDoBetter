@@ -106,7 +106,7 @@ public class MCDManaging {
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while(iterator.hasNext()) {
 			Node currentNode = iterator.next();
-			if(currentNode.getName() == name) {
+			if(currentNode.getName().equals(name)) {
 				return currentNode;
 			}
 		}
