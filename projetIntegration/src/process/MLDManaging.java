@@ -168,14 +168,25 @@ public class MLDManaging {
 				association=(Association)currentNode;
 				Card=association.getCardinalityList();
 				ListIterator<Cardinality> lItr = Card.listIterator();
-				while (lItr.hasNext()) {
-				    high=lItr.next().getHighValue();
-				    listCard.add(high);
+				int it=0;
+				String h1=null,l1=null,h2=null,l2=null;
+				for(Cardinality c:Card) {
+					high=c.getHighValue();
+					listCard.add(high);
+					if (it==0) {
+						h1=c.getHighValue();
+						l1=c.getLowValue();
+					}
+					else if (it==1) {
+						h2=c.getHighValue();
+						l2=c.getLowValue();
+					}
+					it++;
 				}
 				for(String str:listCard) {
 					if(str.equals("N")) {addfk=true;}
 					else {addfk=false;break;}
-				}if(addfk==true) {
+				}if ((addfk==true)||((h1.equals("1"))&&(h2.equals("1"))&&(l1.equals("0"))&&(l2.equals("0")))) {
 					ArrayList<Attribute> newAttribute=new ArrayList<Attribute>();
 					for(int i = 0 ; i < connectedNodes.size(); i++) {
 						ArrayList<Attribute> liste = new ArrayList<Attribute>();
@@ -210,6 +221,10 @@ public class MLDManaging {
 		MCD finalMCD=newAssociation(secondMCD);
 		return mcd;
 	}
+	
+
+	
+	
 	
 	
 	
@@ -494,8 +509,6 @@ public class MLDManaging {
 		return mld;
 	}
 	
-
-
 	public void  testduprograme(MCDManaging mcdM) {
 		MCD mcd= newMCD(mcdM);
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
@@ -518,7 +531,6 @@ public class MLDManaging {
 				else {
 					System.out.println(dog.getName());
 				}
-
 			}
 			
 			
@@ -533,32 +545,10 @@ public class MLDManaging {
 				else {
 					System.out.println(att.get(i).getName());
 				}
-
 			}
 			
 			
 		}
-
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	*/
 }
