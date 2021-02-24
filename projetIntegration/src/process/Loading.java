@@ -19,6 +19,8 @@ public class Loading {
 	private MCDManaging mcd;
 	private HashMap<String, Node> listNode;
 	private HashMap<String, Cardinality> listCard;
+	
+	
 	public Loading(String path) {
 		this.mcd = new MCDManaging();
 		this.listNode=new HashMap<String, Node>();
@@ -68,30 +70,13 @@ public class Loading {
 		
 	}
 
-	private void extractCardinality(BufferedReader br) {
-		try {
-			String str;
-			while((str=br.readLine())!="</Cardinalities>") {
-				if(str=="<Cardinality>") {
-					str=br.readLine();
-					String[] tmpStr=str.split(",");
-					listCard.put(tmpStr[0], new Cardinality(tmpStr[2],tmpStr[3],tmpStr[1]));
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-
 	private void extractEntity(BufferedReader br) {
 		try {
 			String name = null;
 			ArrayList <Attribute> att = new ArrayList<Attribute>();
 			String str;
 			while((str=br.readLine())!="</Entities>") {
-				if(str=="</Entity>") {
+				if(str=="</Table>") {
 					Entity a = new Entity(name,att);
 					listNode.put(name, a);
 					att.clear();
@@ -122,7 +107,7 @@ public class Loading {
 			ArrayList <Attribute> att = new ArrayList<Attribute>();
 			String str;
 			while((str=br.readLine())!="</Associations>") {
-				if(str=="</Entity>") {
+				if(str=="</Table>") {
 					Association a = new Association(name,att,null);
 					listNode.put(name, a);
 					att.clear();
@@ -138,6 +123,23 @@ public class Loading {
 							Boolean.parseBoolean(listatt[3]),Boolean.parseBoolean(listatt[4]));
 					att.add(tmpAtt);
 					tmpAtt=null;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void extractCardinality(BufferedReader br) {
+		try {
+			String str;
+			while((str=br.readLine())!="</Cardinalities>") {
+				if(str=="<Cardinality>") {
+					str=br.readLine();
+					String[] tmpStr=str.split(",");
+					listCard.put(tmpStr[0], new Cardinality(tmpStr[2],tmpStr[3],tmpStr[1]));
 				}
 			}
 		} catch (IOException e) {

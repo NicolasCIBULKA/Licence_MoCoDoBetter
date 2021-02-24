@@ -20,13 +20,31 @@ import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class Saving {
+	//path of the file
 	private String path;
+	//keeping in memory the list of entity and association to treat them separatly
 	private ArrayList<Entity> listEntity;
 	private ArrayList<Association> listAssociation;
-
+	//boolean to save as if the constructor have a boolean in argument then it means it's a save as request
+	private boolean saveAs = false;
+	
+	//constructor save
 	public Saving(String path, MCD mcd) throws SaveWasInteruptedException, FileAlreadyExistException {
 		listEntity = new ArrayList<Entity>();
 		listAssociation = new ArrayList<Association>();
+		storeMCD(mcd);
+		this.path=path;
+		if(creaFile(path)) {
+			writeEntity();
+			writeAssociation();
+			writeCard();
+		}
+	}
+	//constructor save as
+	public Saving(String path, MCD mcd, boolean saveAs) throws SaveWasInteruptedException, FileAlreadyExistException {
+		listEntity = new ArrayList<Entity>();
+		listAssociation = new ArrayList<Association>();
+		this.saveAs=true;
 		storeMCD(mcd);
 		
 		this.path=path;
@@ -36,7 +54,7 @@ public class Saving {
 			writeCard();
 		}
 	}
-	
+	//we read the mcd graph and separate entities and associations 
 	private void storeMCD(MCD mcd) {
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while(iterator.hasNext()) {
@@ -54,30 +72,32 @@ public class Saving {
 			}	
 		}
 	}
-	
+	//I create a new file if it doesn't exist if already exist depending on save as or save action it will either overwrite
+	//or throws an exception
 	private boolean creaFile(String path) throws SaveWasInteruptedException, FileAlreadyExistException {
 		try {
 		      File initfile = new File(path+".stdd");
 		      if (initfile.createNewFile()) {
 		        System.out.println("File created: " + initfile.getName());
 		      } else {
-		        System.out.println("File already exists.");
-		        throw new FileAlreadyExistException("This file already exist");
+		    	  if(saveAs==true) {
+		    		  System.out.println("File already exists.");
+				      throw new FileAlreadyExistException("This file already exist");
+		    	  }
 		      }
 		    } catch (IOException e) {
 		      throw new SaveWasInteruptedException("The file couldn't be opened");
 		    }
 		return true;
 	}
-	
+	//In a first time i write the entities 
 	private void writeEntity() throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd",true));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd"));
 			writer.write("<Entities>\n");
-			//null pointer probablement une lecture à vide
 			if(!listEntity.isEmpty()) {
 				for(Node entity : listEntity) {
-					writer.write("<Entity>\n");
+					writer.write("<Table>\n");
 					writer.write("<Name>\n");
 					writer.write(entity.getName()+"\n");
 					writer.write("</Name>\n");
@@ -87,7 +107,7 @@ public class Saving {
 					+attribut.isNullable()+","+attribut.isPrimaryKey()+","+attribut.isUnique()+"\n");
 						writer.write("</Attribut>\n");
 					}
-					writer.write("</Entity>\n");
+					writer.write("</Table>\n");
 				}
 				
 			}
@@ -100,7 +120,7 @@ public class Saving {
 			throw new SaveWasInteruptedException("Can't write the entity part of the file");
 		}
 	}
-	
+	//Then i write the association in the file
 	private void writeAssociation() throws SaveWasInteruptedException {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd",true));
@@ -108,7 +128,7 @@ public class Saving {
 			//null pointer probablement une lecture à vide
 			if(!listAssociation.isEmpty()) {
 				for(Node association : listAssociation) {
-					writer.write("<Entity>\n");
+					writer.write("<Table>\n");
 					writer.write("<Name>\n");
 					writer.write(association.getName()+"\n");
 					writer.write("</Name>\n");
@@ -118,7 +138,7 @@ public class Saving {
 					+attribut.isNullable()+","+attribut.isPrimaryKey()+","+attribut.isUnique()+"\n");
 						writer.write("</Attribut>\n");
 					}
-					writer.write("</Entity>\n");
+					writer.write("</Table>\n");
 				}
 			}
 			else {
@@ -130,6 +150,7 @@ public class Saving {
 			throw new SaveWasInteruptedException("Can't write the association part of the file");
 		}
 	}
+	//Finaly i write each cardinality by getting them from the association list
 	private void writeCard() throws SaveWasInteruptedException {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd",true));
