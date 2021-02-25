@@ -54,14 +54,14 @@ public class GUI extends JFrame {
 
 	private ShapeGroup selectedComponent;
 	private ShapePanel sp;
-	private AttributePanel ap = new AttributePanel();;
+	private AttributePanel ap = new AttributePanel();
 
 	private MCDManaging mcdManager = new MCDManaging();
 
 	private String cursorState = new String("selection");
 
 	private MovingAdapter ma = new MovingAdapter();
-	
+
 	private int uniqueSuffix = 0;
 
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
@@ -324,16 +324,16 @@ public class GUI extends JFrame {
 		} else {
 			configFrame = new JFrame("Paramètres de l'association");
 		}
-
+		
 		ap.setAttributeList(sp.getComponentMap().get(selectedComponent).getListAttribute());
 
 		Container contentPane = configFrame.getContentPane();
 		contentPane.setLayout(new BorderLayout());
 
 		bottomConfigPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		topConfigPanel.setPreferredSize(new Dimension(400, 50));
-		bodyConfigPanel.setPreferredSize(new Dimension(400, 500));
-		bottomConfigPanel.setPreferredSize(new Dimension(400, 50));
+		topConfigPanel.setPreferredSize(new Dimension(520, 50));
+		bodyConfigPanel.setPreferredSize(new Dimension(520, 500));
+		bottomConfigPanel.setPreferredSize(new Dimension(520, 50));
 
 		jtfConfigName.setPreferredSize(new Dimension(150, 20));
 		jtfConfigName.setText(selectedComponent.getGroupName());
@@ -349,7 +349,7 @@ public class GUI extends JFrame {
 		bottomConfigPanel.add(applyConfigButton);
 		contentPane.add(bottomConfigPanel, BorderLayout.PAGE_END);
 
-		configFrame.setSize(400, 600);
+		configFrame.setSize(520, 600);
 		configFrame.setResizable(false);
 		configFrame.setLocationRelativeTo(null);
 		configFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -394,7 +394,7 @@ public class GUI extends JFrame {
 	 * Moves shapes from cursor coordinates
 	 *
 	 */
-	class MovingAdapter extends MouseAdapter {
+	public class MovingAdapter extends MouseAdapter {
 
 		private int x;
 		private int y;
@@ -416,18 +416,20 @@ public class GUI extends JFrame {
 			if (!cursorState.equals("none")) {
 				switch (cursorState) {
 				case "entity":
+					String newEntityName = "Entite" + uniqueSuffix;
 					ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
-					Node newNodeEntity = new Entity("Entite" + uniqueSuffix, entityAttributeList);
+					Node newNodeEntity = new Entity(newEntityName, entityAttributeList);
 					mcdManager.addNode(newNodeEntity);
-					sp.getComponentMap().put(sp.addShapeGroup("Entite" + uniqueSuffix, x, y, true), newNodeEntity);
+					sp.getComponentMap().put(sp.addShapeGroup(newEntityName, x, y, true), newNodeEntity);
 					uniqueSuffix++;
 					break;
 
 				case "association":
+					String newAssociationName = "Entite" + uniqueSuffix;
 					ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
-					Node newNodeAssociation = new Association("Association" + uniqueSuffix, associationAttributeList);
+					Node newNodeAssociation = new Association(newAssociationName, associationAttributeList);
 					mcdManager.addNode(newNodeAssociation);
-					sp.getComponentMap().put(sp.addShapeGroup("Association" + uniqueSuffix, x, y, false), newNodeAssociation);
+					sp.getComponentMap().put(sp.addShapeGroup(newAssociationName, x, y, false), newNodeAssociation);
 					uniqueSuffix++;
 					break;
 
@@ -651,17 +653,29 @@ public class GUI extends JFrame {
 	public class ApplyConfigAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("selectedComponent.getGroupName() : " + selectedComponent.getGroupName());
-			mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
-			mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
-			
-			sp.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
-			sp.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
-			selectedComponent.setGroupName(jtfConfigName.getText());
-			
-			configFrame.dispose();
-			cursorState = "selection";
-			repaint();
+			boolean nameExist = false;
+			for (Node node : sp.getComponentMap().values()) {
+				if (node.getName().equals(jtfConfigName.getText()) && node != sp.getComponentMap().get(selectedComponent)) {
+					JOptionPane.showMessageDialog(configFrame,
+									"Un autre objet (entité ou association) porte déjà le nom « "
+											+ jtfConfigName.getText() + " »",
+									"Erreur de saisie", JOptionPane.WARNING_MESSAGE);
+					nameExist = true;
+				}
+			}
+
+			if (!nameExist) {
+				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
+				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
+
+				sp.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
+				sp.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
+				selectedComponent.setGroupName(jtfConfigName.getText());
+
+				configFrame.dispose();
+				cursorState = "selection";
+				repaint();
+			}
 		}
 	}
 

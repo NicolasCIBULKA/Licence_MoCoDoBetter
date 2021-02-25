@@ -35,16 +35,28 @@ public class ShapePanel extends JPanel {
 	private List<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
 //	private Map<ShapeGroup, ArrayList<Line2D.Float>> mapRelation = new HashMap<ShapeGroup, ArrayList<Line2D.Float>>();
 	private List<ShapeGroup[]> alRelations = new ArrayList<ShapeGroup[]>();
+	
+	private Color entityHeadColor = new Color(192, 223, 139);
+	private Color entitySplitColor = new Color(148, 191, 89);
+	private Color entityBodyColor = new Color(232, 243, 210);
+	private Color entityBoundColor = new Color(140, 185, 78);
+	
+	// Former colors
+//	private Color entityHeadColor = new Color(0, 150, 150);
+//	private Color entitySplitColor = new Color(0, 100, 100);
+//	private Color entityBodyColor = new Color(60, 190, 190);
+//	private Color entityBoundColor = new Color(0, 75, 75);
 
-	private Color entityHeadColor = new Color(0, 150, 150);
-	private Color entitySplitColor = new Color(0, 100, 100);
-	private Color entityBodyColor = new Color(60, 190, 190);
-	private Color entityBoundColor = new Color(0, 75, 75);
-
-	private Color associationHeadColor = new Color(160, 30, 150);
-	private Color associationSplitColor = new Color(140, 50, 140);
-	private Color associationBodyColor = new Color(210, 110, 200);
-	private Color associationBoundColor = new Color(100, 50, 100);
+	private Color associationHeadColor = new Color(233,	186, 217);
+	private Color associationSplitColor = new Color(216, 146, 187);
+	private Color associationBodyColor = new Color(248, 225, 238);
+	private Color associationBoundColor = new Color(209, 126, 173);
+	
+	// Former colors
+//	private Color associationHeadColor = new Color(160, 30, 150);
+//	private Color associationSplitColor = new Color(140, 50, 140);
+//	private Color associationBodyColor = new Color(210, 110, 200);
+//	private Color associationBoundColor = new Color(100, 50, 100);
 
 	private Graphics2D g2d;
 
@@ -199,6 +211,11 @@ public class ShapePanel extends JPanel {
 		System.out.println("[ShapeGroup]  attributeList size : " + attributeList.size());
 		for(int index = 0 ; index < attributeList.size() ; index++) {
 			g2d.drawString(attributeList.get(index).getName(), component.getX() + 70.0f, component.getY() + 30.0f + 40.0f + (index*20.0f));
+			if(attributeList.get(index).isPrimaryKey()) {
+				int x = (int) (component.getX() + 70.0f);
+				int y = (int) (component.getY() + 30.0f + 40.0f + (index*20.0f));
+				g2d.drawLine(x, y + 2, x + getFontMetrics(getFont()).stringWidth(attributeList.get(index).getName()), y + 2);
+			}
 		}
 
 	}
