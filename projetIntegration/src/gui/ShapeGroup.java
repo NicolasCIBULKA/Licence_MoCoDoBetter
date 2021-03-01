@@ -13,7 +13,7 @@ public class ShapeGroup {
 
 	private float x;
 	private float y;
-	private float width = 200.0f;
+	private float width = 80.0f;
 	private float height = 100.0f;
 
 	private boolean isAnEntity;
@@ -27,12 +27,12 @@ public class ShapeGroup {
 		if (isAnEntity) {
 
 			mainShape = new Rectangle2D.Float(x, y, width, height);
-			headShape = new Rectangle2D.Float(x, y, width, height / 2);
+			headShape = new Rectangle2D.Float(x, y, width, 50.0f);
 
 		} else {
 
 			mainShape = new RoundRectangle2D.Float(x, y, width, height, 20.0f, 20.0f);
-			headShape = new RoundRectangle2D.Float(x, y, width, height / 2, 20.0f, 20.0f);
+			headShape = new RoundRectangle2D.Float(x, y, width, 50.0f, 20.0f, 20.0f);
 		}
 
 	}
@@ -44,12 +44,12 @@ public class ShapeGroup {
 		if (isAnEntity) {
 
 			((Rectangle2D) mainShape).setRect(newX, y, width, height);
-			((Rectangle2D) headShape).setRect(newX, y, width, height / 2);
+			((Rectangle2D) headShape).setRect(newX, y, width, 50.0f);
 
 		} else {
 
 			((RoundRectangle2D) mainShape).setRoundRect(newX, y, width, height, 20.0f, 20.0f);
-			((RoundRectangle2D) headShape).setRoundRect(newX, y, width, height / 2, 20.0f, 20.0f);
+			((RoundRectangle2D) headShape).setRoundRect(newX, y, width, 50.0f, 20.0f, 20.0f);
 
 		}
 
@@ -61,12 +61,12 @@ public class ShapeGroup {
 		if (isAnEntity) {
 
 			((Rectangle2D) mainShape).setRect(x, newY, width, height);
-			((Rectangle2D) headShape).setRect(x, newY, width, height / 2);
+			((Rectangle2D) headShape).setRect(x, newY, width, 50.0f);
 
 		} else {
 
 			((RoundRectangle2D) mainShape).setRoundRect(x, newY, width, height, 20.0f, 20.0f);
-			((RoundRectangle2D) headShape).setRoundRect(x, newY, width, height / 2, 20.0f, 20.0f);
+			((RoundRectangle2D) headShape).setRoundRect(x, newY, width, 50.0f, 20.0f, 20.0f);
 
 		}
 	}
@@ -125,6 +125,17 @@ public class ShapeGroup {
 	 */
 	public void setWidth(float width) {
 		this.width = width;
+		if (isAnEntity) {
+
+			((Rectangle2D) mainShape).setRect(x, y, width, height);
+			((Rectangle2D) headShape).setRect(x, y, width, 50.0f);
+
+		} else {
+
+			((RoundRectangle2D) mainShape).setRoundRect(x, y, width, height, 20.0f, 20.0f);
+			((RoundRectangle2D) headShape).setRoundRect(x, y, width, 50.0f, 20.0f, 20.0f);
+
+		}
 	}
 
 	/**
@@ -139,6 +150,18 @@ public class ShapeGroup {
 	 */
 	public void setHeight(float height) {
 		this.height = height;
+		
+		if (isAnEntity) {
+
+			((Rectangle2D) mainShape).setRect(x, y, width, height);
+			((Rectangle2D) headShape).setRect(x, y, width, 50.0f);
+
+		} else {
+
+			((RoundRectangle2D) mainShape).setRoundRect(x, y, width, height, 20.0f, 20.0f);
+			((RoundRectangle2D) headShape).setRoundRect(x, y, width, 50.0f, 20.0f, 20.0f);
+
+		}
 	}
 
 	/**

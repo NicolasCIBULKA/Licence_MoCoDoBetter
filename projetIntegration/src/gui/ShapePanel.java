@@ -34,7 +34,6 @@ public class ShapePanel extends JPanel {
 	private Map<ShapeGroup, List<ShapeGroup>> linkMap = new HashMap<ShapeGroup, List<ShapeGroup>>();
 	private List<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
 //	private Map<ShapeGroup, ArrayList<Line2D.Float>> mapRelation = new HashMap<ShapeGroup, ArrayList<Line2D.Float>>();
-	private List<ShapeGroup[]> alRelations = new ArrayList<ShapeGroup[]>();
 	
 	private Color entityHeadColor = new Color(192, 223, 139);
 	private Color entitySplitColor = new Color(148, 191, 89);
@@ -75,17 +74,17 @@ public class ShapePanel extends JPanel {
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		// Painting lines which links objects
-		System.out.println("[ShapeGroup]  ---- " + linkMap.size() + " link(s)");
+		System.out.println("[ShapePanel]  ---- " + linkMap.size() + " link(s)");
 		g2d.setColor(Color.BLACK);
 		for (ShapeGroup shape : linkMap.keySet()) {
 			float firstObjectCenterX = (float) shape.getMainShape().getBounds2D().getCenterX();
 			float firstObjectCenterY = (float) shape.getMainShape().getBounds2D().getCenterY();
-			System.out.println("[ShapeGroup]  first : x = " + firstObjectCenterX + " Y = " + firstObjectCenterY);
+			System.out.println("[ShapePanel]  first : x = " + firstObjectCenterX + " Y = " + firstObjectCenterY);
 			for (ShapeGroup linkedShape : linkMap.get(shape)) {
-				System.out.println("[ShapeGroup] I'm drawing !");
+				System.out.println("[ShapePanel] I'm drawing !");
 				float secondObjectCenterX = (float) linkedShape.getMainShape().getBounds2D().getCenterX();
 				float seconfObjectCenterY = (float) linkedShape.getMainShape().getBounds2D().getCenterY();
-				System.out.println("[ShapeGroup]  second : x = " + secondObjectCenterX + " Y = " + seconfObjectCenterY);
+				System.out.println("[ShapePanel]  second : x = " + secondObjectCenterX + " Y = " + seconfObjectCenterY);
 				g2d.draw(new Line2D.Float(firstObjectCenterX, firstObjectCenterY, secondObjectCenterX,
 						seconfObjectCenterY));
 			}
@@ -93,13 +92,15 @@ public class ShapePanel extends JPanel {
 		}
 
 		// Painting entities and associations
-		System.out.println("[ShapeGroup]  ---- " + componentMap.size() + " component(s)");
+		System.out.println("[ShapePanel]  ---- " + componentMap.size() + " component(s)");
 		
 		for (ShapeGroup component : componentMap.keySet()) {
 //			float nameWidth = g.getFontMetrics().stringWidth(componentMap.get(component).getName()) ;
 //			if( nameWidth > component.getWidth()) {
 //				component.setWidth(nameWidth);
 //			}
+			maxComponentDimensionUpdate(component);
+			
 			if (component.isAnEntity()) {
 				drawEntity(component);
 
@@ -181,13 +182,15 @@ public class ShapePanel extends JPanel {
 	}
 
 	public void drawEntity(ShapeGroup component) {
-
+		
+		// Body and head
 		g2d.setColor(entityBodyColor);
 		g2d.fill(component.getMainShape());
 
 		g2d.setColor(entityHeadColor);
 		g2d.fill(component.getHeadShape());
 
+		// Split line between body and head
 		BasicStroke headStroke = new BasicStroke(3);
 		g2d.setColor(entitySplitColor);
 		g2d.setStroke(headStroke);
@@ -196,6 +199,7 @@ public class ShapePanel extends JPanel {
 				component.getHeadShape().getBounds2D().getWidth() + 1,
 				component.getHeadShape().getBounds2D().getHeight() + 1));
 
+		// Entity bound
 		BasicStroke boundStroke = new BasicStroke(3);
 		g2d.setColor(entityBoundColor);
 		g2d.setStroke(boundStroke);
@@ -205,16 +209,27 @@ public class ShapePanel extends JPanel {
 				component.getMainShape().getBounds2D().getHeight() + 1));
 		
 		// Drawing text
+		// Title
+		int titleWidth = getFontMetrics(getFont()).stringWidth(component.getGroupName());
+		float titleTab = (component.getWidth() - titleWidth) / 2;
 		g2d.setColor(Color.black);
-		g2d.drawString(component.getGroupName(), component.getX() + 70.0f, component.getY() + 30.0f);
+		g2d.drawString(component.getGroupName(), component.getX() + titleTab, component.getY() + 30.0f);
+		
+		// Attributes
 		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
-		System.out.println("[ShapeGroup]  attributeList size : " + attributeList.size());
-		for(int index = 0 ; index < attributeList.size() ; index++) {
-			g2d.drawString(attributeList.get(index).getName(), component.getX() + 70.0f, component.getY() + 30.0f + 40.0f + (index*20.0f));
+		int attributeQuantity = attributeList.size();
+		
+		for(int index = 0 ; index < attributeQuantity ; index++) {
+			
+			g2d.drawString(attributeList.get(index).getName(), component.getX() + 10.0f, component.getY() + 70.0f + (index*20.0f));
+			
+			// Underlines the Primary Key attribute
 			if(attributeList.get(index).isPrimaryKey()) {
-				int x = (int) (component.getX() + 70.0f);
-				int y = (int) (component.getY() + 30.0f + 40.0f + (index*20.0f));
-				g2d.drawLine(x, y + 2, x + getFontMetrics(getFont()).stringWidth(attributeList.get(index).getName()), y + 2);
+				
+				int x = (int) (component.getX() + 10.0f);
+				int y = (int) (component.getY() + 70.0f + (index*20.0f));
+				int attributeWidth = getFontMetrics(getFont()).stringWidth(attributeList.get(index).getName());
+				g2d.drawLine(x, y + 2, x + attributeWidth, y + 2);
 			}
 		}
 
@@ -222,12 +237,14 @@ public class ShapePanel extends JPanel {
 
 	public void drawAssociation(ShapeGroup component) {
 
+		// Body and head
 		g2d.setColor(associationBodyColor);
 		g2d.fill(component.getMainShape());
 
 		g2d.setColor(associationHeadColor);
 		g2d.fill(component.getHeadShape());
 
+		// Split line between body and head
 		BasicStroke headStroke = new BasicStroke(3);
 		g2d.setColor(associationSplitColor);
 		g2d.setStroke(headStroke);
@@ -236,6 +253,7 @@ public class ShapePanel extends JPanel {
 				component.getHeadShape().getBounds2D().getWidth() + 1,
 				component.getHeadShape().getBounds2D().getHeight() + 1, 20.0f, 20.0f));
 
+		// Association bound
 		BasicStroke boundStroke = new BasicStroke(3);
 		g2d.setColor(associationBoundColor);
 		g2d.setStroke(boundStroke);
@@ -244,8 +262,30 @@ public class ShapePanel extends JPanel {
 				component.getMainShape().getBounds2D().getWidth() + 1,
 				component.getMainShape().getBounds2D().getHeight() + 1, 20.0f, 20.0f));
 
+		// Drawing text
+		// Title
+		int titleWidth = getFontMetrics(getFont()).stringWidth(component.getGroupName());
+		float titleTab = (component.getWidth() - titleWidth) / 2;
 		g2d.setColor(Color.black);
-		g2d.drawString(component.getGroupName(), component.getX() + 60.0f, component.getY() + 30.0f);
+		g2d.drawString(component.getGroupName(), component.getX() + titleTab, component.getY() + 30.0f);
+		
+		// Attributes
+		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
+		int attributeQuantity = attributeList.size();
+		
+		for(int index = 0 ; index < attributeQuantity ; index++) {
+			
+			g2d.drawString(attributeList.get(index).getName(), component.getX() + 10.0f, component.getY() + 70.0f + (index*20.0f));
+			
+			// Underlines the Primary Key attribute
+			if(attributeList.get(index).isPrimaryKey()) {
+				
+				int x = (int) (component.getX() + 10.0f);
+				int y = (int) (component.getY() + 70.0f + (index*20.0f));
+				int attributeWidth = getFontMetrics(getFont()).stringWidth(attributeList.get(index).getName());
+				g2d.drawLine(x, y + 2, x + attributeWidth, y + 2);
+			}
+		}
 	}
 
 	public void drawLines(List<ShapeGroup> linkedComponents, ShapeGroup mainComponent) {
@@ -259,6 +299,35 @@ public class ShapePanel extends JPanel {
 			g2d.draw(
 					new Line2D.Float(firstObjectCenterX, firstObjectCenterY, secondObjectCenterX, seconfObjectCenterY));
 		}
+	}
+	
+	/**
+	 * Calculates the max width of the entity or association to be drawn from attribute names
+	 * 
+	 * @param component the component to calcul the width
+	 */
+	private void maxComponentDimensionUpdate(ShapeGroup component){
+		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
+		
+		// Calculating width
+		int maxTextWidth = getFontMetrics(getFont()).stringWidth(component.getGroupName());
+		System.out.println("[ShapePanel]  title font metrics : " + maxTextWidth);
+		for(Attribute attribute : attributeList) {
+			int nameWidth = getFontMetrics(getFont()).stringWidth(attribute.getName());
+			if( nameWidth > maxTextWidth) {
+				maxTextWidth = nameWidth;
+			}
+		}
+		
+		component.setWidth(maxTextWidth + 20.0f);
+		
+		// And now the height
+		if(attributeList.size() == 1) {
+			component.setHeight(50.0f + 27.0f);
+		}else {
+			component.setHeight(50.0f + attributeList.size() * 21.0f);
+		}
+		
 	}
 
 	/**
@@ -275,12 +344,6 @@ public class ShapePanel extends JPanel {
 		return linkMap;
 	}
 
-	/**
-	 * @return the alRelations
-	 */
-	public List<ShapeGroup[]> getAlRelations() {
-		return alRelations;
-	}
 
 	/**
 	 * @return the alLines

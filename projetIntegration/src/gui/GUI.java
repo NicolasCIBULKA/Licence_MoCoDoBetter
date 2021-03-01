@@ -11,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -665,6 +664,8 @@ public class GUI extends JFrame {
 			}
 
 			if (!nameExist) {
+				ap.updateAttributeList();
+				
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
 
