@@ -160,8 +160,8 @@ public class AttributePanel extends JPanel {
 		for (Attribute attribute : attributeList) {
 			Vector<Object> attributeVector = new Vector<Object>();
 			attributeVector.add(attribute.getName());
-			attributeVector.add("int");
-			attributeVector.add(false);
+			attributeVector.add(attribute.getType());
+			attributeVector.add(attribute.isNullable());
 			
 			JRadioButton rb = new JRadioButton();
 			if(attribute.isPrimaryKey()) {
@@ -171,7 +171,7 @@ public class AttributePanel extends JPanel {
 			}
 			radioGroupPK.add(rb);
 			attributeVector.add(rb);
-			attributeVector.add(false);
+			attributeVector.add(attribute.isUnique());
 			
 			model.addRow(attributeVector);
 		}

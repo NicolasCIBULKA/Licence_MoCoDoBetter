@@ -42,7 +42,7 @@ import process.MCDManaging;
 import process.Saving;
 
 /**
- * Will surely become the main GUI class after many crash tests
+ * Main GUI class after many crash tests
  * 
  * @author Yann Barrachina
  *
@@ -59,7 +59,7 @@ public class GUI extends JFrame {
 
 	private String cursorState = new String("selection");
 
-	private MovingAdapter ma = new MovingAdapter();
+	private ClickManager clickManager = new ClickManager();
 
 	private int uniqueSuffix = 0;
 
@@ -102,7 +102,6 @@ public class GUI extends JFrame {
 
 	private JTextField jtfConfigName = new JTextField();
 
-	private JButton testButton = new JButton("Ne pas toucher");
 	private JButton selectionButton = new JButton("S");
 	private JButton handButton = new JButton("H");
 	private JButton newEntityButton = new JButton("+E");
@@ -153,14 +152,16 @@ public class GUI extends JFrame {
 	public void initLayout() {
 		setTitle("Mocodo Better");
 
+		selectedComponent = null;
+
 		BorderLayout bl = new BorderLayout(3, 1);
 		Container contentPane = getContentPane();
 		contentPane.setLayout(bl);
 
 		sp = new ShapePanel();
 
-		addMouseMotionListener(ma);
-		addMouseListener(ma);
+		addMouseMotionListener(clickManager);
+		addMouseListener(clickManager);
 //		addMouseWheelListener(new ScaleHandler());
 
 		FlowLayout flIcon = new FlowLayout(FlowLayout.LEADING);
@@ -191,7 +192,6 @@ public class GUI extends JFrame {
 		jpl.setPreferredSize(TEST_SIZE);
 
 		jpl.add(jlaR1);
-		jpl.add(testButton);
 		jpl.add(jlaXR1);
 //		jpl.add(newEntityButton);
 		jpl.add(jlaYR1);
@@ -199,7 +199,7 @@ public class GUI extends JFrame {
 
 		contentPane.add(iconPanel, BorderLayout.NORTH);
 		contentPane.add(sp, BorderLayout.CENTER);
-		contentPane.add(jpl, BorderLayout.SOUTH);
+//		contentPane.add(jpl, BorderLayout.SOUTH);
 
 		options.add(about);
 		options.addSeparator();
@@ -211,8 +211,8 @@ public class GUI extends JFrame {
 		file.addSeparator();
 		file.add(exportFile);
 
-		edit.add(undo);
-		edit.add(redo);
+//		edit.add(undo);
+//		edit.add(redo);
 
 		window.add(minimize);
 		window.add(fullScreen);
@@ -225,7 +225,7 @@ public class GUI extends JFrame {
 
 		jmb.add(options);
 		jmb.add(file);
-		jmb.add(edit);
+//		jmb.add(edit);
 		jmb.add(window);
 		jmb.add(help);
 		setJMenuBar(jmb);
@@ -307,12 +307,11 @@ public class GUI extends JFrame {
 		newLinkButton.addActionListener(new AddLinkAction());
 		applyConfigButton.addActionListener(new ApplyConfigAction());
 		cancelConfigButton.addActionListener(new CancelConfigAction());
-		testButton.addActionListener(new testAction());
 
 	}
 
 	/**
-	 * Let's the user configure the parameters of an object through a dedicated
+	 * Let the user configure the parameters of an object through a dedicated
 	 * window. Uses cancel and applyConfiguration buttons
 	 * 
 	 * @param shapeToConfigure the entity or association to configure
@@ -323,7 +322,7 @@ public class GUI extends JFrame {
 		} else {
 			configFrame = new JFrame("Paramètres de l'association");
 		}
-		
+
 		ap.setAttributeList(sp.getComponentMap().get(selectedComponent).getListAttribute());
 
 		Container contentPane = configFrame.getContentPane();
@@ -393,7 +392,7 @@ public class GUI extends JFrame {
 	 * Moves shapes from cursor coordinates
 	 *
 	 */
-	public class MovingAdapter extends MouseAdapter {
+	public class ClickManager extends MouseAdapter {
 
 		private int x;
 		private int y;
@@ -411,28 +410,38 @@ public class GUI extends JFrame {
 			y = e.getY() - HEIGHT_DIFFERENCE;
 			System.out.println("[GUI]  X : " + x + " Y : " + y);
 
-			selectedComponent = null;
+			// Determining action to perform according to cursorState
+			// Only determining when cusrsor is not disabled with "none" status
 			if (!cursorState.equals("none")) {
-				switch (cursorState) {
-				case "entity":
+
+				// If entity button is selected, creating an entity at desired coordinates
+				if (cursorState.equals("entity")) {
+
 					String newEntityName = "Entite" + uniqueSuffix;
 					ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
 					Node newNodeEntity = new Entity(newEntityName, entityAttributeList);
 					mcdManager.addNode(newNodeEntity);
 					sp.getComponentMap().put(sp.addShapeGroup(newEntityName, x, y, true), newNodeEntity);
 					uniqueSuffix++;
-					break;
 
-				case "association":
-					String newAssociationName = "Entite" + uniqueSuffix;
+					// If association button is selected, creating an association at desired
+					// coordinates
+				} else if (cursorState.equals("association")) {
+
+					String newAssociationName = "Association" + uniqueSuffix;
 					ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
 					Node newNodeAssociation = new Association(newAssociationName, associationAttributeList);
 					mcdManager.addNode(newNodeAssociation);
 					sp.getComponentMap().put(sp.addShapeGroup(newAssociationName, x, y, false), newNodeAssociation);
 					uniqueSuffix++;
-					break;
 
-				default:
+				} else {
+
+					// For all other states...
+
+					selectedComponent = null;
+
+					// Determining clicked component
 					for (ShapeGroup component : sp.getComponentMap().keySet()) {
 
 						if (component.getMainShape().contains(x, y)) {
@@ -444,27 +453,32 @@ public class GUI extends JFrame {
 							jlaYR1.setText("Y : " + selectedComponent.getY());
 						}
 					}
-					if (selectedComponent == null) {
-						jlaR1.setText("NULL");
-					} else {
+
+					if (selectedComponent != null) {
+
+						// If a component is clicked, displays the configuration frame
 						if (cursorState.equals("selection")) {
 							displayObjectConfiguration();
 							cursorState = "none";
 						}
 
+						// If the linking tool is selected, performs a linking
 						if (cursorState.equals("link")) {
 							if (shapesToConnect.size() < 2) {
 								shapesToConnect.add(selectedComponent);
 								repaint();
 							}
+							// If two components are selected
 							if (shapesToConnect.size() == 2) {
 								boolean fisrtObjectType = shapesToConnect.get(0).isAnEntity();
 								boolean secondObjectType = shapesToConnect.get(1).isAnEntity();
 
+								// Links...
 								if (fisrtObjectType != secondObjectType) {
 									linkTwoShapes(shapesToConnect);
 									repaint();
 
+									// Or says to the user that he's a clumsy smurf
 								} else {
 									JOptionPane.showMessageDialog(theFrame,
 											"Vous ne pouvez pas associer deux objets de même type !",
@@ -600,12 +614,14 @@ public class GUI extends JFrame {
 	public class DragAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			cursorState = "hand";
-			selectionButton.setEnabled(true);
-			handButton.setEnabled(false);
-			newEntityButton.setEnabled(true);
-			newAssociationButton.setEnabled(true);
-			newLinkButton.setEnabled(true);
+			if (!cursorState.equals("none")) {
+				cursorState = "hand";
+				selectionButton.setEnabled(true);
+				handButton.setEnabled(false);
+				newEntityButton.setEnabled(true);
+				newAssociationButton.setEnabled(true);
+				newLinkButton.setEnabled(true);
+			}
 
 		}
 	}
@@ -613,12 +629,14 @@ public class GUI extends JFrame {
 	public class AddEntityAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			cursorState = "entity";
-			selectionButton.setEnabled(true);
-			handButton.setEnabled(true);
-			newEntityButton.setEnabled(false);
-			newAssociationButton.setEnabled(true);
-			newLinkButton.setEnabled(true);
+			if (!cursorState.equals("none")) {
+				cursorState = "entity";
+				selectionButton.setEnabled(true);
+				handButton.setEnabled(true);
+				newEntityButton.setEnabled(false);
+				newAssociationButton.setEnabled(true);
+				newLinkButton.setEnabled(true);
+			}
 
 		}
 	}
@@ -626,12 +644,14 @@ public class GUI extends JFrame {
 	public class AddAssociationAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			cursorState = "association";
-			selectionButton.setEnabled(true);
-			handButton.setEnabled(true);
-			newEntityButton.setEnabled(true);
-			newAssociationButton.setEnabled(false);
-			newLinkButton.setEnabled(true);
+			if (!cursorState.equals("none")) {
+				cursorState = "association";
+				selectionButton.setEnabled(true);
+				handButton.setEnabled(true);
+				newEntityButton.setEnabled(true);
+				newAssociationButton.setEnabled(false);
+				newLinkButton.setEnabled(true);
+			}
 
 		}
 	}
@@ -639,12 +659,14 @@ public class GUI extends JFrame {
 	public class AddLinkAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			cursorState = "link";
-			selectionButton.setEnabled(true);
-			handButton.setEnabled(true);
-			newEntityButton.setEnabled(true);
-			newAssociationButton.setEnabled(true);
-			newLinkButton.setEnabled(false);
+			if (!cursorState.equals("none")) {
+				cursorState = "link";
+				selectionButton.setEnabled(true);
+				handButton.setEnabled(true);
+				newEntityButton.setEnabled(true);
+				newAssociationButton.setEnabled(true);
+				newLinkButton.setEnabled(false);
+			}
 
 		}
 	}
@@ -653,9 +675,14 @@ public class GUI extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			boolean nameExist = false;
+			boolean isDefaultName = false;
+
+			// Checking if the new name given by the user doesn't already exist
 			for (Node node : sp.getComponentMap().values()) {
-				if (node.getName().equals(jtfConfigName.getText()) && node != sp.getComponentMap().get(selectedComponent)) {
-					JOptionPane.showMessageDialog(configFrame,
+				if (node.getName().equals(jtfConfigName.getText())
+						&& node != sp.getComponentMap().get(selectedComponent)) {
+					JOptionPane
+							.showMessageDialog(configFrame,
 									"Un autre objet (entité ou association) porte déjà le nom « "
 											+ jtfConfigName.getText() + " »",
 									"Erreur de saisie", JOptionPane.WARNING_MESSAGE);
@@ -663,9 +690,34 @@ public class GUI extends JFrame {
 				}
 			}
 
-			if (!nameExist) {
-				ap.updateAttributeList();
+			// Checking if the beggining of new name given by the user isn't equal to the default names
+			String configName = jtfConfigName.getText();
+			 if (configName.length() >= 6) {
+				String splitted = configName.substring(0, 6);
+
+				if (splitted.equals("Entite")) {
+					JOptionPane.showMessageDialog(configFrame,
+							"Le nom « Entite » est réservé, le nom de votre objet ne peut commencer par cette suite de caractères.",
+							"Renommage obligatoire", JOptionPane.WARNING_MESSAGE);
+					isDefaultName = true;
+				}
 				
+				if (configName.length() >= 11 && !isDefaultName) {
+					String splitted2 = configName.substring(0, 11);
+
+					if (splitted2.equals("Association")) {
+						JOptionPane.showMessageDialog(configFrame,
+								"Le nom « Association » est réservé, le nom de votre objet ne peut commencer par cette suite de caractères.",
+								"Renommage obligatoire", JOptionPane.WARNING_MESSAGE);
+						isDefaultName = true;
+					}
+				}
+			}
+
+			// Applying changes to MCD and graphical component
+			if (!nameExist && !isDefaultName) {
+				ap.updateAttributeList();
+
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
 
@@ -689,14 +741,6 @@ public class GUI extends JFrame {
 		}
 	}
 
-	public class testAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JOptionPane.showMessageDialog(theFrame, "Je vous l'avait dit !", "Petit margoulin",
-					JOptionPane.ERROR_MESSAGE);
-		}
-	}
-
 	/**
 	 * action of a button to know more about the program
 	 *
@@ -715,7 +759,6 @@ public class GUI extends JFrame {
 			} catch (SaveWasInteruptedException e1) {
 				e1.printStackTrace();
 			} catch (FileAlreadyExistException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}

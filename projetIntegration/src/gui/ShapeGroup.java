@@ -3,13 +3,11 @@ package gui;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 
 public class ShapeGroup {
 	private Shape mainShape;
 	private Shape headShape;
 	private String groupName;
-	private ArrayList<String> alEntries = new ArrayList<String>();
 
 	private float x;
 	private float y;
@@ -37,7 +35,6 @@ public class ShapeGroup {
 
 	}
 
-	// TODO : update height operations, only suitable for empty entities
 	public void setGroupAbscissa(float newX) {
 		setX(newX);
 
@@ -190,13 +187,6 @@ public class ShapeGroup {
 	 */
 	public Shape getHeadShape() {
 		return headShape;
-	}
-
-	/**
-	 * @return the alEntries
-	 */
-	public ArrayList<String> getAlEntries() {
-		return alEntries;
 	}
 
 }
