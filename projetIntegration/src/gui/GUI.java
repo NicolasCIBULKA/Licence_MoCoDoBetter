@@ -13,12 +13,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -27,6 +31,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import data.Association;
 import data.Attribute;
@@ -40,6 +45,7 @@ import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
 import process.MCDManaging;
 import process.Saving;
+import process.Loading;
 
 /**
  * Main GUI class after many crash tests
@@ -62,6 +68,9 @@ public class GUI extends JFrame {
 	private ClickManager clickManager = new ClickManager();
 
 	private int uniqueSuffix = 0;
+
+	FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("stdd Files", "stdd");
+	private JFileChooser jfc = new JFileChooser();
 
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 	private static final Dimension ICONPANEL_SIZE = new Dimension(PANEL_SIZE.width, 60);
@@ -144,6 +153,7 @@ public class GUI extends JFrame {
 
 		initLayout();
 		initActions();
+		jfc.setFileFilter(extensionFilter);
 	}
 
 	/**
@@ -211,8 +221,8 @@ public class GUI extends JFrame {
 		file.addSeparator();
 		file.add(exportFile);
 
-//		edit.add(undo);
-//		edit.add(redo);
+		edit.add(undo);
+		edit.add(redo);
 
 		window.add(minimize);
 		window.add(fullScreen);
@@ -238,7 +248,7 @@ public class GUI extends JFrame {
 	}
 
 	/**
-	 * Initialize the menu About
+	 * Initialize the About menu
 	 */
 	public void initAbout() {
 		JFrame jfa = new JFrame("A propos");
@@ -294,8 +304,9 @@ public class GUI extends JFrame {
 	public void initActions() {
 		// Menu actions
 		about.addActionListener(new ActionAbout());
-		quit.addActionListener(new QuitAction());
+		openFile.addActionListener(new OpenAction());
 		saveFile.addActionListener(new ActionSave());
+		quit.addActionListener(new QuitAction());
 		minimize.addActionListener(new MinimizeAction());
 		fullScreen.addActionListener(new FullScreenAction());
 
@@ -516,7 +527,6 @@ public class GUI extends JFrame {
 
 				int dx = e.getX() - x;
 				int dy = e.getY() - y - HEIGHT_DIFFERENCE;
-
 				float newX = selectedComponent.getX() + dx;
 				float newY = selectedComponent.getY() + dy;
 
@@ -690,9 +700,10 @@ public class GUI extends JFrame {
 				}
 			}
 
-			// Checking if the beggining of new name given by the user isn't equal to the default names
+			// Checking if the beggining of new name given by the user isn't equal to the
+			// default names
 			String configName = jtfConfigName.getText();
-			 if (configName.length() >= 6) {
+			if (configName.length() >= 6) {
 				String splitted = configName.substring(0, 6);
 
 				if (splitted.equals("Entite")) {
@@ -701,7 +712,7 @@ public class GUI extends JFrame {
 							"Renommage obligatoire", JOptionPane.WARNING_MESSAGE);
 					isDefaultName = true;
 				}
-				
+
 				if (configName.length() >= 11 && !isDefaultName) {
 					String splitted2 = configName.substring(0, 11);
 
@@ -742,7 +753,7 @@ public class GUI extends JFrame {
 	}
 
 	/**
-	 * action of a button to know more about the program
+	 * action of the about button to know more about the program
 	 *
 	 */
 	class ActionAbout implements ActionListener {
@@ -751,11 +762,55 @@ public class GUI extends JFrame {
 		}
 	}
 
+	class OpenAction implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			// JFileChooser opening
+				jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+				jfc.setDialogTitle("Ouvrir un fichier .stdd");
+				jfc.setAcceptAllFileFilterUsed(false);
+				
+				int returnVal = jfc.showOpenDialog(GUI.this);
+				
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = jfc.getSelectedFile();
+					Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
+					
+					Loading loader = new Loading(file.getAbsolutePath());
+					mcdManager.getMCD().setMCDGraph(loader.getMcdManager().getMCD().getMCDGraph());
+					
+					
+					
+				}
+		}
+	}
+
 	class ActionSave implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+//			jfc.setDialogType(JFileChooser.SAVE_DIALOG);
+//			jfc.setDialogTitle("Enregistrer le fichier");
+//			jfc.setAcceptAllFileFilterUsed(false);
+//			jfc.setApproveButtonText("Enregistrer");
+//			
+//			int returnVal = jfc.showSaveDialog(GUI.this);
+//			
+//			if (returnVal == JFileChooser.APPROVE_OPTION) {
+//				File file = jfc.get;
+//				
+//			}
+			
+			Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
+			for (ShapeGroup shape : sp.getComponentMap().keySet()) {
+				ArrayList<Float> position = new ArrayList<Float>();
+				position.add(shape.getX());
+				position.add(shape.getY());
+				position.add(shape.getWidth());
+				position.add(shape.getHeight());
+
+				coordinatesMap.put(shape.getGroupName(), position);
+			}
 			try {
 				new Saving("/Users/ryzentosh/Fac/Cours L3 I/Semestre 6/Projet d'intégration/essai",
-						mcdManager.getMCD());
+						mcdManager.getMCD(), coordinatesMap);
 			} catch (SaveWasInteruptedException e1) {
 				e1.printStackTrace();
 			} catch (FileAlreadyExistException e1) {
@@ -764,6 +819,10 @@ public class GUI extends JFrame {
 		}
 	}
 
+	/**
+	 * action of a button to minimize the window
+	 *
+	 */
 	public class MinimizeAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -779,6 +838,10 @@ public class GUI extends JFrame {
 		}
 	}
 
+	/**
+	 * action of a button to quit
+	 *
+	 */
 	public class QuitAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {

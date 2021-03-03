@@ -1,15 +1,9 @@
 package process;
 
-import data.Association;
-import data.Attribute;
-import data.Cardinality;
-import data.Entity;
-import data.MCD;
-import data.Node;
-import exceptions.FileAlreadyExistException;
-import exceptions.SaveWasInteruptedException;
-
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,165 +13,197 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import data.Association;
+import data.Attribute;
+import data.Cardinality;
+import data.Entity;
+import data.MCD;
+import data.Node;
+import exceptions.FileAlreadyExistException;
+import exceptions.SaveWasInteruptedException;
+
 public class Saving {
-	//path of the file
-	private String path;
-	//keeping in memory the list of entity and association to treat them separatly
+
+	// keeping in memory the list of entity and association to treat them separatly
 	private ArrayList<Entity> listEntity;
 	private ArrayList<Association> listAssociation;
-	//boolean to save as if the constructor have a boolean in argument then it means it's a save as request
-	private boolean saveAs = false;
-	
-	//constructor save
-	public Saving(String path, MCD mcd) throws SaveWasInteruptedException, FileAlreadyExistException {
+
+	// constructor save
+	public Saving(String path, MCD mcd, Map<String, ArrayList<Float>> coordinatesMap)
+			throws SaveWasInteruptedException, FileAlreadyExistException {
 		listEntity = new ArrayList<Entity>();
 		listAssociation = new ArrayList<Association>();
 		storeMCD(mcd);
-		this.path=path;
-		if(creaFile(path)) {
-			writeEntity();
-			writeAssociation();
-			writeCard();
+		if (creaFile(path, false)) {
+			writeEntity(path, coordinatesMap);
+			writeAssociation(path, coordinatesMap);
+			writeCard(path);
 		}
 	}
-	//constructor save as
-	public Saving(String path, MCD mcd, boolean saveAs) throws SaveWasInteruptedException, FileAlreadyExistException {
+
+	// constructor save as
+	public Saving(String path, MCD mcd, Map<String, ArrayList<Float>> coordinatesMap, boolean saveAs)
+			throws SaveWasInteruptedException, FileAlreadyExistException {
 		listEntity = new ArrayList<Entity>();
 		listAssociation = new ArrayList<Association>();
-		this.saveAs=true;
 		storeMCD(mcd);
-		
-		this.path=path;
-		if(creaFile(path)) {
-			writeEntity();
-			writeAssociation();
-			writeCard();
+		if (creaFile(path, saveAs)) {
+			writeEntity(path, coordinatesMap);
+			writeAssociation(path, coordinatesMap);
+			writeCard(path);
 		}
 	}
-	//we read the mcd graph and separate entities and associations 
+
+	// we read the mcd graph and separate entities and associations
 	private void storeMCD(MCD mcd) {
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			Node currentNode = iterator.next();
 			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
-			for(Node connectedNode : connectedNodes) {
-				System.out.println("\n\n\n"+connectedNode.toString() +"\n\n");
-				if(connectedNode instanceof Entity) {
+			for (Node connectedNode : connectedNodes) {
+				System.out.println("\n\n\n" + connectedNode.toString() + "\n\n");
+				if (connectedNode instanceof Entity) {
 					listEntity.add((Entity) connectedNode);
-				}
-				else if(connectedNode instanceof Association) {
+				} else if (connectedNode instanceof Association) {
 					listAssociation.add((Association) connectedNode);
 				}
-				
-			}	
+
+			}
 		}
 	}
-	//I create a new file if it doesn't exist if already exist depending on save as or save action it will either overwrite
-	//or throws an exception
-	private boolean creaFile(String path) throws SaveWasInteruptedException, FileAlreadyExistException {
+
+	//
+	//
+	//
+
+	/**
+	 * I create a new file if it doesn't exist if already exist depending on save as
+	 * or save action it will either overwrite or throws an exception
+	 * 
+	 * @param path
+	 * @param saveAs the boolean to save as if the constructor have a boolean in
+	 *               argument then it means it's a save as request
+	 * @return
+	 * @throws SaveWasInteruptedException
+	 * @throws FileAlreadyExistException
+	 */
+	private boolean creaFile(String path, Boolean saveAs) throws SaveWasInteruptedException, FileAlreadyExistException {
 		try {
-		      File initfile = new File(path+".stdd");
-		      if (initfile.createNewFile()) {
-		        System.out.println("File created: " + initfile.getName());
-		      } else {
-		    	  if(saveAs==true) {
-		    		  System.out.println("File already exists.");
-				      throw new FileAlreadyExistException("This file already exist");
-		    	  }
-		      }
-		    } catch (IOException e) {
-		      throw new SaveWasInteruptedException("The file couldn't be opened");
-		    }
+			File initfile = new File(path + ".stdd");
+			if (initfile.createNewFile()) {
+				System.out.println("File created: " + initfile.getName());
+			} else {
+				if (saveAs) {
+					System.out.println("File already exists.");
+					throw new FileAlreadyExistException("This file already exist");
+				}
+			}
+		} catch (IOException e) {
+			throw new SaveWasInteruptedException("The file couldn't be opened");
+		}
 		return true;
 	}
-	//In a first time i write the entities 
-	private void writeEntity() throws SaveWasInteruptedException {
+
+	// In a first time i write the entities
+	private void writeEntity(String path, Map<String, ArrayList<Float>> coordinatesMap)
+			throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd"));
 			writer.write("<Entities>\n");
-			if(!listEntity.isEmpty()) {
-				for(Node entity : listEntity) {
+			if (!listEntity.isEmpty()) {
+				for (Node entity : listEntity) {
 					writer.write("<Table>\n");
 					writer.write("<Name>\n");
-					writer.write(entity.getName()+"\n");
+					writer.write(entity.getName() + "\n");
 					writer.write("</Name>\n");
-					for(Attribute attribut : entity.getListAttribute()) {
+					writer.write("<Graphical>\n");
+					writer.write(coordinatesMap.get(entity.getName()).get(0) + ";"
+							+ coordinatesMap.get(entity.getName()).get(1) + ";"
+							+ coordinatesMap.get(entity.getName()).get(2) + ";"
+							+ coordinatesMap.get(entity.getName()).get(3) + "\n");
+					writer.write("</Graphical>\n");
+					for (Attribute attribut : entity.getListAttribute()) {
 						writer.write("<Attribut>\n");
-						writer.write(attribut.getName()+","+attribut.getType()+","
-					+attribut.isNullable()+","+attribut.isPrimaryKey()+","+attribut.isUnique()+"\n");
+						writer.write(attribut.getName() + "," + attribut.getType() + "," + attribut.isNullable() + ","
+								+ attribut.isPrimaryKey() + "," + attribut.isUnique() + "\n");
 						writer.write("</Attribut>\n");
 					}
 					writer.write("</Table>\n");
 				}
-				
-			}
-			else {
+
+			} else {
 				System.out.println("\n\n\n empty entity\n\n");
 			}
 			writer.write("</Entities>\n");
 			writer.close();
-		}catch(IOException e) {
+		} catch (IOException e) {
 			throw new SaveWasInteruptedException("Can't write the entity part of the file");
 		}
 	}
-	//Then i write the association in the file
-	private void writeAssociation() throws SaveWasInteruptedException {
+
+	// Then i write the association in the file
+	private void writeAssociation(String path, Map<String, ArrayList<Float>> coordinatesMap)
+			throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd",true));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd", true));
 			writer.write("<Associations>\n");
-			//null pointer probablement une lecture à vide
-			if(!listAssociation.isEmpty()) {
-				for(Node association : listAssociation) {
+			// null pointer probablement une lecture ï¿½ vide
+			if (!listAssociation.isEmpty()) {
+				for (Node association : listAssociation) {
 					writer.write("<Table>\n");
 					writer.write("<Name>\n");
-					writer.write(association.getName()+"\n");
+					writer.write(association.getName() + "\n");
 					writer.write("</Name>\n");
-					for(Attribute attribut : association.getListAttribute()) {
+					writer.write("<Graphical>\n");
+					writer.write(coordinatesMap.get(association.getName()).get(0) + ";"
+							+ coordinatesMap.get(association.getName()).get(1) + ";"
+							+ coordinatesMap.get(association.getName()).get(2) + ";"
+							+ coordinatesMap.get(association.getName()).get(3) + "\n");
+					writer.write("</Graphical>\n");
+					for (Attribute attribut : association.getListAttribute()) {
 						writer.write("<Attribut>\n");
-						writer.write(attribut.getName()+","+attribut.getType()+","
-					+attribut.isNullable()+","+attribut.isPrimaryKey()+","+attribut.isUnique()+"\n");
+						writer.write(attribut.getName() + "," + attribut.getType() + "," + attribut.isNullable() + ","
+								+ attribut.isPrimaryKey() + "," + attribut.isUnique() + "\n");
 						writer.write("</Attribut>\n");
 					}
 					writer.write("</Table>\n");
 				}
-			}
-			else {
+			} else {
 				System.out.println("\n\n\n empty association\n\n");
 			}
 			writer.write("</Associations>\n");
 			writer.close();
-		}catch(IOException e) {
+		} catch (IOException e) {
 			throw new SaveWasInteruptedException("Can't write the association part of the file");
 		}
 	}
-	//Finaly i write each cardinality by getting them from the association list
-	private void writeCard() throws SaveWasInteruptedException {
+
+	// Finaly i write each cardinality by getting them from the association list
+	private void writeCard(String path) throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path+".stdd",true));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd", true));
 			writer.write("<Cardinalities>\n");
-			//null pointer probablement une lecture à vide
-			if(!listAssociation.isEmpty()) {
-				for(Association association : listAssociation) {
+			// null pointer probablement une lecture ï¿½ vide
+			if (!listAssociation.isEmpty()) {
+				for (Association association : listAssociation) {
 					writer.write("<Cardinality>\n");
-					if(!association.getCardinalityList().isEmpty()) {
-						for(Cardinality card : association.getCardinalityList()) {
-							writer.write(association.getName()+","+card.getNomEntity()+","+card.getLowValue()+","+
-						card.getHighValue()+"\n");
+					if (!association.getCardinalityList().isEmpty()) {
+						for (Cardinality card : association.getCardinalityList()) {
+							writer.write(association.getName() + "," + card.getNomEntity() + "," + card.getLowValue()
+									+ "," + card.getHighValue() + "\n");
 						}
-					}
-					else {
+					} else {
 						System.out.println("\n\n\n empty cardinatlity\n\n");
 					}
 					writer.write("</Cardinality>\n");
 				}
-			}
-			else {
+			} else {
 				System.out.println("\n\n\n empty association\n\n");
 
 			}
 			writer.write("</Cardinalities>\n");
 			writer.close();
-		}catch(IOException e) {
+		} catch (IOException e) {
 			throw new SaveWasInteruptedException("Can't write the cardinality part of the file");
 		}
 	}

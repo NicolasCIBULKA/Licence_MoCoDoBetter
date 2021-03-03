@@ -27,13 +27,20 @@ import javax.swing.table.TableColumn;
 
 import data.Attribute;
 
+/**
+ * AttributePanel is a JPanel containing the dynamic JTable which reprensents
+ * all attributes of an entity or association
+ * 
+ * @author Yann Barrachina
+ *
+ */
 public class AttributePanel extends JPanel {
 	private JPanel mainPanel;
 
 	private JButton addButton = new JButton("+");
 	private JButton deleteButton = new JButton("-");
-	
-	private ButtonGroup radioGroupPK ;
+
+	private ButtonGroup radioGroupPK;
 
 	private JTable mainTable;
 	private DefaultTableModel model;
@@ -47,7 +54,7 @@ public class AttributePanel extends JPanel {
 	public AttributePanel() {
 		mainPanel = this;
 		attributeList = new ArrayList<Attribute>();
-		
+
 		String columnHeader[] = { "Nom", "Type", "is Null", "Primary Key", "is Unique" };
 		Object[][] data = {};
 		model = new DefaultTableModel(data, columnHeader);
@@ -85,7 +92,7 @@ public class AttributePanel extends JPanel {
 		String[] attributeTypeList = new String[] { "int", "varchar" };
 		JComboBox<String> attributeTypeChooser = new JComboBox<String>(attributeTypeList);
 		typeColumn.setCellEditor(new DefaultCellEditor(attributeTypeChooser));
-	
+
 		typeColumn = mainTable.getColumnModel().getColumn(3);
 		typeColumn.setCellRenderer(new RadioButtonRenderer());
 		typeColumn.setCellEditor(new RadioButtonEditor(new JCheckBox()));
@@ -141,7 +148,8 @@ public class AttributePanel extends JPanel {
 
 		for (int index = 0; index < rowCount; index++) {
 			newAttributeList.add(new Attribute((String) model.getValueAt(index, 0), (String) model.getValueAt(index, 1),
-					(Boolean) model.getValueAt(index, 2), (Boolean) ((JRadioButton) model.getValueAt(index, 3)).isSelected(),
+					(Boolean) model.getValueAt(index, 2),
+					(Boolean) ((JRadioButton) model.getValueAt(index, 3)).isSelected(),
 					(Boolean) model.getValueAt(index, 4)));
 		}
 
@@ -153,26 +161,26 @@ public class AttributePanel extends JPanel {
 	 */
 	public void setAttributeList(ArrayList<Attribute> attributeList) {
 		this.attributeList = attributeList;
-		
+
 		radioGroupPK = new ButtonGroup();
-		
+
 		model.setRowCount(0);
 		for (Attribute attribute : attributeList) {
 			Vector<Object> attributeVector = new Vector<Object>();
 			attributeVector.add(attribute.getName());
 			attributeVector.add(attribute.getType());
 			attributeVector.add(attribute.isNullable());
-			
+
 			JRadioButton rb = new JRadioButton();
-			if(attribute.isPrimaryKey()) {
+			if (attribute.isPrimaryKey()) {
 				rb.setSelected(true);
-			}else {
+			} else {
 				rb.setSelected(false);
 			}
 			radioGroupPK.add(rb);
 			attributeVector.add(rb);
 			attributeVector.add(attribute.isUnique());
-			
+
 			model.addRow(attributeVector);
 		}
 		// Notifying table that datas are uploaded into the table's model
@@ -189,11 +197,11 @@ public class AttributePanel extends JPanel {
 			String newName = "" + index++;
 			Attribute newAttribute;
 			Vector<Object> attributeVector = new Vector<Object>();
-			
+
 			attributeVector.add(newName);
 			attributeVector.add("int");
 			attributeVector.add(false);
-			
+
 			JRadioButton rb = new JRadioButton();
 			if (attributeList.size() == 0) {
 				newAttribute = new Attribute(newName, "int", false, true, false);
@@ -205,9 +213,9 @@ public class AttributePanel extends JPanel {
 			radioGroupPK.add(rb);
 			attributeVector.add(rb);
 			attributeVector.add(false);
-			
+
 			attributeList.add(newAttribute);
-			
+
 			model.addRow(attributeVector);
 			model.fireTableDataChanged();
 			repaint();
@@ -227,7 +235,7 @@ public class AttributePanel extends JPanel {
 			repaint();
 		}
 	}
-	
+
 	class RadioButtonRenderer implements TableCellRenderer {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
@@ -236,7 +244,7 @@ public class AttributePanel extends JPanel {
 			return (Component) value;
 		}
 	}
-	
+
 	class RadioButtonEditor extends DefaultCellEditor implements ItemListener {
 		private JRadioButton button;
 
@@ -244,7 +252,8 @@ public class AttributePanel extends JPanel {
 			super(checkBox);
 		}
 
-		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+				int column) {
 			if (value == null)
 				return null;
 			button = (JRadioButton) value;

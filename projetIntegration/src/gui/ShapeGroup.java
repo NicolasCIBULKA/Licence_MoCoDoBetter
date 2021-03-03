@@ -4,6 +4,12 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
+/**
+ * Basic graphical component which represents the entity or association
+ * 
+ * @author Yann Barrachina
+ *
+ */
 public class ShapeGroup {
 	private Shape mainShape;
 	private Shape headShape;
