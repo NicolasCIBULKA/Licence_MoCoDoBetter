@@ -27,16 +27,18 @@ public class Saving {
 	// keeping in memory the list of entity and association to treat them separatly
 	private ArrayList<Entity> listEntity;
 	private ArrayList<Association> listAssociation;
+	private Map<String, ArrayList<Float>> coordinatesMap;
 
 	// constructor save
 	public Saving(String path, MCD mcd, Map<String, ArrayList<Float>> coordinatesMap)
 			throws SaveWasInteruptedException, FileAlreadyExistException {
 		listEntity = new ArrayList<Entity>();
 		listAssociation = new ArrayList<Association>();
+		this.coordinatesMap = coordinatesMap;
 		storeMCD(mcd);
 		if (creaFile(path, false)) {
-			writeEntity(path, coordinatesMap);
-			writeAssociation(path, coordinatesMap);
+			writeEntity(path);
+			writeAssociation(path);
 			writeCard(path);
 		}
 	}
@@ -48,8 +50,8 @@ public class Saving {
 		listAssociation = new ArrayList<Association>();
 		storeMCD(mcd);
 		if (creaFile(path, saveAs)) {
-			writeEntity(path, coordinatesMap);
-			writeAssociation(path, coordinatesMap);
+			writeEntity(path);
+			writeAssociation(path);
 			writeCard(path);
 		}
 	}
@@ -105,7 +107,7 @@ public class Saving {
 	}
 
 	// In a first time i write the entities
-	private void writeEntity(String path, Map<String, ArrayList<Float>> coordinatesMap)
+	private void writeEntity(String path)
 			throws SaveWasInteruptedException {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd"));
@@ -142,7 +144,7 @@ public class Saving {
 	}
 
 	// Then i write the association in the file
-	private void writeAssociation(String path, Map<String, ArrayList<Float>> coordinatesMap)
+	private void writeAssociation(String path)
 			throws SaveWasInteruptedException {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd", true));
