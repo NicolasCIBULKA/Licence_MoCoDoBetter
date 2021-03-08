@@ -61,17 +61,14 @@ public class Saving {
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while (iterator.hasNext()) {
 			Node currentNode = iterator.next();
-			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
-			for (Node connectedNode : connectedNodes) {
-				System.out.println("\n\n\n" + connectedNode.toString() + "\n\n");
-				if (connectedNode instanceof Entity) {
-					listEntity.add((Entity) connectedNode);
-				} else if (connectedNode instanceof Association) {
-					listAssociation.add((Association) connectedNode);
-				}
-
+			if (currentNode instanceof Entity) {
+				listEntity.add((Entity) currentNode);
+			} else if (currentNode instanceof Association) {
+				listAssociation.add((Association) currentNode);
 			}
+
 		}
+		
 	}
 
 	//
