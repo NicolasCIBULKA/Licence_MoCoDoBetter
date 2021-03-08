@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
@@ -17,8 +18,10 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import data.Node;
+import data.Association;
 import data.Attribute;
+import data.Cardinality;
+import data.Node;
 
 /**
  * ShapePanel contains all the graphical objects to paint and manage their
@@ -34,23 +37,23 @@ public class ShapePanel extends JPanel {
 	private Map<ShapeGroup, List<ShapeGroup>> linkMap = new HashMap<ShapeGroup, List<ShapeGroup>>();
 	private List<Line2D.Float> alLines = new ArrayList<Line2D.Float>();
 //	private Map<ShapeGroup, ArrayList<Line2D.Float>> mapRelation = new HashMap<ShapeGroup, ArrayList<Line2D.Float>>();
-	
+
 	private Color entityHeadColor = new Color(192, 223, 139);
 	private Color entitySplitColor = new Color(148, 191, 89);
 	private Color entityBodyColor = new Color(232, 243, 210);
 	private Color entityBoundColor = new Color(140, 185, 78);
-	
+
 	// Former colors
 //	private Color entityHeadColor = new Color(0, 150, 150);
 //	private Color entitySplitColor = new Color(0, 100, 100);
 //	private Color entityBodyColor = new Color(60, 190, 190);
 //	private Color entityBoundColor = new Color(0, 75, 75);
 
-	private Color associationHeadColor = new Color(233,	186, 217);
+	private Color associationHeadColor = new Color(233, 186, 217);
 	private Color associationSplitColor = new Color(216, 146, 187);
 	private Color associationBodyColor = new Color(248, 225, 238);
 	private Color associationBoundColor = new Color(209, 126, 173);
-	
+
 	// Former colors
 //	private Color associationHeadColor = new Color(160, 30, 150);
 //	private Color associationSplitColor = new Color(140, 50, 140);
@@ -73,34 +76,17 @@ public class ShapePanel extends JPanel {
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// Painting lines which links objects
-		System.out.println("[ShapePanel]  ---- " + linkMap.size() + " link(s)");
-		g2d.setColor(Color.BLACK);
-		for (ShapeGroup shape : linkMap.keySet()) {
-			float firstObjectCenterX = (float) shape.getMainShape().getBounds2D().getCenterX();
-			float firstObjectCenterY = (float) shape.getMainShape().getBounds2D().getCenterY();
-			System.out.println("[ShapePanel]  first : x = " + firstObjectCenterX + " Y = " + firstObjectCenterY);
-			for (ShapeGroup linkedShape : linkMap.get(shape)) {
-				System.out.println("[ShapePanel] I'm drawing !");
-				float secondObjectCenterX = (float) linkedShape.getMainShape().getBounds2D().getCenterX();
-				float seconfObjectCenterY = (float) linkedShape.getMainShape().getBounds2D().getCenterY();
-				System.out.println("[ShapePanel]  second : x = " + secondObjectCenterX + " Y = " + seconfObjectCenterY);
-				g2d.draw(new Line2D.Float(firstObjectCenterX, firstObjectCenterY, secondObjectCenterX,
-						seconfObjectCenterY));
-			}
-
-		}
-
-		// Painting entities and associations
+		// Painting entities, associations, links and cardinalities
 		System.out.println("[ShapePanel]  ---- " + componentMap.size() + " component(s)");
+
+		drawLinesAndCardinalities();
 		
 		for (ShapeGroup component : componentMap.keySet()) {
-//			float nameWidth = g.getFontMetrics().stringWidth(componentMap.get(component).getName()) ;
-//			if( nameWidth > component.getWidth()) {
-//				component.setWidth(nameWidth);
-//			}
+
 			maxComponentDimensionUpdate(component);
+
 			
+
 			if (component.isAnEntity()) {
 				drawEntity(component);
 
@@ -108,59 +94,7 @@ public class ShapePanel extends JPanel {
 				drawAssociation(component);
 
 			}
-
 		}
-
-//		for (Shape shape : al) {
-//
-//			String shapeTypeTable[] = shape.getClass().getCanonicalName().split("\\.");
-//			String shapeType = shapeTypeTable[3] + shapeTypeTable[4];
-//
-//			switch (shapeType) {
-//
-//			case "Rectangle2DFloat":
-//
-//				// TODO : paintRectangle() ;
-//
-//				Graphics2D g2d = (Graphics2D) g;
-//
-//				
-//
-//				float dash1[] = { 10.0f };
-//				BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1,
-//						0.0f);
-//
-//				g2d.setStroke(dashed);
-//
-//				g2d.draw(new Rectangle2D.Double(shape.getBounds2D().getX() - 1, shape.getBounds2D().getY() - 1,
-//						shape.getBounds2D().getWidth() + 1, shape.getBounds2D().getHeight() + 1));
-//
-//				g2d.setColor(new Color(100, 100, 200));
-//				g2d.fill(shape);
-//				shape.setRect(0,0,0,0) ;
-//
-//				break;
-//
-//			case "Line2DFloat":
-//
-//				// TODO : paintLine() ;
-//
-//				
-//
-//				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//				g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-//				g2d.setColor(new Color(200, 100, 100));
-//
-//				g2d.draw(shape);
-//
-//				break;
-//
-//			default:
-//				System.err.println("Unknown shape type : " + shapeType);
-//			}
-//
-//		}
-
 	}
 
 	/**
@@ -181,8 +115,8 @@ public class ShapePanel extends JPanel {
 		alLines.add(line);
 	}
 
-	public void drawEntity(ShapeGroup component) {
-		
+	private void drawEntity(ShapeGroup component) {
+
 		// Body and head
 		g2d.setColor(entityBodyColor);
 		g2d.fill(component.getMainShape());
@@ -207,27 +141,28 @@ public class ShapePanel extends JPanel {
 				component.getMainShape().getBounds2D().getY() - 1,
 				component.getMainShape().getBounds2D().getWidth() + 1,
 				component.getMainShape().getBounds2D().getHeight() + 1));
-		
+
 		// Drawing text
 		// Title
 		int titleWidth = getFontMetrics(getFont()).stringWidth(component.getGroupName());
 		float titleTab = (component.getWidth() - titleWidth) / 2;
 		g2d.setColor(Color.black);
 		g2d.drawString(component.getGroupName(), component.getX() + titleTab, component.getY() + 30.0f);
-		
+
 		// Attributes
 		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
 		int attributeQuantity = attributeList.size();
-		
-		for(int index = 0 ; index < attributeQuantity ; index++) {
-			
-			g2d.drawString(attributeList.get(index).getName(), component.getX() + 10.0f, component.getY() + 70.0f + (index*20.0f));
-			
+
+		for (int index = 0; index < attributeQuantity; index++) {
+
+			g2d.drawString(attributeList.get(index).getName(), component.getX() + 10.0f,
+					component.getY() + 70.0f + (index * 20.0f));
+
 			// Underlines the Primary Key attribute
-			if(attributeList.get(index).isPrimaryKey()) {
-				
+			if (attributeList.get(index).isPrimaryKey()) {
+
 				int x = (int) (component.getX() + 10.0f);
-				int y = (int) (component.getY() + 70.0f + (index*20.0f));
+				int y = (int) (component.getY() + 70.0f + (index * 20.0f));
 				int attributeWidth = getFontMetrics(getFont()).stringWidth(attributeList.get(index).getName());
 				g2d.drawLine(x, y + 2, x + attributeWidth, y + 2);
 			}
@@ -235,7 +170,7 @@ public class ShapePanel extends JPanel {
 
 	}
 
-	public void drawAssociation(ShapeGroup component) {
+	private void drawAssociation(ShapeGroup component) {
 
 		// Body and head
 		g2d.setColor(associationBodyColor);
@@ -268,68 +203,263 @@ public class ShapePanel extends JPanel {
 		float titleTab = (component.getWidth() - titleWidth) / 2;
 		g2d.setColor(Color.black);
 		g2d.drawString(component.getGroupName(), component.getX() + titleTab, component.getY() + 30.0f);
-		
+
 		// Attributes
 		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
 		int attributeQuantity = attributeList.size();
-		
-		for(int index = 0 ; index < attributeQuantity ; index++) {
-			
-			g2d.drawString(attributeList.get(index).getName(), component.getX() + 10.0f, component.getY() + 70.0f + (index*20.0f));
-			
+
+		for (int index = 0; index < attributeQuantity; index++) {
+
+			g2d.drawString(attributeList.get(index).getName(), component.getX() + 10.0f,
+					component.getY() + 70.0f + (index * 20.0f));
+
 			// Underlines the Primary Key attribute
-			if(attributeList.get(index).isPrimaryKey()) {
-				
+			if (attributeList.get(index).isPrimaryKey()) {
+
 				int x = (int) (component.getX() + 10.0f);
-				int y = (int) (component.getY() + 70.0f + (index*20.0f));
+				int y = (int) (component.getY() + 70.0f + (index * 20.0f));
 				int attributeWidth = getFontMetrics(getFont()).stringWidth(attributeList.get(index).getName());
 				g2d.drawLine(x, y + 2, x + attributeWidth, y + 2);
 			}
 		}
 	}
 
-	public void drawLines(List<ShapeGroup> linkedComponents, ShapeGroup mainComponent) {
-		for (ShapeGroup shape : linkedComponents) {
-			float firstObjectCenterX = (float) shape.getMainShape().getBounds2D().getCenterX();
-			float firstObjectCenterY = (float) shape.getMainShape().getBounds2D().getCenterX();
+	// TODO : case of two links between one A/E couple
+	// TODO : case of vertical links
+	private void drawLinesAndCardinalities() {
+		
 
-			float secondObjectCenterX = (float) mainComponent.getMainShape().getBounds2D().getCenterX();
-			float seconfObjectCenterY = (float) mainComponent.getMainShape().getBounds2D().getCenterX();
-			g2d.setColor(Color.BLACK);
-			g2d.draw(
-					new Line2D.Float(firstObjectCenterX, firstObjectCenterY, secondObjectCenterX, seconfObjectCenterY));
+		for (ShapeGroup shape : linkMap.keySet()) {
+			System.out.println("[ShapePanel]  Cardinality : " + ((Association) componentMap.get(shape)).toString());
+			float associationCenterX = (float) shape.getMainShape().getBounds2D().getCenterX();
+			float associationCenterY = (float) shape.getMainShape().getBounds2D().getCenterY();
+
+			for (ShapeGroup linkedShape : linkMap.get(shape)) {
+				System.out.println("[ShapePanel]  Entity : " + linkedShape.getGroupName());
+				
+				float entityCenterX = (float) linkedShape.getMainShape().getBounds2D().getCenterX();
+				float entityCenterY = (float) linkedShape.getMainShape().getBounds2D().getCenterY();
+
+				g2d.setColor(Color.BLACK);
+				g2d.draw(new Line2D.Float(associationCenterX, associationCenterY, entityCenterX, entityCenterY));
+
+				// Here we calculate the most revlevent position to display cardinality
+				// Have to find first the intersection between entity perimeter and link line
+
+				// if the slope is infinite, x coordinates are aligned
+				if (associationCenterX == entityCenterX) {
+					float intersectionY;
+					g2d.setColor(Color.GREEN);
+
+					// If association is under entity
+					if (associationCenterY > entityCenterY) {
+						intersectionY = entityCenterY + linkedShape.getHeight() / 2;
+						g2d.drawOval((int) (entityCenterX - 2.5), (int) (intersectionY - 2.5), 5, 5);
+					} else {
+						intersectionY = entityCenterY - linkedShape.getHeight() / 2;
+						g2d.drawOval((int) (entityCenterX - 2.5), (int) (intersectionY - 2.5), 5, 5);
+					}
+
+				} else { // Else it calculates as usual
+
+					// line's equation : y = ax + b ; finding "a" and "b"
+					float a = (associationCenterY - entityCenterY) / (associationCenterX - entityCenterX);
+					float b = entityCenterY - (a * entityCenterX);
+
+//					g2d.drawString("a = " + a, 10, 20);
+//					g2d.drawString("b = " + b, 10, 40);
+
+					float x = entityCenterX;
+					float y = entityCenterY;
+					float halfWidth = linkedShape.getWidth() / 2;
+					float halfHeight = linkedShape.getHeight() / 2;
+
+					float associationX = associationCenterX;
+					float associationY = associationCenterY;
+
+					// These are the four intersection candidates
+					// Vertical ones
+					float vX = entityCenterX - halfWidth;
+					float vY = a * (vX) + b;
+
+					float wX = entityCenterX + halfWidth;
+					float wY = a * (wX) + b;
+
+					// Horizontal ones
+					float hY = entityCenterY - halfHeight;
+					float hX = (hY - b) / a;
+
+					float gY = entityCenterY + halfHeight;
+					float gX = (gY - b) / a;
+
+					// Creating points to simplify distance calculation
+					Point2D v = new Point2D.Float();
+					v.setLocation(vX, vY);
+					Point2D w = new Point2D.Float();
+					w.setLocation(wX, wY);
+					Point2D h = new Point2D.Float();
+					h.setLocation(hX, hY);
+					Point2D g = new Point2D.Float();
+					g.setLocation(gX, gY);
+
+					// This part determines which point must be drawn
+
+					/**
+					 * Note : No need to verify second vertical or horizontal point, if one is in
+					 * bounds so the other is mathematically inside too.
+					 * 
+					 * 2nd vertical : (y - halfHeight <= w.getY()) && (w.getY() <= y + halfHeight)
+					 * 2nd horizontal : (x - halfWidth <= g.getX()) && (g.getX() <= x + halfWidth)
+					 */
+//					g2d.setColor(Color.RED);
+
+					double distance = 0;
+					Point2D validPoint = new Point2D.Float();
+
+					if ((y - halfHeight <= v.getY()) && (v.getY() <= y + halfHeight)) {
+
+						if (v.distance(associationX, associationY) < w.distance(associationX, associationY)) {
+//							g2d.drawString("p1 = " + vX + " ; " + vY, 10, 80);
+
+//							g2d.drawOval((int) (v.getX() - 2.5), (int) (v.getY() - 2.5), 5, 5);
+							distance = v.distance(entityCenterX, entityCenterY);
+							validPoint = v;
+
+						} else {
+//							g2d.drawString("p2 = " + wX + " ; " + wY, 10, 100);
+
+//							g2d.drawOval((int) (w.getX() - 2.5), (int) (w.getY() - 2.5), 5, 5);
+
+							distance = w.distance(entityCenterX, entityCenterY);
+							validPoint = w;
+						}
+
+					} else if ((x - halfWidth <= h.getX()) && (h.getX() <= x + halfWidth)) {
+
+						if (h.distanceSq(associationX, associationY) < g.distanceSq(associationX, associationY)) {
+//							g2d.drawString("p3 = " + hX + " ; " + hY, 10, 160);
+
+//							g2d.drawOval((int) (h.getX() - 2.5), (int) (h.getY() - 2.5), 5, 5);
+
+							distance = h.distance(entityCenterX, entityCenterY);
+							validPoint = h;
+						} else {
+//							g2d.drawString("p4 = " + gX + " ; " + gY, 10, 180);
+
+//							g2d.drawOval((int) (g.getX() - 2.5), (int) (g.getY() - 2.5), 5, 5);
+
+							distance = g.distance(entityCenterX, entityCenterY);
+							validPoint = g;
+						}
+					}
+
+					distance += 15;
+
+					double angle = Math.atan(a);
+					double newAngle;
+
+					float endX = entityCenterX + (float) (distance * Math.cos(angle));
+					float endY = entityCenterY + (float) (distance * Math.sin(angle));
+
+					// These coordinates are dynamically updated according to cardinality string size
+					float newEndX;
+					float newEndY;
+
+					double isOnSegmentX = endX - associationX / validPoint.getX() - validPoint.getX();
+					double isOnSegmentY = endY - associationY / validPoint.getY() - validPoint.getY();
+//
+//					g2d.drawString("isOnSegmentX =  " + isOnSegmentX, 200, 60);
+//					g2d.drawString("isOnSegmentY =  " + isOnSegmentY, 200, 80);
+//					g2d.drawString("angle in radian = " + angle, 200, 40);
+
+					String values = "";
+					for (Cardinality card : ((Association) componentMap.get(shape)).getCardinalityList()) {
+						if (card.getNomEntity().equals(linkedShape.getGroupName())) {
+							values += card.getLowValue() + "," + card.getHighValue();
+						}
+					}
+
+					// If we are above π/2 and under -π/2
+					if (isOnSegmentY > 14 || isOnSegmentY < -16 || isOnSegmentX > 14) {
+						if (a > 0) {
+							newAngle = Math.atan(a) - Math.PI / 11;
+							newEndY = entityCenterY + (float) (-distance * Math.sin(newAngle));
+							newEndX = entityCenterX + (float) (-distance * Math.cos(newAngle)) - getFontMetrics(getFont()).stringWidth(values);
+						} else {
+							newAngle = Math.atan(a) + Math.PI / 11;
+							newEndY = entityCenterY + (float) (-distance * Math.sin(newAngle)) + 10.0f;
+							newEndX = entityCenterX + (float) (-distance * Math.cos(newAngle)) - getFontMetrics(getFont()).stringWidth(values);
+						}
+						endX = entityCenterX + (float) (-distance * Math.cos(angle));
+						endY = entityCenterY + (float) (-distance * Math.sin(angle));
+
+//						g2d.setColor(Color.YELLOW);
+//						g2d.draw(new Line2D.Float(entityCenterX, entityCenterY, endX, endY));
+					} else {
+						if (a > 0) {
+							newAngle = Math.atan(a) - Math.PI / 11;
+							newEndY = entityCenterY + (float) (distance * Math.sin(newAngle)) + 10.0f;
+
+						} else {
+							newAngle = Math.atan(a) + Math.PI / 11;
+							newEndY = entityCenterY + (float) (distance * Math.sin(newAngle));
+						}
+//						g2d.setColor(Color.GREEN);
+//						g2d.draw(new Line2D.Float(entityCenterX, entityCenterY, endX, endY));
+
+						newEndX = entityCenterX + (float) (distance * Math.cos(newAngle));
+
+					}
+//					g2d.setColor(Color.PINK);
+//					g2d.draw(new Line2D.Float(entityCenterX, entityCenterY, newEndX, newEndY));
+
+					g2d.setColor(Color.BLACK);
+					g2d.drawString(values, newEndX + 2, newEndY);
+
+				}
+
+			}
+
 		}
 	}
-	
+
 	/**
-	 * Calculates the max width of the entity or association to be drawn from attribute names
+	 * Calculates and update the max width of the entity or association to be drawn
+	 * from attribute names
 	 * 
-	 * @param component the component to calcul the width
+	 * @param component the component whose width must be updated
 	 */
-	private void maxComponentDimensionUpdate(ShapeGroup component){
+	private void maxComponentDimensionUpdate(ShapeGroup component) {
 		ArrayList<Attribute> attributeList = componentMap.get(component).getListAttribute();
-		
+
 		// Calculating width
 		int maxTextWidth = getFontMetrics(getFont()).stringWidth(component.getGroupName());
-		System.out.println("[ShapePanel]  title font metrics : " + maxTextWidth);
-		for(Attribute attribute : attributeList) {
+//		System.out.println("[ShapePanel]  title font metrics : " + maxTextWidth);
+		for (Attribute attribute : attributeList) {
 			int nameWidth = getFontMetrics(getFont()).stringWidth(attribute.getName());
-			if( nameWidth > maxTextWidth) {
+			if (nameWidth > maxTextWidth) {
 				maxTextWidth = nameWidth;
 			}
 		}
-		
+
 		component.setWidth(maxTextWidth + 20.0f);
-		
+
 		// And now the height
-		if(attributeList.size() == 1) {
+		if (attributeList.size() == 1) {
 			component.setHeight(50.0f + 27.0f);
-		}else {
+		} else {
 			component.setHeight(50.0f + attributeList.size() * 21.0f);
 		}
-		
+
 	}
 
+//	public boolean associationDoubleLinkedWith(ShapeGroup association) {
+//		boolean result;
+//		
+//		
+//		
+//		return result;
+//	}
 	/**
 	 * @return the componentMap
 	 */
@@ -343,7 +473,6 @@ public class ShapePanel extends JPanel {
 	public Map<ShapeGroup, List<ShapeGroup>> getLinkMap() {
 		return linkMap;
 	}
-
 
 	/**
 	 * @return the alLines

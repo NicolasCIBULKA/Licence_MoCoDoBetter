@@ -32,5 +32,14 @@ public class Association extends Node {
 	public void setCardinalityList(ArrayList<Cardinality> cardinalityList) {
 		this.cardinalityList = cardinalityList;
 	}
+	
+	@Override
+	public String toString() {
+		String result = "" + this.getName();
+		for(Cardinality cardinality : cardinalityList) {
+			result += "\n" + cardinality.toString();
+		}
+		return result;
+	}
 
 }

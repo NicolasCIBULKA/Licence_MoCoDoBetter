@@ -112,7 +112,7 @@ public class AttributePanel extends JPanel {
 		mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
 	}
 
-	public void initActions() {
+	private void initActions() {
 		addButton.addActionListener(new AddAttributeAction());
 		deleteButton.addActionListener(new DeleteAttributeAction());
 	}

@@ -43,6 +43,9 @@ public class Cardinality {
 		this.nomEntity=nomEntity;
 	}
 	
-	
+	public String toString() {
+		String result = "Nom : " + nomEntity + " ; low : " + lowValue + " ; high : " + highValue;
+		return result;
+	}
 	
 }

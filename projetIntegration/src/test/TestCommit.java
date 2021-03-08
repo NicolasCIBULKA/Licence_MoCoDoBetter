@@ -1,32 +1,23 @@
 package test;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleGraph;
-import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.BreadthFirstIterator;
-
-import data.*;
+import data.Association;
+import data.Attribute;
+import data.Cardinality;
+import data.Entity;
 import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import process.MCDManaging;
-import process.MLDManaging;
-import process.SQLCreation;
 
 public class TestCommit {
 	
 	public static void main(String[] args) throws InvalidNodeLinkException {
 		
 		MCDManaging manager = new MCDManaging();
-		MLDManaging m = new MLDManaging();
-		MLD mld = new MLD();
+//		MLDManaging m = new MLDManaging();
+//		MLD mld = new MLD();
 
 		
 		
@@ -120,7 +111,7 @@ public class TestCommit {
 			manager.connectNodes(e1, a3,ce1_a3);
 			manager.connectNodes(e5, a3,ce5_a3);
 		} catch (NullNodeException | ExistingEdgeException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
