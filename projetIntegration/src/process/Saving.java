@@ -114,9 +114,9 @@ public class Saving {
 					writer.write(entity.getName() + "\n");
 					writer.write("</Name>\n");
 					writer.write("<Graphical>\n");
-					writer.write(coordinatesMap.get(entity.getName()).get(0) + ";"
-							+ coordinatesMap.get(entity.getName()).get(1) + ";"
-							+ coordinatesMap.get(entity.getName()).get(2) + ";"
+					writer.write(coordinatesMap.get(entity.getName()).get(0) + ","
+							+ coordinatesMap.get(entity.getName()).get(1) + ","
+							+ coordinatesMap.get(entity.getName()).get(2) + ","
 							+ coordinatesMap.get(entity.getName()).get(3) + "\n");
 					writer.write("</Graphical>\n");
 					for (Attribute attribut : entity.getListAttribute()) {
@@ -152,9 +152,9 @@ public class Saving {
 					writer.write(association.getName() + "\n");
 					writer.write("</Name>\n");
 					writer.write("<Graphical>\n");
-					writer.write(coordinatesMap.get(association.getName()).get(0) + ";"
-							+ coordinatesMap.get(association.getName()).get(1) + ";"
-							+ coordinatesMap.get(association.getName()).get(2) + ";"
+					writer.write(coordinatesMap.get(association.getName()).get(0) + ","
+							+ coordinatesMap.get(association.getName()).get(1) + ","
+							+ coordinatesMap.get(association.getName()).get(2) + ","
 							+ coordinatesMap.get(association.getName()).get(3) + "\n");
 					writer.write("</Graphical>\n");
 					for (Attribute attribut : association.getListAttribute()) {
