@@ -2,6 +2,8 @@ package gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -32,6 +34,14 @@ import data.Node;
  */
 public class ShapePanel extends JPanel {
 	private JPanel mainPanel;
+
+	private static final int ORIGINAL_WIDTH = 3000;
+	private static final int ORIGINAL_HEIGHT = 1500;
+
+	private static final Dimension SHAPE_PANEL_SIZE = new Dimension(ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+
+	private Font mainFont;
+
 	// LinkedHashMap to prevent an unsorted iteration for the mousePressed listener
 	private Map<ShapeGroup, Node> componentMap = new LinkedHashMap<ShapeGroup, Node>();
 	private Map<ShapeGroup, List<ShapeGroup>> linkMap = new HashMap<ShapeGroup, List<ShapeGroup>>();
@@ -63,9 +73,16 @@ public class ShapePanel extends JPanel {
 	private Graphics2D g2d;
 
 	public ShapePanel() {
+//		shapePanel = new JPanel();
 		mainPanel = this;
 		mainPanel.setDoubleBuffered(true);
 		mainPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		mainPanel.setPreferredSize(SHAPE_PANEL_SIZE);
+		mainFont = new Font(Font.DIALOG, Font.PLAIN, 15);
+		mainPanel.setFont(mainFont);
+//		shapePanel.setSize(SHAPE_PANEL_SIZE);
+
+//		mainPanel.add(jsp, BorderLayout.NORTH);
 
 		// TODO : colorChooser (if still exist...)
 	}
@@ -75,17 +92,16 @@ public class ShapePanel extends JPanel {
 		g2d = (Graphics2D) g;
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+//		g2d.setFont(mainFont);
 
 		// Painting entities, associations, links and cardinalities
 		System.out.println("[ShapePanel]  ---- " + componentMap.size() + " component(s)");
 
 		drawLinesAndCardinalities();
-		
+
 		for (ShapeGroup component : componentMap.keySet()) {
 
 			maxComponentDimensionUpdate(component);
-
-			
 
 			if (component.isAnEntity()) {
 				drawEntity(component);
@@ -227,7 +243,6 @@ public class ShapePanel extends JPanel {
 	// TODO : case of two links between one A/E couple
 	// TODO : case of vertical links
 	private void drawLinesAndCardinalities() {
-		
 
 		for (ShapeGroup shape : linkMap.keySet()) {
 			System.out.println("[ShapePanel]  Cardinality : " + ((Association) componentMap.get(shape)).toString());
@@ -236,7 +251,7 @@ public class ShapePanel extends JPanel {
 
 			for (ShapeGroup linkedShape : linkMap.get(shape)) {
 				System.out.println("[ShapePanel]  Entity : " + linkedShape.getGroupName());
-				
+
 				float entityCenterX = (float) linkedShape.getMainShape().getBounds2D().getCenterX();
 				float entityCenterY = (float) linkedShape.getMainShape().getBounds2D().getCenterY();
 
@@ -361,7 +376,8 @@ public class ShapePanel extends JPanel {
 					float endX = entityCenterX + (float) (distance * Math.cos(angle));
 					float endY = entityCenterY + (float) (distance * Math.sin(angle));
 
-					// These coordinates are dynamically updated according to cardinality string size
+					// These coordinates are dynamically updated according to cardinality string
+					// size
 					float newEndX;
 					float newEndY;
 
@@ -384,11 +400,13 @@ public class ShapePanel extends JPanel {
 						if (a > 0) {
 							newAngle = Math.atan(a) - Math.PI / 11;
 							newEndY = entityCenterY + (float) (-distance * Math.sin(newAngle));
-							newEndX = entityCenterX + (float) (-distance * Math.cos(newAngle)) - getFontMetrics(getFont()).stringWidth(values);
+							newEndX = entityCenterX + (float) (-distance * Math.cos(newAngle))
+									- getFontMetrics(getFont()).stringWidth(values);
 						} else {
 							newAngle = Math.atan(a) + Math.PI / 11;
 							newEndY = entityCenterY + (float) (-distance * Math.sin(newAngle)) + 10.0f;
-							newEndX = entityCenterX + (float) (-distance * Math.cos(newAngle)) - getFontMetrics(getFont()).stringWidth(values);
+							newEndX = entityCenterX + (float) (-distance * Math.cos(newAngle))
+									- getFontMetrics(getFont()).stringWidth(values);
 						}
 						endX = entityCenterX + (float) (-distance * Math.cos(angle));
 						endY = entityCenterY + (float) (-distance * Math.sin(angle));
@@ -434,7 +452,7 @@ public class ShapePanel extends JPanel {
 
 		// Calculating width
 		int maxTextWidth = getFontMetrics(getFont()).stringWidth(component.getGroupName());
-//		System.out.println("[ShapePanel]  title font metrics : " + maxTextWidth);
+		System.out.println("[ShapePanel]  title font metrics : " + maxTextWidth);
 		for (Attribute attribute : attributeList) {
 			int nameWidth = getFontMetrics(getFont()).stringWidth(attribute.getName());
 			if (nameWidth > maxTextWidth) {
@@ -449,6 +467,98 @@ public class ShapePanel extends JPanel {
 			component.setHeight(50.0f + 27.0f);
 		} else {
 			component.setHeight(50.0f + attributeList.size() * 21.0f);
+		}
+
+	}
+
+	public void zoom() {
+		// The Java upper limit size for fonts is 20, so it's relevent to stop zooming
+		// at max font size
+		if (mainFont.getSize() < 20) {
+			int newWidth = mainPanel.getWidth() + 200;
+			int newHeight = mainPanel.getHeight() + 100;
+
+			float percentWidth = (float) newWidth / mainPanel.getWidth() * 100;
+			float percentHeight = (float) newHeight / mainPanel.getHeight() * 100;
+			System.out.println("[Zoom] propWidth = " + percentWidth + "% ; propHeight = " + percentHeight + "%");
+
+//			int newFontSize = (int) (mainFont.getSize2D() / 100 * percentWidth);
+			int newFontSize = mainFont.getSize() + 1;
+//			float mf = mainFont.getSize2D() / 100 * percentWidth;
+			mainFont = new Font(Font.DIALOG, Font.PLAIN, (int) newFontSize);
+			mainPanel.setFont(mainFont);
+
+			System.out.println("[Zoom] Font size = " + mainFont.getSize2D());
+//			System.out.println("[Zoom] Font size not int = " + mf);
+
+			for (ShapeGroup shape : componentMap.keySet()) {
+				float x = shape.getX() / 100 * percentWidth;
+				float y = shape.getY() / 100 * percentHeight;
+				// TODO : màj des dimensions des carrés
+//				double w = shape.getMainShape().getWidth() / 100 * percentWidth;
+//				double h = shape.getMainShape().getHeight() / 100 * percentHeight;
+
+				// Only need to update coordinates, the ShapePanel has an auto method which
+				// recalculate all the time the correct dimensions for shapeGroups from the font size
+				shape.setGroupAbscissa(x);
+				shape.setGroupOrdinate(y);
+
+//				((Rectangle2D)shape).setRect(x, y, w, h);
+
+			}
+			Dimension newD = new Dimension(newWidth, newHeight);
+//			mainPanel.removeAll();
+//			mainPanel.validate();
+			mainPanel.setPreferredSize(newD);
+//			mainPanel.revalidate();
+			mainPanel.repaint();
+
+		}
+
+	}
+
+	public void dezoom(Dimension frameCurrentSize) {
+
+		// Minimum dezoom allowed on this software, preventing illegible content
+		if (mainFont.getSize() > 11) {
+			int newWidth = mainPanel.getWidth() - 200;
+			int newHeight = mainPanel.getHeight() - 100;
+
+			System.out.println("[Dezoom]  frameWidth = " + frameCurrentSize.getWidth() + "px ; frameHeight = " + frameCurrentSize.getHeight() + "px");
+			System.out.println("[Dezoom]  futurWidth = " + newWidth + "px ; futurHeight = " + newHeight + "px");
+			if (newWidth >= frameCurrentSize.getWidth() && newHeight >= frameCurrentSize.getHeight()) {
+
+				float percentWidth = (float) newWidth / mainPanel.getWidth() * 100;
+				float percentHeight = (float) newHeight / mainPanel.getHeight() * 100;
+				System.out.println("[Dezoom]  propWidth = " + percentWidth + "% ; propHeight = " + percentHeight + "%");
+
+//				int newFontSize = (int) (testFont.getSize2D() / 100 * percentWidth);
+				int newFontSize = mainFont.getSize() - 1;
+//				float nfs = testFont.getSize2D() / 100 * percentWidth;
+				mainFont = new Font(Font.DIALOG, Font.PLAIN, (int) newFontSize);
+				mainPanel.setFont(mainFont);
+				System.out.println("[Dezoom] (144) Font size = " + mainFont.getSize2D());
+//				System.out.println("[Dezoom] (145) Font size not int = " + nfs);
+
+				for (ShapeGroup shape : componentMap.keySet()) {
+					float x = shape.getX() / 100 * percentWidth;
+					float y = shape.getY() / 100 * percentHeight;
+//					double w = shape.getBounds2D().getWidth() / 100 * percentWidth;
+//					double h = shape.getBounds2D().getHeight() / 100 * percentHeight;
+
+					shape.setGroupAbscissa(x);
+					shape.setGroupOrdinate(y);
+
+//					((Rectangle2D) shape).setRect(x, y, w, h);
+
+				}
+				Dimension newD = new Dimension(newWidth, newHeight);
+//				mainPanel.removeAll();
+//				mainPanel.validate();
+				mainPanel.setPreferredSize(newD);
+//				mainPanel.revalidate();
+				mainPanel.repaint();
+			}
 		}
 
 	}
@@ -514,6 +624,13 @@ public class ShapePanel extends JPanel {
 	 */
 	public Color getEntityBodyColor() {
 		return entityBodyColor;
+	}
+
+	/**
+	 * @param mainFont the mainFont of the shapePanel to set
+	 */
+	public void setMainFont(Font mainFont) {
+		this.mainFont = mainFont;
 	}
 
 	/**

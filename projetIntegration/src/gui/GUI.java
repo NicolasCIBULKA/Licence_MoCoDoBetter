@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -31,6 +33,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -78,7 +81,10 @@ public class GUI extends JFrame {
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 	private static final Dimension ICONPANEL_SIZE = new Dimension(PANEL_SIZE.width, 60);
 	private static final Dimension ICONBUTTON_SIZE = new Dimension(50, 50);
+	private static final Dimension MAX_FRAME_SIZE = new Dimension(3000,1500);
+	
 	private static final int HEIGHT_DIFFERENCE = ICONPANEL_SIZE.height + 45;
+	
 	private static final Font APP_FONT = new Font(Font.DIALOG, Font.BOLD, 15);
 
 	private JFrame theFrame;
@@ -99,6 +105,8 @@ public class GUI extends JFrame {
 	private JPanel bottomConfigPanel = new JPanel();
 
 	private JTabbedPane associationTabbedPane = new JTabbedPane();
+	
+	private JScrollPane jsp;
 
 	private JLabel jlaR1 = new JLabel("Rect1");
 //	private JLabel jlaR2 = new JLabel("Rect2");
@@ -107,7 +115,7 @@ public class GUI extends JFrame {
 	private JLabel jlaXR2 = new JLabel("X : 200");
 	private JLabel jlaYR2 = new JLabel("Y : 200");
 	private JLabel jlaSoftwareName = new JLabel("Mocodo better");
-	private JLabel jlaVersion = new JLabel("Version 0.6-19.02.21");
+	private JLabel jlaVersion = new JLabel("Version 0.8-10.03.21");
 	private JLabel jlaDEV1 = new JLabel("Dev : Barrachina Yann");
 	private JLabel jlaDEV2 = new JLabel("	   Cibulka Nicolas");
 	private JLabel jlaDEV3 = new JLabel("      Coutenceau Etienne");
@@ -121,6 +129,9 @@ public class GUI extends JFrame {
 	private JButton newEntityButton = new JButton("+E");
 	private JButton newAssociationButton = new JButton("+A");
 	private JButton newLinkButton = new JButton("E-A");
+	private JButton zoomButton = new JButton("+");
+	private JButton dezoomButton = new JButton("-");
+	
 	private JButton applyConfigButton = new JButton("Appliquer");
 	private JButton cancelConfigButton = new JButton("Annuler");
 
@@ -169,15 +180,17 @@ public class GUI extends JFrame {
 		setTitle("Mocodo Better");
 
 		selectedComponent = null;
-
 		BorderLayout bl = new BorderLayout(3, 1);
 		Container contentPane = getContentPane();
 		contentPane.setLayout(bl);
 
 		sp = new ShapePanel();
+		jsp = new JScrollPane(sp, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		jsp.getVerticalScrollBar().setUnitIncrement(10);
+		jsp.getHorizontalScrollBar().setUnitIncrement(10);
 
-		addMouseMotionListener(clickManager);
-		addMouseListener(clickManager);
+		sp.addMouseMotionListener(clickManager);
+		sp.addMouseListener(clickManager);
 //		addMouseWheelListener(new ScaleHandler());
 
 		FlowLayout flIcon = new FlowLayout(FlowLayout.LEADING);
@@ -190,12 +203,16 @@ public class GUI extends JFrame {
 		newEntityButton.setPreferredSize(ICONBUTTON_SIZE);
 		newAssociationButton.setPreferredSize(ICONBUTTON_SIZE);
 		newLinkButton.setPreferredSize(ICONBUTTON_SIZE);
+		zoomButton.setPreferredSize(ICONBUTTON_SIZE);
+		dezoomButton.setPreferredSize(ICONBUTTON_SIZE);
 
 		selectionButton.setToolTipText("Sélectionner (V)");
 		handButton.setToolTipText("Déplacer (H)");
 		newEntityButton.setToolTipText("New entity tool");
 		newAssociationButton.setToolTipText("New association tool");
 		newLinkButton.setToolTipText("Linking tool");
+		zoomButton.setToolTipText("Zoomer");
+		dezoomButton.setToolTipText("Dézoomer");
 
 		selectionButton.setIcon(selectionIcon);
 		handButton.setIcon(handIcon);
@@ -205,6 +222,8 @@ public class GUI extends JFrame {
 		iconPanel.add(newEntityButton);
 		iconPanel.add(newAssociationButton);
 		iconPanel.add(newLinkButton);
+		iconPanel.add(zoomButton);
+		iconPanel.add(dezoomButton);
 
 		GridLayout glInfo = new GridLayout(3, 2);
 		jpl.setLayout(glInfo);
@@ -219,7 +238,8 @@ public class GUI extends JFrame {
 //		jpl.add(newAssociationButton);
 
 		contentPane.add(iconPanel, BorderLayout.NORTH);
-		contentPane.add(sp, BorderLayout.CENTER);
+//		contentPane.add(sp, BorderLayout.CENTER);
+		contentPane.add(jsp, BorderLayout.CENTER);
 //		contentPane.add(jpl, BorderLayout.SOUTH);
 
 		options.add(about);
@@ -252,6 +272,7 @@ public class GUI extends JFrame {
 		setJMenuBar(jmb);
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setMaximumSize(MAX_FRAME_SIZE);
 		setSize(PANEL_SIZE);
 		setResizable(true);
 		setLocationRelativeTo(null);
@@ -327,6 +348,8 @@ public class GUI extends JFrame {
 		newEntityButton.addActionListener(new AddEntityAction());
 		newAssociationButton.addActionListener(new AddAssociationAction());
 		newLinkButton.addActionListener(new AddLinkAction());
+		zoomButton.addActionListener(new ZoomAction());
+		dezoomButton.addActionListener(new DezoomAction());
 		applyConfigButton.addActionListener(new ApplyConfigAction());
 		cancelConfigButton.addActionListener(new CancelConfigAction());
 
@@ -443,7 +466,8 @@ public class GUI extends JFrame {
 			 * y coordinate is offset about 23 to 25 pixels, may include the titlebar of the
 			 * frame
 			 */
-			y = e.getY() - HEIGHT_DIFFERENCE;
+//			y = e.getY() - HEIGHT_DIFFERENCE;
+			y = e.getY();
 //			System.out.println("[GUI]  X : " + x + " Y : " + y);
 
 			// Determining action to perform according to cursorState
@@ -457,7 +481,9 @@ public class GUI extends JFrame {
 					ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
 					Node newNodeEntity = new Entity(newEntityName, entityAttributeList);
 					mcdManager.addNode(newNodeEntity);
+					
 					sp.getComponentMap().put(sp.addShapeGroup(newEntityName, x, y, true), newNodeEntity);
+
 					uniqueSuffix++;
 
 					// If association button is selected, creating an association at desired
@@ -556,7 +582,8 @@ public class GUI extends JFrame {
 			if (selectedComponent != null && cursorState.equals("hand")) {
 
 				int dx = e.getX() - x;
-				int dy = e.getY() - y - HEIGHT_DIFFERENCE;
+//				int dy = e.getY() - y - HEIGHT_DIFFERENCE;
+				int dy = e.getY() - y;
 				float newX = selectedComponent.getX() + dx;
 				float newY = selectedComponent.getY() + dy;
 
@@ -615,29 +642,30 @@ public class GUI extends JFrame {
 	 * Modifie la taille du rectangle selon le mouvement de la molette
 	 *
 	 */
-//	class ScaleHandler implements MouseWheelListener {
-//		public void mouseWheelMoved(MouseWheelEvent e) {
-//
-//			int x = e.getX();
-//			int y = e.getY();
-//
-//			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
-//			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-//
-//				// Le curseur est-il dans le rectangle ?
-//				if (myRect.getBounds2D().contains(x, y)) {
-//
-//					// Récupérer la quantité de rotation
-//					float amount = e.getWheelRotation() * 5f;
-//
-//					// Modifier les dimension du rectangle en conséquence
-//					myRect.width += amount;
-//					myRect.height += amount;
-//					repaint();
-//				}
-//			}
-//		}
-//	}
+	class ScaleHandler implements MouseWheelListener {
+		public void mouseWheelMoved(MouseWheelEvent e) {
+
+			int x = e.getX();
+			int y = e.getY();
+
+			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
+			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+
+				// Le curseur est-il dans le rectangle ?
+				if (selectedComponent.getMainShape().contains(x, y)) {
+
+					// Récupérer la quantité de rotation
+					float amount = e.getWheelRotation() * 5f;
+					float w = selectedComponent.getWidth();
+					float h = selectedComponent.getHeight();
+					// Modifier les dimension du rectangle en conséquence
+					selectedComponent.setWidth(w + amount);
+					selectedComponent.setHeight(h + amount);
+					repaint();
+				}
+			}
+		}
+	}
 
 	public class SelectionAction implements ActionListener {
 		@Override
@@ -710,6 +738,22 @@ public class GUI extends JFrame {
 				newLinkButton.setEnabled(false);
 			}
 
+		}
+	}
+	
+	public class ZoomAction implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			sp.zoom();
+			
+		}
+	}
+	
+	public class DezoomAction implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			sp.dezoom(theFrame.getSize());
+			
 		}
 	}
 
@@ -792,7 +836,6 @@ public class GUI extends JFrame {
 	public class CancelConfigAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-//			configFrame.setVisible(false);
 			configFrame.dispose();
 			cursorState = "selection";
 		}
