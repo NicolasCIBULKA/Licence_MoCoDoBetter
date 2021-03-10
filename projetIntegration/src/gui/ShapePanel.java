@@ -546,6 +546,8 @@ public class ShapePanel extends JPanel {
 //					double w = shape.getBounds2D().getWidth() / 100 * percentWidth;
 //					double h = shape.getBounds2D().getHeight() / 100 * percentHeight;
 
+					// Only need to update coordinates, the ShapePanel has an auto method which
+					// recalculate all the time the correct dimensions for shapeGroups from the font size
 					shape.setGroupAbscissa(x);
 					shape.setGroupOrdinate(y);
 
