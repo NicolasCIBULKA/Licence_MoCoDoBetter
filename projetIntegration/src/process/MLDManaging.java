@@ -214,11 +214,6 @@ public class MLDManaging {
 	
 
 	
-	
-	
-	
-	
-	
 	public ArrayList<Entity>  addEntityToMLD(MCDManaging mcdM) {
 		MCD mcd=newMCD(mcdM);
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();

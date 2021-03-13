@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import data.Attribute;
 import data.Entity;
@@ -27,27 +28,33 @@ public class SQLCreation {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path.toString()+"/"+filename+".sql"));
 			// print some comments 
-			writer.write("# This is an autogenerate SQL file for PostgreSQL created by BetterThanMoCoDo");
-			writer.write("# To use it, you just have to copy/paste the code below in your Postgres DB manager to create your database");
+			writer.write("-- This is an autogenerate SQL file for PostgreSQL created by BetterThanMoCoDo\n");
+			writer.write("-- To use it, you just have to copy/paste the code below in your Postgres DB manager to create your database\n");
 			
 			/*
 			 *  organise the entity list to have the "natural" entities first, and then those 
 			 *  
 			 *	that have been created from associations
 			*/
+			
 			List<Entity> entities = mld.getEntityList();
 			entities = organiseMLDEntities(entities);
+			System.out.println("test");
 			
 			// moving through all the entities of the MLD
 			for (Entity entity : entities) {
+				System.out.println(" -- "+entity.getName());
 				// list of the primary key and foreign keys
 				List<Attribute> pklist = new ArrayList<Attribute>();
 				List<MLDAttribute> fklist = new ArrayList<MLDAttribute>();
 				// creating the table
-				writer.write("\n\nCREATE TABLE " + entity.getName() + "(");
-
+				writer.write("\n\nCREATE TABLE " + entity.getName() + "(\n");
+				System.out.println(entity.getListAttribute().size());
 				// creating the attributes
+				
 				for (Attribute attribute : entity.getListAttribute()) {
+					System.out.println(attribute.getName() +" "+ attribute.isPrimaryKey() );
+					System.out.println(attribute.getName());
 					// possible parameter for the attribute
 					String isnull = " NOT NULL";
 					String isunique = " UNIQUE";
@@ -59,35 +66,40 @@ public class SQLCreation {
 						isunique = " ";
 					}
 					if (attribute.isPrimaryKey()) {
+						System.out.println("pk" + attribute.getType());
 						pklist.add(attribute);
 					}
 					if (attribute instanceof MLDAttribute && (((MLDAttribute) attribute).isForeignKey())) {
 						fklist.add((MLDAttribute) attribute);
 					}
 					// adding the attribute to the file
-					writer.write("\t" + attribute.getName() + " " + attribute.getType() + isnull + isunique + ",");
-
+					writer.write("\t" + attribute.getName() + " " + attribute.getType() + isnull + isunique + ",\n");
+					
 				}
+				System.out.println("pklist " + pklist.size());
 				// create the constraints
 				// creating constraint for Primary Key
 				String pkString = "( ";
+				if(pklist.size() > 0) {
 				pkString += pklist.get(0).getName().toString() + " ";
+				}
 				for (int i = 1; i < pklist.size(); i++) {
 					pkString += ", " + pklist.get(i).getName().toString() + " ";
 				}
 				pkString += ")";
 				if (!fklist.isEmpty()) {
-					pkString += ",";
+					pkString += ",\n";
 				}
-				writer.write("CONSTRAINT " + entity.getName() + "_pk PRIMARY KEY " + pkString);
-
+				
+				writer.write("\tCONSTRAINT " + entity.getName() + "_pk PRIMARY KEY " + pkString);
+				
 				// Creating constraints for Foreign Keys
 				for (int i = 0; i < fklist.size(); i++) {
-					String coma = ",";
+					String coma = ",\n";
 					if (i == fklist.size() - 1) {
-						coma = "";
+						coma = "\n";
 					}
-					writer.write("CONSTRAINT " + entity.getName() + "_FK_"
+					writer.write("\tCONSTRAINT " + entity.getName() + "_FK_"
 							+ fklist.get(i).getReferenceAttribute().getName() + " FOREIGN KEY ("
 							+ fklist.get(i).getName() + ") REFERENCE " + fklist.get(i).getReferenceNode().getName()
 							+ " (" + fklist.get(i).getReferenceAttribute().getName() + ")" + coma);
@@ -95,18 +107,19 @@ public class SQLCreation {
 				}
 
 				// end of the table
-				writer.write(");");
+				writer.write("\n);\n");
 			}
 			// creating the part of script to erase the DB
-			writer.write("# This part of the code is useful to reset the database by destroying all the tables");
-			writer.write("# Do not take this part of code if you want to install the DB\n\n");
-			writer.close();
+			writer.write("-- This part of the code is useful to reset the database by destroying all the tables\n");
+			writer.write("-- Do not take this part of code if you want to install the DB\n\n");
+			
 			for (Entity entity : entities) {
-				writer.write("DROP TABLE IF EXISTS " + entity.getName());
+				writer.write("DROP TABLE IF EXISTS " + entity.getName() + "\n");
 			}
+			writer.close();
 
 		} catch (IOException e) {
-			throw new SQLTranscriptionException("Error - Impossible to load the file using given path");
+			throw new SQLTranscriptionException("Error - Impossible to load the file using given path\n");
 
 		}
 
@@ -115,7 +128,8 @@ public class SQLCreation {
 	// Organise all the Entities of the MLD to have all the entities of MCF first
 	// and after all the Entities created from associations
 	public static List<Entity> organiseMLDEntities(List<Entity> entities) {
-		List<Entity> finalList = new ArrayList<Entity>();
+		
+		List<Entity> finalList = new Vector<Entity>();
 		List<Entity> tempList = new ArrayList<Entity>();
 		for (Entity entity : entities) {
 			List<Attribute> attributeList = entity.getListAttribute();
@@ -127,12 +141,16 @@ public class SQLCreation {
 					MLDAttributeNotFound = false;
 					tempList.add(entity);
 				}
+				i++;
 			}
-			if(MLDAttributeNotFound = true) {
+			if(MLDAttributeNotFound == true) {
 				finalList.add(entity);
 			}
 		}
+		System.out.println("templist "+tempList.size());
+		
 		for(Entity entity : tempList) {
+			System.out.println(entity.getName());
 			finalList.add(entity);
 		}
 		return finalList;

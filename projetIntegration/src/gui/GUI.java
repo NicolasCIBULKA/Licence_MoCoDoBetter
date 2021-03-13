@@ -38,6 +38,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.Pseudograph;
+
 import data.Association;
 import data.Attribute;
 import data.Cardinality;
@@ -866,7 +869,7 @@ public class GUI extends JFrame {
 				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
 
 				Loading loader = new Loading(file.getAbsolutePath());
-				mcdManager.getMCD().setMCDGraph(loader.getMcdManager().getMCD().getMCDGraph());
+				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
 
 			}
 		}

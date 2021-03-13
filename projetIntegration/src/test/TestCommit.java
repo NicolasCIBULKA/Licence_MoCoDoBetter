@@ -1,37 +1,43 @@
 package test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import data.Association;
 import data.Attribute;
 import data.Cardinality;
 import data.Entity;
+import data.MLD;
 import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
+import exceptions.SQLTranscriptionException;
 import process.MCDManaging;
+import process.MLDManaging;
+import process.SQLCreation;
 
 public class TestCommit {
 	
 	public static void main(String[] args) throws InvalidNodeLinkException {
 		
 		MCDManaging manager = new MCDManaging();
-//		MLDManaging m = new MLDManaging();
-//		MLD mld = new MLD();
-
+		MLDManaging m = new MLDManaging();
+		MLD mld = new MLD();
+		SQLCreation sql = new SQLCreation();
 		
 		
 		// Entities
-		Attribute at1 = new Attribute("Attribute 1","String",false,true,false);
-		Attribute at2 = new Attribute("Attribute 2","int",false,false,false);
-		Attribute at3 = new Attribute("Attribute 3","String",false,false,false);
-		Attribute at4 = new Attribute("Attribute 4","int",false,true,false);
-		Attribute at5 = new Attribute("Attribute 5","float",false,false,false);
-		Attribute at6 = new Attribute("Attribute 6","int",false,true,false);
-		Attribute at7 = new Attribute("Attribute 7","float",false,false,false);
-		Attribute at8 = new Attribute("Attribute 8","int",false,true,false);
-		Attribute at9 = new Attribute("Attribute 9","float",false,true,false);
-		Attribute at10 = new Attribute("Attribute 10","int",false,false,false);
+		Attribute at1 = new Attribute("Attribute1","String",false,true,false);
+		Attribute at2 = new Attribute("Attribute2","int",false,false,false);
+		Attribute at3 = new Attribute("Attribute3","String",false,false,false);
+		Attribute at4 = new Attribute("Attribute4","int",false,true,false);
+		Attribute at5 = new Attribute("Attribute5","float",false,false,false);
+		Attribute at6 = new Attribute("Attribute6","int",false,true,false);
+		Attribute at7 = new Attribute("Attribute7","float",false,false,false);
+		Attribute at8 = new Attribute("Attribute8","int",false,true,false);
+		Attribute at9 = new Attribute("Attribute9","float",false,true,false);
+		Attribute at10 = new Attribute("Attribute10","int",false,false,false);
 		
 		ArrayList<Attribute> liste1 = new ArrayList<Attribute>();
 		liste1.add(at1);
@@ -50,11 +56,11 @@ public class TestCommit {
 		liste5.add(at10);
 		
 		
-		Entity e1 = new Entity("Entité 1", liste1);
-		Entity e2 = new Entity("Entité 2", liste2);
-		Entity e3 = new Entity("Entité 3", liste3);
-		Entity e4 = new Entity("Entité 4", liste4);
-		Entity e5 = new Entity("Entité 5", liste5);
+		Entity e1 = new Entity("Entite1", liste1);
+		Entity e2 = new Entity("Entite2", liste2);
+		Entity e3 = new Entity("Entite3", liste3);
+		Entity e4 = new Entity("Entite4", liste4);
+		Entity e5 = new Entity("Entite5", liste5);
 		
 		
 		Cardinality ce1_a1= new Cardinality("0","N",e1.getName());
@@ -81,7 +87,7 @@ public class TestCommit {
 		
 		ArrayList< Cardinality> card3 = new ArrayList< Cardinality>();
 		card3.add(ce1_a3);
-		card2.add(ce5_a3);
+		card3.add(ce5_a3);
 		
 		
 		Association a1 = new Association("Association1", new ArrayList<Attribute>(), card);
@@ -114,6 +120,18 @@ public class TestCommit {
 			
 			e.printStackTrace();
 		}
+		
+		m.newMld(manager);
+		mld=m.getMLD();
+		System.out.println(mld.getEntityList());
+		
+		try {
+			SQLCreation.SQLConverter(mld, "sqltest", Path.of("./"));
+		} catch (SQLTranscriptionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 		
 		
