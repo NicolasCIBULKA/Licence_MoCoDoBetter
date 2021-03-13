@@ -239,8 +239,9 @@ public class MLDManaging {
 				
 				ArrayList<Attribute> newAttribute=new ArrayList<Attribute>();
 				
-				
+
 				ArrayList<Attribute> curentNodeAttribute=currentNode.getListAttribute();
+				
 				for(int i=0;i<curentNodeAttribute.size();i++) {
 					MLDAttribute cat = new MLDAttribute(null, null, false, false, false, false, null, null);
 					
@@ -254,10 +255,15 @@ public class MLDManaging {
 				}
 				
 				Entity newEntity=new Entity(currentNode.getName(), newAttribute);
-				entityListToMld.add(newEntity);
+				//System.out.println(newAttribute.isEmpty()+newEntity.getName());
+				if(newAttribute.isEmpty()==false) {
+					entityListToMld.add(newEntity);
+				}
+				
+			
 			}
 		}
-		System.out.println("Fin asso: "+entityListToMld.size());
+		//System.out.println("Fin asso: "+entityListToMld.size());
 		return entityListToMld;
 		
 	}
