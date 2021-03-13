@@ -123,7 +123,7 @@ public class TestCommit {
 		
 		m.newMld(manager);
 		mld=m.getMLD();
-		System.out.println(mld.getEntityList());
+		
 		
 		try {
 			SQLCreation.SQLConverter(mld, "sqltest", Path.of("./"));
