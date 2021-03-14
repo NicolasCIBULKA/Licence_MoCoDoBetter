@@ -33,14 +33,14 @@ public class Loading {
 	}
 
 	private void addNodes() {
-		for (Entry<String, Node> set : listNode.entrySet()) {
+		for (HashMap.Entry<String, Node> set : listNode.entrySet()) {
 			mcd.addNode(set.getValue());
 		}
 	}
 
 	private void addCardinality() {
 		try {
-			for (Entry<String, Cardinality> set : listCard.entrySet()) {
+			for (HashMap.Entry<String, Cardinality> set : listCard.entrySet()) {
 				mcd.connectNodes(listNode.get(set.getKey()), listNode.get(set.getValue().getNomEntity()),
 						set.getValue());
 			}
@@ -55,7 +55,7 @@ public class Loading {
 
 	private void extract(String path) {
 		try {
-			BufferedReader br = Files.newBufferedReader(Paths.get("path"));
+			BufferedReader br = Files.newBufferedReader(Paths.get(path));
 			extractEntity(br);
 			extractAssociation(br);
 			extractCardinality(br);
@@ -71,15 +71,19 @@ public class Loading {
 			String name = null;
 			ArrayList<Attribute> att = new ArrayList<Attribute>();
 			String str;
-			while ((str = br.readLine()) != "</Entities>") {
+			while (!(str = br.readLine()).equals("</Entities>") ) {
+
 				if (str.equals("</Table>")) {
+
 					Entity a = new Entity(name, att);
 					listNode.put(name, a);
 					att.clear();
 				}
 				if (str.equals("<Name>")) {
+
 					str = br.readLine();
 					name = str;
+
 				}
 				if (str.equals("<Attribut>")) {
 					str = br.readLine();
@@ -100,14 +104,19 @@ public class Loading {
 		try {
 			String name = null;
 			ArrayList<Attribute> att = new ArrayList<Attribute>();
+			ArrayList<Cardinality> card = new ArrayList<Cardinality>();
+
 			String str;
-			while ((str = br.readLine()) != "</Associations>") {
+			while (!(str = br.readLine()).equals("<Associations>") );
+			while (!(str = br.readLine()).equals("</Associations>") ) {
+
 				if (str.equals("</Table>")) {
-					Association a = new Association(name, att, null);
+					Association a = new Association(name, att, card);
 					listNode.put(name, a);
 					att.clear();
 				}
 				if (str.equals("<Name>")) {
+
 					str = br.readLine();
 					name = str;
 				}
@@ -131,9 +140,11 @@ public class Loading {
 			String str;
 			while (!(str = br.readLine()).equals("</Cardinalities>")) {
 				if (str.equals("<Cardinality>")) {
+
 					str = br.readLine();
 					String[] tmpStr = str.split(",");
 					listCard.put(tmpStr[0], new Cardinality(tmpStr[2], tmpStr[3], tmpStr[1]));
+					System.out.println(tmpStr[0]+tmpStr[1]+tmpStr[2]+tmpStr[3]);
 				}
 			}
 		} catch (IOException e) {

@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import exceptions.FileAlreadyExistException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
+import process.Loading;
 import process.MCDManaging;
 import process.Saving;
 
@@ -139,7 +141,7 @@ public class GUI extends JFrame {
 	private JMenuBar jmb = new JMenuBar();
 
 	private JMenu options = new JMenu("Mocodo Better");
-	private JMenuItem about = new JMenuItem("À propos");
+	private JMenuItem about = new JMenuItem("Ã€ propos");
 	private JMenuItem quit = new JMenuItem("Quitter");
 
 	private JMenu file = new JMenu("Fichier");
@@ -150,14 +152,14 @@ public class GUI extends JFrame {
 
 	private JMenu edit = new JMenu("Edition");
 	private JMenuItem undo = new JMenuItem("Annuler");
-	private JMenuItem redo = new JMenuItem("Rétablir");
+	private JMenuItem redo = new JMenuItem("RÃ©tablir");
 
-	private JMenu window = new JMenu("Fenêtre");
-	private JMenuItem minimize = new JMenuItem("Réduire");
-	private JMenuItem fullScreen = new JMenuItem("Plein écran");
+	private JMenu window = new JMenu("FenÃªtre");
+	private JMenuItem minimize = new JMenuItem("RÃ©duire");
+	private JMenuItem fullScreen = new JMenuItem("Plein Ã©cran");
 	private JMenu views = new JMenu("Vues");
-	private JMenuItem mcdView = new JMenuItem("Schéma conceptuel");
-	private JMenuItem mldView = new JMenuItem("Schéma relationnel");
+	private JMenuItem mcdView = new JMenuItem("SchÃ©ma conceptuel");
+	private JMenuItem mldView = new JMenuItem("SchÃ©ma relationnel");
 
 	private JMenu help = new JMenu("Aide");
 	private JMenuItem userGuide = new JMenuItem("Manuel de l'utilisateur");
@@ -203,13 +205,13 @@ public class GUI extends JFrame {
 		zoomButton.setPreferredSize(ICONBUTTON_SIZE);
 		dezoomButton.setPreferredSize(ICONBUTTON_SIZE);
 
-		selectionButton.setToolTipText("Sélectionner (V)");
-		handButton.setToolTipText("Déplacer (H)");
+		selectionButton.setToolTipText("SÃ©lectionner (V)");
+		handButton.setToolTipText("DÃ©placer (H)");
 		newEntityButton.setToolTipText("New entity tool");
 		newAssociationButton.setToolTipText("New association tool");
 		newLinkButton.setToolTipText("Linking tool");
 		zoomButton.setToolTipText("Zoomer");
-		dezoomButton.setToolTipText("Dézoomer");
+		dezoomButton.setToolTipText("DÃ©zoomer");
 
 		selectionButton.setIcon(selectionIcon);
 		handButton.setIcon(handIcon);
@@ -379,16 +381,16 @@ public class GUI extends JFrame {
 		ap.setAttributeList(sp.getComponentMap().get(selectedComponent).getListAttribute());
 
 		if (selectedComponent.isAnEntity()) {
-			configFrame = new JFrame("Paramètres de l'entité");
+			configFrame = new JFrame("ParamÃ¨tres de l'entitÃ©");
 
 			bodyConfigPanel.add(ap);
 		} else {
-			configFrame = new JFrame("Paramètres de l'association");
+			configFrame = new JFrame("ParamÃ¨tres de l'association");
 
 			cp.setCardinalityList(((Association) sp.getComponentMap().get(selectedComponent)).getCardinalityList());
 
 			associationTabbedPane.addTab("Attributs", null, ap, "");
-			associationTabbedPane.addTab("Cardinalités", null, cp, "");
+			associationTabbedPane.addTab("CardinalitÃ©s", null, cp, "");
 
 			bodyConfigPanel.add(associationTabbedPane);
 		}
@@ -551,7 +553,7 @@ public class GUI extends JFrame {
 									// Or says to the user that he's a clumsy smurf
 								} else {
 									JOptionPane.showMessageDialog(theFrame,
-											"Vous ne pouvez pas associer deux objets de même type !",
+											"Vous ne pouvez pas associer deux objets de mÃªme type !",
 											"Erreur d'association", JOptionPane.WARNING_MESSAGE);
 								}
 								shapesToConnect.clear();
@@ -627,17 +629,17 @@ public class GUI extends JFrame {
 			int x = e.getX();
 			int y = e.getY();
 
-			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
+			// Le dÃ©filement est-il de type unitaire ? (flÃ¨ches clavier ou molette)
 			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
 
 				// Le curseur est-il dans le rectangle ?
 				if (selectedComponent.getMainShape().contains(x, y)) {
 
-					// Récupérer la quantité de rotation
+					// RÃ©cupÃ©rer la quantitÃ© de rotation
 					float amount = e.getWheelRotation() * 5f;
 					float w = selectedComponent.getWidth();
 					float h = selectedComponent.getHeight();
-					// Modifier les dimension du rectangle en conséquence
+					// Modifier les dimension du rectangle en consÃ©quence
 					selectedComponent.setWidth(w + amount);
 					selectedComponent.setHeight(h + amount);
 					repaint();
@@ -749,8 +751,8 @@ public class GUI extends JFrame {
 						&& node != sp.getComponentMap().get(selectedComponent)) {
 					JOptionPane
 							.showMessageDialog(configFrame,
-									"Un autre objet (entité ou association) porte déjà le nom « "
-											+ jtfConfigName.getText() + " »",
+									"Un autre objet (entitÃ© ou association) porte dÃ©jÃ  le nom Â« "
+											+ jtfConfigName.getText() + " Â»",
 									"Erreur de saisie", JOptionPane.WARNING_MESSAGE);
 					nameExist = true;
 				}
@@ -764,7 +766,7 @@ public class GUI extends JFrame {
 
 				if (splitted.equals("Entite")) {
 					JOptionPane.showMessageDialog(configFrame,
-							"Le nom « Entite » est réservé, le nom de votre objet ne peut commencer par cette suite de caractères.",
+							"Le nom Â« Entite Â» est rÃ©servÃ©, le nom de votre objet ne peut commencer par cette suite de caractÃ¨res.",
 							"Renommage obligatoire", JOptionPane.WARNING_MESSAGE);
 					isDefaultName = true;
 				}
@@ -774,7 +776,7 @@ public class GUI extends JFrame {
 
 					if (splitted2.equals("Association")) {
 						JOptionPane.showMessageDialog(configFrame,
-								"Le nom « Association » est réservé, le nom de votre objet ne peut commencer par cette suite de caractères.",
+								"Le nom Â« Association Â» est rÃ©servÃ©, le nom de votre objet ne peut commencer par cette suite de caractÃ¨res.",
 								"Renommage obligatoire", JOptionPane.WARNING_MESSAGE);
 						isDefaultName = true;
 					}
@@ -833,21 +835,21 @@ public class GUI extends JFrame {
 
 	class OpenAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// JFileChooser opening
-//			jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-//			jfc.setDialogTitle("Ouvrir un fichier .stdd");
-//			jfc.setAcceptAllFileFilterUsed(false);
-//
-//			int returnVal = jfc.showOpenDialog(GUI.this);
-//
-//			if (returnVal == JFileChooser.APPROVE_OPTION) {
-//				File file = jfc.getSelectedFile();
-//				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
-//
-//				Loading loader = new Loading(file.getAbsolutePath());
+			JFileChooser opening;
+			jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+			jfc.setDialogTitle("Ouvrir un fichier .stdd");
+			jfc.setAcceptAllFileFilterUsed(false);
+
+			int returnVal = jfc.showOpenDialog(GUI.this);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = jfc.getSelectedFile();
+				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
+
+				Loading loader = new Loading(file.getAbsolutePath());
 //				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
-//
-//			}
+				System.out.println(loader.getMcd().toString());
+			}
 			
 			sp.clear();
 		}
@@ -878,7 +880,7 @@ public class GUI extends JFrame {
 				coordinatesMap.put(shape.getGroupName(), position);
 			}
 			try {
-				new Saving("/Users/ryzentosh/Fac/Cours L3 I/Semestre 6/Projet d'intégration/essai",
+				new Saving("C:\\Users\\etien\\Desktop\\test",
 						mcdManager.getMCD(), coordinatesMap);
 			} catch (SaveWasInteruptedException e1) {
 				e1.printStackTrace();
