@@ -14,9 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,9 +36,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.Pseudograph;
-
 import data.Association;
 import data.Attribute;
 import data.Cardinality;
@@ -51,7 +46,6 @@ import exceptions.FileAlreadyExistException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
-import process.Loading;
 import process.MCDManaging;
 import process.Saving;
 
@@ -345,6 +339,7 @@ public class GUI extends JFrame {
 		minimize.addActionListener(new MinimizeAction());
 		fullScreen.addActionListener(new FullScreenAction());
 
+		
 		// Buttons actions
 		selectionButton.addActionListener(new SelectionAction());
 		handButton.addActionListener(new DragAction());
@@ -414,6 +409,7 @@ public class GUI extends JFrame {
 		configFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		configFrame.setVisible(true);
 	}
+	
 
 	/**
 	 * Connects nodes in the given List of ShapeGroup. These are corresponding to
@@ -424,30 +420,35 @@ public class GUI extends JFrame {
 	 * @param shapesToBeConnected List of shapes to connect
 	 */
 	public void linkTwoShapes(List<ShapeGroup> shapesToBeConnected) {
-		try {
-			// Connecting nodes, Jgraph part
-			mcdManager.connectNodes(sp.getComponentMap().get(shapesToBeConnected.get(0)),
-					sp.getComponentMap().get(shapesToBeConnected.get(1)),
-					new Cardinality("1", "0", shapesToBeConnected.get(1).getGroupName()));
-			System.out.println("[GUI]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
-					+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
-			// Connecting objects, graphical part
-			// Depends on existing entries in the linkMap
-			if (sp.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
+		
+		if(sp.canBeLinked(shapesToBeConnected)) {
+			try {
+				// Connecting nodes, Jgraph part
+				mcdManager.connectNodes(sp.getComponentMap().get(shapesToBeConnected.get(0)),
+						sp.getComponentMap().get(shapesToBeConnected.get(1)),
+						new Cardinality("1", "0", shapesToBeConnected.get(1).getGroupName()));
+				System.out.println("[GUI]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
+						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
+				
+				// Connecting objects, graphical part
+				// Depends on existing entries in the linkMap
+				if (sp.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
 
-				System.out.println("[GUI]  Added a shape");
-				sp.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
+					System.out.println("[GUI] linkTwoShapes()  Added a shape");
+					sp.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
 
-			} else {
-				System.out.println("[GUI]  Added a couple key-value");
+				} else {
+					System.out.println("[GUI] linkTwoShapes()  Added a couple key-value");
 
-				List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
-				newLinkList.add(shapesToBeConnected.get(1));
-				sp.getLinkMap().put(shapesToBeConnected.get(0), newLinkList);
+					List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
+					newLinkList.add(shapesToBeConnected.get(1));
+					sp.getLinkMap().put(shapesToBeConnected.get(0), newLinkList);
+				}
+			} catch (NullNodeException | ExistingEdgeException | InvalidNodeLinkException e1) {
+				e1.printStackTrace();
 			}
-		} catch (NullNodeException | ExistingEdgeException | InvalidNodeLinkException e1) {
-			e1.printStackTrace();
 		}
+		
 	}
 
 	/**
@@ -614,33 +615,9 @@ public class GUI extends JFrame {
 				x += dx;
 				y += dy;
 			}
-
 		}
-
-		/**
-		 * Returns the first line in the collection of lines that is close enough to
-		 * where the user clicked, or null if no such line exists
-		 *
-		 */
-
-		public Line2D.Float getClickedLine(int x, int y) {
-//		int boxX = x - HIT_BOX_SIZE / 2;
-//		int boxY = y - HIT_BOX_SIZE / 2 + 12;
-			double boxX = x;
-			double boxY = y;
-
-			for (Line2D.Float line : sp.getAlLines()) {
-				if (line.ptSegDist(boxX, boxY) < 10.0d) {
-					System.out.println("--- " + line.x1 + " " + line.y1 + " " + line.x2 + " " + line.y2 + " ---");
-					return line;
-				}
-			}
-			return null;
-		}
-
 	}
 
-	// TODO : scaling global du schéma de conception
 	/**
 	 * Modifie la taille du rectangle selon le mouvement de la molette
 	 *
@@ -858,20 +835,21 @@ public class GUI extends JFrame {
 	class OpenAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// JFileChooser opening
-			jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-			jfc.setDialogTitle("Ouvrir un fichier .stdd");
-			jfc.setAcceptAllFileFilterUsed(false);
-
-			int returnVal = jfc.showOpenDialog(GUI.this);
-
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = jfc.getSelectedFile();
-				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
-
-				Loading loader = new Loading(file.getAbsolutePath());
-				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
-
-			}
+//			jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+//			jfc.setDialogTitle("Ouvrir un fichier .stdd");
+//			jfc.setAcceptAllFileFilterUsed(false);
+//
+//			int returnVal = jfc.showOpenDialog(GUI.this);
+//
+//			if (returnVal == JFileChooser.APPROVE_OPTION) {
+//				File file = jfc.getSelectedFile();
+//				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
+//
+//				Loading loader = new Loading(file.getAbsolutePath());
+//				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
+//
+//			}
+			sp.clear();
 		}
 	}
 
