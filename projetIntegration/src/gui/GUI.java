@@ -339,7 +339,6 @@ public class GUI extends JFrame {
 		minimize.addActionListener(new MinimizeAction());
 		fullScreen.addActionListener(new FullScreenAction());
 
-		
 		// Buttons actions
 		selectionButton.addActionListener(new SelectionAction());
 		handButton.addActionListener(new DragAction());
