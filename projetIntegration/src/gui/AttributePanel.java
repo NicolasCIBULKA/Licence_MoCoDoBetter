@@ -16,7 +16,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -30,6 +29,8 @@ import data.Attribute;
 /**
  * AttributePanel is a JPanel containing the dynamic JTable which reprensents
  * all attributes of an entity or association
+ * 
+ * TODO : [AttributePanel] 
  * 
  * @author Yann Barrachina
  *
@@ -73,7 +74,7 @@ public class AttributePanel extends JPanel {
 				case 0:
 					return String.class;
 				case 1:
-					return JComboBox.class;
+					return String.class;
 				case 2:
 					return Boolean.class;
 				case 3:
@@ -89,9 +90,9 @@ public class AttributePanel extends JPanel {
 
 		TableColumn typeColumn = mainTable.getColumnModel().getColumn(1);
 
-		String[] attributeTypeList = new String[] { "int", "varchar" };
-		JComboBox<String> attributeTypeChooser = new JComboBox<String>(attributeTypeList);
-		typeColumn.setCellEditor(new DefaultCellEditor(attributeTypeChooser));
+//		String[] attributeTypeList = new String[] { "int", "varchar" };
+//		JComboBox<String> attributeTypeChooser = new JComboBox<String>(attributeTypeList);
+//		typeColumn.setCellEditor(new DefaultCellEditor(attributeTypeChooser));
 
 		typeColumn = mainTable.getColumnModel().getColumn(3);
 		typeColumn.setCellRenderer(new RadioButtonRenderer());
@@ -115,27 +116,6 @@ public class AttributePanel extends JPanel {
 	private void initActions() {
 		addButton.addActionListener(new AddAttributeAction());
 		deleteButton.addActionListener(new DeleteAttributeAction());
-	}
-
-	/**
-	 * @return the addButton
-	 */
-	public JButton getAddButton() {
-		return addButton;
-	}
-
-	/**
-	 * @return the deleteButton
-	 */
-	public JButton getDeleteButton() {
-		return deleteButton;
-	}
-
-	/**
-	 * @return the attributeList
-	 */
-	public ArrayList<Attribute> getAttributeList() {
-		return attributeList;
 	}
 
 	/**
@@ -185,6 +165,27 @@ public class AttributePanel extends JPanel {
 		}
 		// Notifying table that datas are uploaded into the table's model
 		model.fireTableDataChanged();
+	}
+	
+	/**
+	 * @return the addButton
+	 */
+	public JButton getAddButton() {
+		return addButton;
+	}
+
+	/**
+	 * @return the deleteButton
+	 */
+	public JButton getDeleteButton() {
+		return deleteButton;
+	}
+
+	/**
+	 * @return the attributeList
+	 */
+	public ArrayList<Attribute> getAttributeList() {
+		return attributeList;
 	}
 
 	/**
@@ -270,4 +271,5 @@ public class AttributePanel extends JPanel {
 			super.fireEditingStopped();
 		}
 	}
+	
 }

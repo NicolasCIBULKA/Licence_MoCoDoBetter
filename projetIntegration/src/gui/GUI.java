@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -21,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -42,6 +39,7 @@ import data.Attribute;
 import data.Cardinality;
 import data.Entity;
 import data.Node;
+import exceptions.EdgesNotLinkedException;
 import exceptions.ExistingEdgeException;
 import exceptions.FileAlreadyExistException;
 import exceptions.InvalidNodeLinkException;
@@ -62,13 +60,12 @@ public class GUI extends JFrame {
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
 
 	private ShapeGroup selectedComponent;
-	private ShapePanel sp;
+	private IconPanel iconPanel;
+	private ShapePanel shapePanel;
 	private AttributePanel ap = new AttributePanel();
 	private CardinalityPanel cp = new CardinalityPanel();
 
 	private MCDManaging mcdManager = new MCDManaging();
-
-	private String cursorState = new String("selection");
 
 	private ClickManager clickManager = new ClickManager();
 
@@ -80,31 +77,20 @@ public class GUI extends JFrame {
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 	private static final Dimension ICONPANEL_SIZE = new Dimension(PANEL_SIZE.width, 60);
 	private static final Dimension ICONBUTTON_SIZE = new Dimension(50, 50);
-	private static final Dimension MAX_FRAME_SIZE = new Dimension(3000,1500);
-	
-	private static final int HEIGHT_DIFFERENCE = ICONPANEL_SIZE.height + 45;
-	
+	private static final Dimension MAX_FRAME_SIZE = new Dimension(3000, 1500);
+
 	private static final Font APP_FONT = new Font(Font.DIALOG, Font.BOLD, 15);
 
 	private JFrame theFrame;
 	private JFrame configFrame;
 
-	private JPanel jpl = new JPanel();
-	private JPanel iconPanel = new JPanel();
-	private JPanel a1 = new JPanel();
-	private JPanel a2 = new JPanel();
-	private JPanel a3 = new JPanel();
-	private JPanel a4 = new JPanel();
-	private JPanel a5 = new JPanel();
-	private JPanel a6 = new JPanel();
-	private JPanel a7 = new JPanel();
-	private JPanel a8 = new JPanel();
+	private JPanel headPanel = new JPanel();
 	private JPanel topConfigPanel = new JPanel();
 	private JPanel bodyConfigPanel = new JPanel();
 	private JPanel bottomConfigPanel = new JPanel();
 
 	private JTabbedPane associationTabbedPane = new JTabbedPane();
-	
+
 	private JScrollPane jsp;
 
 	private JLabel jlaR1 = new JLabel("Rect1");
@@ -122,20 +108,11 @@ public class GUI extends JFrame {
 	private JLabel nameConfigLabel = new JLabel("Nom :");
 
 	private JTextField jtfConfigName = new JTextField();
-
-	private JButton selectionButton = new JButton();
-	private JButton handButton = new JButton();
-	private JButton newEntityButton = new JButton("+E");
-	private JButton newAssociationButton = new JButton("+A");
-	private JButton newLinkButton = new JButton("E-A");
 	private JButton zoomButton = new JButton("+");
 	private JButton dezoomButton = new JButton("-");
-	
+
 	private JButton applyConfigButton = new JButton("Appliquer");
 	private JButton cancelConfigButton = new JButton("Annuler");
-
-	private Icon selectionIcon = new ImageIcon("images/cursor.png");
-	private Icon handIcon = new ImageIcon("images/openHand.png");
 
 	// menuBar objects
 	private JMenuBar jmb = new JMenuBar();
@@ -179,68 +156,39 @@ public class GUI extends JFrame {
 		setTitle("Mocodo Better");
 
 		selectedComponent = null;
-		BorderLayout bl = new BorderLayout(3, 1);
 		Container contentPane = getContentPane();
-		contentPane.setLayout(bl);
+		contentPane.setLayout(new BorderLayout(3, 1));
 
-		sp = new ShapePanel();
-		jsp = new JScrollPane(sp, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		shapePanel = new ShapePanel();
+		shapePanel.addMouseMotionListener(clickManager);
+		shapePanel.addMouseListener(clickManager);
+		
+		iconPanel = new IconPanel();
+
+		jsp = new JScrollPane(shapePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		jsp.getVerticalScrollBar().setUnitIncrement(10);
 		jsp.getHorizontalScrollBar().setUnitIncrement(10);
 
-		sp.addMouseMotionListener(clickManager);
-		sp.addMouseListener(clickManager);
-//		addMouseWheelListener(new ScaleHandler());
+		headPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+		headPanel.setPreferredSize(ICONPANEL_SIZE);
 
-		FlowLayout flIcon = new FlowLayout(FlowLayout.LEADING);
-		iconPanel.setLayout(flIcon);
-
-		iconPanel.setPreferredSize(ICONPANEL_SIZE);
-
-		selectionButton.setPreferredSize(ICONBUTTON_SIZE);
-		handButton.setPreferredSize(ICONBUTTON_SIZE);
-		newEntityButton.setPreferredSize(ICONBUTTON_SIZE);
-		newAssociationButton.setPreferredSize(ICONBUTTON_SIZE);
-		newLinkButton.setPreferredSize(ICONBUTTON_SIZE);
 		zoomButton.setPreferredSize(ICONBUTTON_SIZE);
-		dezoomButton.setPreferredSize(ICONBUTTON_SIZE);
-
-		selectionButton.setToolTipText("Sélectionner (V)");
-		handButton.setToolTipText("Déplacer (H)");
-		newEntityButton.setToolTipText("New entity tool");
-		newAssociationButton.setToolTipText("New association tool");
-		newLinkButton.setToolTipText("Linking tool");
 		zoomButton.setToolTipText("Zoomer");
+		dezoomButton.setPreferredSize(ICONBUTTON_SIZE);
 		dezoomButton.setToolTipText("Dézoomer");
 
-		selectionButton.setIcon(selectionIcon);
-		handButton.setIcon(handIcon);
+		
 
-		iconPanel.add(selectionButton);
-		iconPanel.add(handButton);
-		iconPanel.add(newEntityButton);
-		iconPanel.add(newAssociationButton);
-		iconPanel.add(newLinkButton);
-		iconPanel.add(zoomButton);
-		iconPanel.add(dezoomButton);
 
-		GridLayout glInfo = new GridLayout(3, 2);
-		jpl.setLayout(glInfo);
+		headPanel.add(iconPanel);
+		headPanel.add(zoomButton);
+		headPanel.add(dezoomButton);
 
-		Dimension TEST_SIZE = new Dimension(PANEL_SIZE.width, 200);
-		jpl.setPreferredSize(TEST_SIZE);
-
-		jpl.add(jlaR1);
-		jpl.add(jlaXR1);
-//		jpl.add(newEntityButton);
-		jpl.add(jlaYR1);
-//		jpl.add(newAssociationButton);
-
-		contentPane.add(iconPanel, BorderLayout.NORTH);
-//		contentPane.add(sp, BorderLayout.CENTER);
+		contentPane.add(headPanel, BorderLayout.NORTH);
 		contentPane.add(jsp, BorderLayout.CENTER);
-//		contentPane.add(jpl, BorderLayout.SOUTH);
 
+		// JMenuBar settings
 		options.add(about);
 		options.addSeparator();
 		options.add(quit);
@@ -270,12 +218,14 @@ public class GUI extends JFrame {
 		jmb.add(help);
 		setJMenuBar(jmb);
 
+		// Final frame settings
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setMaximumSize(MAX_FRAME_SIZE);
 		setSize(PANEL_SIZE);
 		setResizable(true);
 		setLocationRelativeTo(null);
 		setVisible(true);
+		iconPanel.repaint();
 	}
 
 	/**
@@ -283,9 +233,16 @@ public class GUI extends JFrame {
 	 */
 	public void initAbout() {
 		JFrame jfa = new JFrame("A propos");
-		GridLayout gla = new GridLayout(8, 1);
+		JPanel a1 = new JPanel();
+		JPanel a2 = new JPanel();
+		JPanel a3 = new JPanel();
+		JPanel a4 = new JPanel();
+		JPanel a5 = new JPanel();
+		JPanel a6 = new JPanel();
+		JPanel a7 = new JPanel();
+		JPanel a8 = new JPanel();
 
-		jfa.getContentPane().setLayout(gla);
+		jfa.getContentPane().setLayout(new GridLayout(8, 1));
 
 		// GUI Name
 		a1.setSize(200, 30);
@@ -341,14 +298,9 @@ public class GUI extends JFrame {
 		minimize.addActionListener(new MinimizeAction());
 		fullScreen.addActionListener(new FullScreenAction());
 
-		// Buttons actions
-		selectionButton.addActionListener(new SelectionAction());
-		handButton.addActionListener(new DragAction());
-		newEntityButton.addActionListener(new AddEntityAction());
-		newAssociationButton.addActionListener(new AddAssociationAction());
-		newLinkButton.addActionListener(new AddLinkAction());
 		zoomButton.addActionListener(new ZoomAction());
 		dezoomButton.addActionListener(new DezoomAction());
+
 		applyConfigButton.addActionListener(new ApplyConfigAction());
 		cancelConfigButton.addActionListener(new CancelConfigAction());
 
@@ -378,7 +330,7 @@ public class GUI extends JFrame {
 		bodyConfigPanel.removeAll();
 		bodyConfigPanel.validate();
 
-		ap.setAttributeList(sp.getComponentMap().get(selectedComponent).getListAttribute());
+		ap.setAttributeList(shapePanel.getComponentMap().get(selectedComponent).getListAttribute());
 
 		if (selectedComponent.isAnEntity()) {
 			configFrame = new JFrame("Paramètres de l'entité");
@@ -387,7 +339,8 @@ public class GUI extends JFrame {
 		} else {
 			configFrame = new JFrame("Paramètres de l'association");
 
-			cp.setCardinalityList(((Association) sp.getComponentMap().get(selectedComponent)).getCardinalityList());
+			cp.setCardinalityList(
+					((Association) shapePanel.getComponentMap().get(selectedComponent)).getCardinalityList());
 
 			associationTabbedPane.addTab("Attributs", null, ap, "");
 			associationTabbedPane.addTab("Cardinalités", null, cp, "");
@@ -410,7 +363,6 @@ public class GUI extends JFrame {
 		configFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		configFrame.setVisible(true);
 	}
-	
 
 	/**
 	 * Connects nodes in the given List of ShapeGroup. These are corresponding to
@@ -421,35 +373,35 @@ public class GUI extends JFrame {
 	 * @param shapesToBeConnected List of shapes to connect
 	 */
 	public void linkTwoShapes(List<ShapeGroup> shapesToBeConnected) {
-		
-		if(sp.canBeLinked(shapesToBeConnected)) {
+
+		if (shapePanel.canBeLinked(shapesToBeConnected)) {
 			try {
 				// Connecting nodes, Jgraph part
-				mcdManager.connectNodes(sp.getComponentMap().get(shapesToBeConnected.get(0)),
-						sp.getComponentMap().get(shapesToBeConnected.get(1)),
+				mcdManager.connectNodes(shapePanel.getComponentMap().get(shapesToBeConnected.get(0)),
+						shapePanel.getComponentMap().get(shapesToBeConnected.get(1)),
 						new Cardinality("1", "0", shapesToBeConnected.get(1).getGroupName()));
 				System.out.println("[GUI]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
 						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
-				
+
 				// Connecting objects, graphical part
 				// Depends on existing entries in the linkMap
-				if (sp.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
+				if (shapePanel.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
 
 					System.out.println("[GUI] linkTwoShapes()  Added a shape");
-					sp.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
+					shapePanel.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
 
 				} else {
 					System.out.println("[GUI] linkTwoShapes()  Added a couple key-value");
 
 					List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
 					newLinkList.add(shapesToBeConnected.get(1));
-					sp.getLinkMap().put(shapesToBeConnected.get(0), newLinkList);
+					shapePanel.getLinkMap().put(shapesToBeConnected.get(0), newLinkList);
 				}
 			} catch (NullNodeException | ExistingEdgeException | InvalidNodeLinkException e1) {
 				e1.printStackTrace();
 			}
 		}
-		
+		System.out.println("[GUI]  Asso after MCDConnect : " + ((Association) mcdManager.getNodeFromName(shapesToBeConnected.get(0).getGroupName())).toString());
 	}
 
 	/**
@@ -461,7 +413,7 @@ public class GUI extends JFrame {
 		private int x;
 		private int y;
 
-//		private List<ShapeGroup> connectedShapes = new ArrayList<ShapeGroup>();
+		private List<ShapeGroup> shapesToDisconnect = new ArrayList<ShapeGroup>();
 		private List<ShapeGroup> shapesToConnect = new ArrayList<ShapeGroup>();
 
 		public void mousePressed(MouseEvent e) {
@@ -474,32 +426,39 @@ public class GUI extends JFrame {
 //			y = e.getY() - HEIGHT_DIFFERENCE;
 			y = e.getY();
 //			System.out.println("[GUI]  X : " + x + " Y : " + y);
+//			System.out.println("shapePanel X : " + shapePanel.getX() + " shapePanel Y : " + shapePanel.getY());
 
+			
+			
 			// Determining action to perform according to cursorState
 			// Only determining when cusrsor is not disabled with "none" status
-			if (!cursorState.equals("none")) {
+			if (!iconPanel.getCursorState().equals("none")) {
 
 				// If entity button is selected, creating an entity at desired coordinates
-				if (cursorState.equals("entity") && (x > 0) && (y > 0)) {
+//				if (iconPanel.getCursorState().equals("entity") && (x >= shapePanel.getX()) && (y >= shapePanel.getY())) {
+				if (iconPanel.getCursorState().equals("entity") && (x > 0) && (y > 0)) {
 
 					String newEntityName = "Entite" + uniqueSuffix;
 					ArrayList<Attribute> entityAttributeList = new ArrayList<Attribute>();
 					Node newNodeEntity = new Entity(newEntityName, entityAttributeList);
 					mcdManager.addNode(newNodeEntity);
-					
-					sp.getComponentMap().put(sp.addShapeGroup(newEntityName, x, y, true), newNodeEntity);
+
+					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(newEntityName, x, y, true),
+							newNodeEntity);
 
 					uniqueSuffix++;
 
 					// If association button is selected, creating an association at desired
 					// coordinates
-				} else if (cursorState.equals("association") && (x > 0) && (y > 0)) {
+//				} else if (iconPanel.getCursorState().equals("association") && (x >= shapePanel.getX()) && (y >= shapePanel.getY())) {
+				} else if (iconPanel.getCursorState().equals("association") && (x > 0) && (y > 0)) {
 
 					String newAssociationName = "Association" + uniqueSuffix;
 					ArrayList<Attribute> associationAttributeList = new ArrayList<Attribute>();
 					Node newNodeAssociation = new Association(newAssociationName, associationAttributeList);
 					mcdManager.addNode(newNodeAssociation);
-					sp.getComponentMap().put(sp.addShapeGroup(newAssociationName, x, y, false), newNodeAssociation);
+					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(newAssociationName, x, y, false),
+							newNodeAssociation);
 					uniqueSuffix++;
 
 				} else {
@@ -509,7 +468,7 @@ public class GUI extends JFrame {
 					selectedComponent = null;
 
 					// Determining clicked component
-					for (ShapeGroup component : sp.getComponentMap().keySet()) {
+					for (ShapeGroup component : shapePanel.getComponentMap().keySet()) {
 
 						if (component.getMainShape().contains(x, y)) {
 							selectedComponent = component;
@@ -523,14 +482,17 @@ public class GUI extends JFrame {
 
 					if (selectedComponent != null) {
 
-						// If a component is clicked, displays the configuration frame
-						if (cursorState.equals("selection")) {
-							displayObjectConfiguration();
-							cursorState = "none";
-						}
+						switch (iconPanel.getCursorState()) {
+						case "selection":
+							// If a component is clicked, displays the configuration frame
 
-						// If the linking tool is selected, performs a linking
-						if (cursorState.equals("link")) {
+							displayObjectConfiguration();
+							iconPanel.setCursorState("none");
+							break;
+
+						case "link":
+							// If the linking tool is selected, performs a linking
+
 							if (shapesToConnect.size() < 2) {
 								// Ensuring that the fisrt object in the list is an association
 								if (selectedComponent.isAnEntity()) {
@@ -558,33 +520,62 @@ public class GUI extends JFrame {
 								}
 								shapesToConnect.clear();
 							}
+							break;
+
+						case "deleteL":
+							// If the deleting link tool is selected
+							// TODO : ça marche pas putain
+							if (shapesToDisconnect.size() < 2) {
+								// Ensuring that the fisrt object in the list is an association
+								if (selectedComponent.isAnEntity()) {
+									shapesToDisconnect.add(selectedComponent);
+								} else {
+									shapesToDisconnect.add(0, selectedComponent);
+								}
+								repaint();
+							}
+							// If two components are selected
+							if (shapesToDisconnect.size() == 2) {
+								boolean fisrtObjectType = shapesToDisconnect.get(0).isAnEntity();
+								boolean secondObjectType = shapesToDisconnect.get(1).isAnEntity();
+
+								// Braking links...
+								if (fisrtObjectType != secondObjectType
+										&& shapePanel.existLinkBetween(shapesToDisconnect.get(0), shapesToDisconnect.get(1))) {
+									try {
+										mcdManager.disconnectNodes(
+												shapePanel.getComponentMap().get(shapesToDisconnect.get(0)),
+												shapePanel.getComponentMap().get(shapesToDisconnect.get(1)));
+									} catch (NullNodeException | EdgesNotLinkedException e1) {
+										e1.printStackTrace();
+									}
+//									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
+									shapePanel.disconnectShapes(shapesToDisconnect);
+									repaint();
+
+									// Or says to the user that he's a clumsy smurf
+								} else {
+									JOptionPane.showMessageDialog(theFrame,
+											"Vous avez sélectionné deux objets le même type !",
+											"Aucun lien à supprimer", JOptionPane.WARNING_MESSAGE);
+								}
+								shapesToDisconnect.clear();
+							}
+
+							break;
 						}
+
 					}
 				}
 			}
 
-//			System.out.println("[GUI]  Liste de connection : " + shapesToConnect.size());
-
-//			else {
-//				List<Node> connectedNodes = Graphs.neighborListOf(mcdManager.getMCD().getMCDGraph(),
-//						sp.getComponentMap().get(selectedComponent));
-//				if (connectedNodes.size() != 0) {
-//					for (ShapeGroup component : sp.getComponentMap().keySet()) {
-//						for (Node node : connectedNodes) {
-//							if (sp.getComponentMap().get(component) == node) {
-//								connectedShapes.add(component);
-//							}
-//						}
-//					}
-//					System.out.println("[GUI]  Nombre de liens : " + connectedShapes.size());
-//				}
-//			}
-
 		}
+		
+
 
 		public void mouseDragged(MouseEvent e) {
 
-			if (selectedComponent != null && cursorState.equals("hand")) {
+			if (selectedComponent != null && iconPanel.getCursorState().equals("hand")) {
 
 				int dx = e.getX() - x;
 //				int dy = e.getY() - y - HEIGHT_DIFFERENCE;
@@ -593,7 +584,7 @@ public class GUI extends JFrame {
 				float newY = selectedComponent.getY() + dy;
 
 				// Checking if component is at the border of the frame
-				Dimension currentPanelSize = new Dimension(sp.getSize());
+				Dimension currentPanelSize = new Dimension(shapePanel.getSize());
 				float componentXLimit = (float) currentPanelSize.getWidth() - selectedComponent.getWidth();
 				float componentYLimit = (float) currentPanelSize.getHeight() - selectedComponent.getHeight();
 
@@ -648,94 +639,21 @@ public class GUI extends JFrame {
 		}
 	}
 
-	public class SelectionAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			theFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			cursorState = "selection";
-			selectionButton.setEnabled(false);
-			handButton.setEnabled(true);
-			newEntityButton.setEnabled(true);
-			newAssociationButton.setEnabled(true);
-			newLinkButton.setEnabled(true);
-		}
-	}
 
-	public class DragAction implements ActionListener {
+	public class ZoomAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (!cursorState.equals("none")) {
-				theFrame.setCursor(new Cursor(Cursor.HAND_CURSOR));
-				cursorState = "hand";
-				selectionButton.setEnabled(true);
-				handButton.setEnabled(false);
-				newEntityButton.setEnabled(true);
-				newAssociationButton.setEnabled(true);
-				newLinkButton.setEnabled(true);
-			}
+			shapePanel.zoom();
+			iconPanel.repaint();
 
 		}
 	}
 
-	public class AddEntityAction implements ActionListener {
+	public class DezoomAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (!cursorState.equals("none")) {
-				cursorState = "entity";
-				selectionButton.setEnabled(true);
-				handButton.setEnabled(true);
-				newEntityButton.setEnabled(false);
-				newAssociationButton.setEnabled(true);
-				newLinkButton.setEnabled(true);
-			}
-
-		}
-	}
-
-	public class AddAssociationAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			if (!cursorState.equals("none")) {
-				cursorState = "association";
-				selectionButton.setEnabled(true);
-				handButton.setEnabled(true);
-				newEntityButton.setEnabled(true);
-				newAssociationButton.setEnabled(false);
-				newLinkButton.setEnabled(true);
-			}
-
-		}
-	}
-
-	public class AddLinkAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			if (!cursorState.equals("none")) {
-				cursorState = "link";
-				selectionButton.setEnabled(true);
-				handButton.setEnabled(true);
-				newEntityButton.setEnabled(true);
-				newAssociationButton.setEnabled(true);
-				newLinkButton.setEnabled(false);
-			}
-
-		}
-	}
-	
-	public class ZoomAction implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			sp.zoom();
-
-			
-		}
-	}
-	
-	public class DezoomAction implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			sp.dezoom(theFrame.getSize());
-			
+			shapePanel.dezoom(theFrame.getSize());
+			iconPanel.repaint();
 		}
 	}
 
@@ -746,9 +664,9 @@ public class GUI extends JFrame {
 			boolean isDefaultName = false;
 
 			// Checking if the new name given by the user doesn't already exist
-			for (Node node : sp.getComponentMap().values()) {
+			for (Node node : shapePanel.getComponentMap().values()) {
 				if (node.getName().equals(jtfConfigName.getText())
-						&& node != sp.getComponentMap().get(selectedComponent)) {
+						&& node != shapePanel.getComponentMap().get(selectedComponent)) {
 					JOptionPane
 							.showMessageDialog(configFrame,
 									"Un autre objet (entité ou association) porte déjà le nom « "
@@ -788,29 +706,31 @@ public class GUI extends JFrame {
 				ap.updateAttributeList();
 
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
-				
+
 				// If it's an entity, updating its references in cardinalities
 				if (selectedComponent.isAnEntity()) {
-					mcdManager.updateEntityNameInCardinalities(selectedComponent.getGroupName(), jtfConfigName.getText());
-					
+					mcdManager.updateEntityNameInCardinalities(selectedComponent.getGroupName(),
+							jtfConfigName.getText());
+
 				} else { // Otherwise, custom updating for association
 					cp.updateCardinalityList();
 					((Association) mcdManager.getNodeFromName(selectedComponent.getGroupName()))
 							.setCardinalityList(cp.getCardinalityList());
-					((Association) sp.getComponentMap().get(selectedComponent))
+					((Association) shapePanel.getComponentMap().get(selectedComponent))
 							.setCardinalityList(cp.getCardinalityList());
 				}
-				
+
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
 
 				// Updating datas in graphical componentMap
-				sp.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
-				sp.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
+				shapePanel.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
+				shapePanel.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
 				selectedComponent.setGroupName(jtfConfigName.getText());
 
 				configFrame.dispose();
-				cursorState = "selection";
+				iconPanel.setCursorState("selection");
 				repaint();
+				iconPanel.repaint();
 			}
 		}
 	}
@@ -819,7 +739,9 @@ public class GUI extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			configFrame.dispose();
-			cursorState = "selection";
+			iconPanel.setCursorState("selection");
+			iconPanel.repaint();
+
 		}
 	}
 
@@ -853,9 +775,9 @@ public class GUI extends JFrame {
 //			}
 				System.out.println(loader.getMcd().toString());
 			}
-			
-			sp.clear();
-			
+
+			shapePanel.clear();
+
 		}
 	}
 
@@ -874,7 +796,7 @@ public class GUI extends JFrame {
 //			}
 
 			Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
-			for (ShapeGroup shape : sp.getComponentMap().keySet()) {
+			for (ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
 				ArrayList<Float> position = new ArrayList<Float>();
 				position.add(shape.getX());
 				position.add(shape.getY());

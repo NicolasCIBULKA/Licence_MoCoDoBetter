@@ -78,6 +78,7 @@ public class ShapePanel extends JPanel {
 		mainPanel.setPreferredSize(SHAPE_PANEL_SIZE);
 		mainFont = new Font(Font.DIALOG, Font.PLAIN, 15);
 		mainPanel.setFont(mainFont);
+//		mainPanel.setBackground(Color.WHITE);
 
 //		mainPanel.add(jsp, BorderLayout.NORTH);
 
@@ -98,6 +99,7 @@ public class ShapePanel extends JPanel {
 		// Painting entities, associations, links and cardinalities
 		System.out.println("[ShapePanel]  ---- " + componentMap.size() + " component(s)");
 
+//		System.out.println(linkMapToString());
 		drawLinks();
 
 		for (ShapeGroup component : componentMap.keySet()) {
@@ -112,7 +114,7 @@ public class ShapePanel extends JPanel {
 
 			}
 		}
-		
+
 	}
 
 	/**
@@ -146,7 +148,7 @@ public class ShapePanel extends JPanel {
 				component.getHeadShape().getBounds2D().getY() - 1,
 				component.getHeadShape().getBounds2D().getWidth() + 1,
 				component.getHeadShape().getBounds2D().getHeight() + 1));
-
+		
 		// Entity bound
 		BasicStroke boundStroke = new BasicStroke(3);
 		g2d.setColor(entityBoundColor);
@@ -309,9 +311,9 @@ public class ShapePanel extends JPanel {
 				cardinalityValue += card.getLowValue() + "," + card.getHighValue();
 			}
 		}
-		
-		drawCardinality(linkedShape, cardinalityValue, Math.PI / 11, associationCenterX, associationCenterY, entityCenterX, entityCenterY,
-				true, true);
+
+		drawCardinality(linkedShape, cardinalityValue, Math.PI / 11, associationCenterX, associationCenterY,
+				entityCenterX, entityCenterY, true, true);
 	}
 
 	/**
@@ -376,10 +378,8 @@ public class ShapePanel extends JPanel {
 			g2d.draw(new Line2D.Float(x1, y1, endX1, endY1));
 			g2d.draw(new Line2D.Float(x2, y2, endX2, endY2));
 
-			drawCardinality(linkedShape, value1, Math.PI / 11,x1, y1, endX1, endY1,
-					true, true);
-			drawCardinality(linkedShape, value2, Math.PI / 11,x2, y2, endX2, endY2,
-					true, true);
+			drawCardinality(linkedShape, value1, Math.PI / 11, x1, y1, endX1, endY1, true, true);
+			drawCardinality(linkedShape, value2, Math.PI / 11, x2, y2, endX2, endY2, true, true);
 
 		} else if ((Math.abs(width1) >= 100 && Math.abs(height1) < 100) && Math.abs(width1) != Math.abs(height1)) {
 
@@ -395,10 +395,8 @@ public class ShapePanel extends JPanel {
 			g2d.draw(new Line2D.Float(x1, y1, endX1, endY1));
 			g2d.draw(new Line2D.Float(x2, y2, endX2, endY2));
 
-			drawCardinality(linkedShape, value1, Math.PI / 11,x1, y1, endX1, endY1,
-					true, true);
-			drawCardinality(linkedShape, value2, Math.PI / 11,x2, y2, endX2, endY2,
-					true, true);
+			drawCardinality(linkedShape, value1, Math.PI / 11, x1, y1, endX1, endY1, true, true);
+			drawCardinality(linkedShape, value2, Math.PI / 11, x2, y2, endX2, endY2, true, true);
 
 		} else { // Standard calculation
 
@@ -711,8 +709,9 @@ public class ShapePanel extends JPanel {
 //			if ((onlyLeftCardinality && onlyRightCardinality) || draw) {
 //				g2d.setColor(Color.PINK);
 //				g2d.draw(new Line2D.Float(entityCenterX, entityCenterY, newEndX, newEndY));
-				g2d.setColor(Color.BLACK);
-				g2d.drawString(cardinalityValues, newEndX + 2, newEndY);
+//				g2d.setColor(entityBoundColor);
+			g2d.setColor(Color.BLACK);
+			g2d.drawString(cardinalityValues, newEndX + 2, newEndY);
 //				g2d.drawString("newAngle in degrees = " + Math.toDegrees(newAngle), 200, 100);
 //				System.out.println("newEndX = " + newEndX);
 //			}
@@ -885,9 +884,69 @@ public class ShapePanel extends JPanel {
 	}
 
 	public boolean isDoubleLinkedAssociation(ShapeGroup association) {
-		boolean result = true;
+		boolean result = false;
+
+		if (linkMap.get(association).size() == 2) {
+			if (linkMap.get(association).get(0) == linkMap.get(association).get(1)) {
+				result = true;
+				System.out.println("[ShapePanel]  " + association.getGroupName() + " is a double linked asso");
+			}
+		}
 
 		return result;
+
+	}
+
+	/**
+	 * Checks if a link between an association and an entity exist.
+	 * 
+	 * @param association to check the linkage
+	 * @param entity      to check the linkage with the association
+	 * @return
+	 */
+	public boolean existLinkBetween(ShapeGroup association, ShapeGroup entity) {
+		boolean result = false;
+
+		if (linkMap.containsKey(association)) {
+			if (linkMap.get(association).contains(entity)) {
+				result = true;
+				System.out.println(
+						"[ShapePanel]  " + association.getGroupName() + " is linked to " + entity.getGroupName());
+			}
+		}
+
+		return result;
+	}
+
+	public void disconnectShapes(List<ShapeGroup> shapeList) {
+
+		if (linkMap.containsKey(shapeList.get(0))) {
+			System.out.println("--- linkMap contain " + shapeList.get(0).getGroupName());
+			if (existLinkBetween(shapeList.get(0), shapeList.get(1))) {
+
+				if (isDoubleLinkedAssociation(shapeList.get(0)) || linkMap.get(shapeList.get(0)).size() == 1) {
+					linkMap.remove(shapeList.get(0));
+					((Association) componentMap.get(shapeList.get(0))).getCardinalityList().clear();
+
+				} else {
+					linkMap.get(shapeList.get(0)).remove(shapeList.get(1));
+					int index = 0, range = 0;
+					for(Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0))).getCardinalityList()) {
+						if(cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
+							index = range;
+							System.out.println("--- Cardinality founded in " + shapeList.get(0).getGroupName() + " for " + cardinality.getNomEntity());
+						}
+						range++;
+					}
+
+					((Association) componentMap.get(shapeList.get(0))).getCardinalityList().remove(index);
+					System.out.println("--- removing value");
+				}
+
+			}
+		}
+
+		System.out.println("[ShapePanel]  " + linkMap.containsKey(shapeList.get(0)));
 	}
 
 	/**
@@ -979,5 +1038,23 @@ public class ShapePanel extends JPanel {
 	 */
 	public void setAssociationBodyColor(Color associationBodyColor) {
 		this.associationBodyColor = associationBodyColor;
+	}
+
+	public String linkMapToString() {
+		String intial = "{";
+
+		StringBuffer stringBuilder = new StringBuffer(intial);
+		for (ShapeGroup shape : linkMap.keySet()) {
+			stringBuilder.append(shape.getGroupName() + "=");
+			if (linkMap.get(shape) != null) {
+				for (ShapeGroup linkedShape : linkMap.get(shape)) {
+					stringBuilder.append(linkedShape.getGroupName() + ",");
+				}
+			}
+			stringBuilder.append(" ; ");
+		}
+		stringBuilder.append("}");
+		String result = stringBuilder.toString();
+		return result;
 	}
 }

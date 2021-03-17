@@ -44,7 +44,7 @@ public class Cardinality {
 	}
 	
 	public String toString() {
-		String result = "Nom : " + nomEntity + " ; low : " + lowValue + " ; high : " + highValue;
+		String result = "Nom : " + nomEntity + " ; low : " + lowValue + " ; high : " + highValue + "\n";
 		return result;
 	}
 	

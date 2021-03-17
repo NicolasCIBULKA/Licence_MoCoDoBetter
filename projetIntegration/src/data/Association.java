@@ -35,10 +35,11 @@ public class Association extends Node {
 	
 	@Override
 	public String toString() {
-		String result = "" + this.getName();
+		String result = "" + this.getName() + "\n";
 		for(Cardinality cardinality : cardinalityList) {
-			result += "\n" + cardinality.toString();
+			result += cardinality.toString();
 		}
+		result += "    ****    Fin de " + this.getName() + "    ****    ";
 		return result;
 	}
 
