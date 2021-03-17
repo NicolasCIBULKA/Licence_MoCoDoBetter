@@ -74,8 +74,9 @@ public class Loading {
 			while (!(str = br.readLine()).equals("</Entities>") ) {
 
 				if (str.equals("</Table>")) {
+					ArrayList<Attribute> att2 = (ArrayList<Attribute>) att.clone();
 
-					Entity a = new Entity(name, att);
+					Entity a = new Entity(name, att2);
 					listNode.put(name, a);
 					att.clear();
 				}
@@ -111,7 +112,8 @@ public class Loading {
 			while (!(str = br.readLine()).equals("</Associations>") ) {
 
 				if (str.equals("</Table>")) {
-					Association a = new Association(name, att, card);
+					ArrayList<Attribute> att2 = (ArrayList<Attribute>) att.clone();
+					Association a = new Association(name, att2, card);
 					listNode.put(name, a);
 					att.clear();
 				}
@@ -144,7 +146,6 @@ public class Loading {
 					str = br.readLine();
 					String[] tmpStr = str.split(",");
 					listCard.put(tmpStr[0], new Cardinality(tmpStr[2], tmpStr[3], tmpStr[1]));
-					System.out.println(tmpStr[0]+tmpStr[1]+tmpStr[2]+tmpStr[3]);
 				}
 			}
 		} catch (IOException e) {

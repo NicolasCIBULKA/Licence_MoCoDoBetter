@@ -14,7 +14,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +37,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.AbstractGraphIterator;
+import org.jgrapht.traverse.BreadthFirstIterator;
 
 import data.Association;
 import data.Attribute;
@@ -767,18 +775,81 @@ public class GUI extends JFrame {
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = jfc.getSelectedFile();
+				
 				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
-
+				loadCoordinates(file, coordinatesMap);
 				Loading loader = new Loading(file.getAbsolutePath());
+				shapePanel.clear();
+				mcdManager = loader.getMcd();
+
+				setSP(coordinatesMap, loader);
+
 //				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
 //
 //			}
 				System.out.println(loader.getMcd().toString());
 			}
-
-			shapePanel.clear();
-
+			
+			
+			
 		}
+		
+		private void loadCoordinates(File file, Map<String, ArrayList<Float>> coordinatesMap) {
+			try {
+				BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()));
+				String name = null;
+				String str;
+				ArrayList<Float> graphicalValuestmp = new ArrayList<Float>();
+
+				while (!(str = br.readLine()).equals("</Associations>") ) {
+
+					if (str.equals("</Table>")) {
+						ArrayList<Float> graphicalValues = (ArrayList<Float>)graphicalValuestmp.clone();
+						coordinatesMap.put(name,graphicalValues );
+						
+						graphicalValuestmp.removeAll(graphicalValuestmp);
+						System.out.println(coordinatesMap.get(name).size());
+
+					}
+					if (str.equals("<Name>")) {
+						str = br.readLine();
+						name = str;
+					}
+					if (str.equals("<Graphical>")) {
+						str = br.readLine();
+						String[] graph = str.split(",");
+
+						graphicalValuestmp.add(Float.parseFloat(graph[0]));
+						graphicalValuestmp.add(Float.parseFloat(graph[1]));
+					}
+				}
+				br.close();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}			
+		}
+		private void setSP(Map<String, ArrayList<Float>> coordinatesMap, Loading loader) {
+			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(loader.getMcd().getMCD().getMCDGraph());
+			while (iterator.hasNext()) {
+				Node currentNode = iterator.next();
+				System.out.println(currentNode.getName());
+
+				Float x = coordinatesMap.get(currentNode.getName()).get(0);
+				Float y = coordinatesMap.get(currentNode.getName()).get(1);
+				if (currentNode instanceof Entity) {
+					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(
+							currentNode.getName(),x , y, true), currentNode);
+				} 
+				else if (currentNode instanceof Association) {
+					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(
+							currentNode.getName(),x , y, false), currentNode);
+				}
+
+			}
+		}
+
+		
 	}
 
 	class ActionSave implements ActionListener {
