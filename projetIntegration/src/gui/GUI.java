@@ -783,17 +783,6 @@ public class GUI extends JFrame {
 
 	class ActionSave implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-//			jfc.setDialogType(JFileChooser.SAVE_DIALOG);
-//			jfc.setDialogTitle("Enregistrer le fichier");
-//			jfc.setAcceptAllFileFilterUsed(false);
-//			jfc.setApproveButtonText("Enregistrer");
-//			
-//			int returnVal = jfc.showSaveDialog(GUI.this);
-//			
-//			if (returnVal == JFileChooser.APPROVE_OPTION) {
-//				File file = jfc.get;
-//				
-//			}
 
 			Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
 			for (ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
