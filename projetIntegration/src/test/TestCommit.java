@@ -11,6 +11,7 @@ import data.Association;
 import data.Attribute;
 import data.Cardinality;
 import data.Entity;
+import data.MCD;
 import data.MLD;
 import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
@@ -70,8 +71,8 @@ public class TestCommit {
 		Cardinality ce2_a1= new Cardinality("2","2",e2.getName());
 		Cardinality ce3_a1= new Cardinality("2","N",e3.getName());
 		
-		Cardinality ce1_a2= new Cardinality("0","N",e1.getName());
-		Cardinality ce4_a2= new Cardinality("1","N",e4.getName());
+		Cardinality ce1_a2= new Cardinality("0","1",e1.getName());
+		Cardinality ce4_a2= new Cardinality("0","1",e4.getName());
 		
 		
 		Cardinality ce1_a3= new Cardinality("0","1",e1.getName());
@@ -107,9 +108,28 @@ public class TestCommit {
 		manager.addNode(a2);
 		manager.addNode(a3);
 		manager.addNode(e5);
+		/**
+		Attribute at1 = new Attribute("Attribute1","String",false,true,false);
+		Attribute at2 = new Attribute("Attribute2","int",false,false,false);
+		ArrayList<Attribute> liste1 = new ArrayList<Attribute>();
+		liste1.add(at1);
+		liste1.add(at2);
+		Entity e1 = new Entity("Entite1", liste1);
+		Cardinality ce1_a1= new Cardinality("0","N",e1.getName());
+		Cardinality ce2_a1= new Cardinality("0","1",e1.getName());
+		ArrayList< Cardinality> card = new ArrayList< Cardinality>();
+		card.add(ce1_a1);
+		card.add(ce2_a1);
+		Association a1 = new Association("Association1", new ArrayList<Attribute>(), card);
+		manager.addNode(e1);
+		manager.addNode(a1);**/
 		//m.addkeytoAssociation(manager);
 		//System.out.println(mld.getEntityList().isEmpty());
 		try {
+			/**
+			manager.connectNodes(e1, a1,ce1_a1);
+			manager.connectNodes(e1, a1,ce2_a1);**/
+			
 			manager.connectNodes(e1, a1,ce1_a1);
 			manager.connectNodes(e2, a1,ce2_a1);
 			manager.connectNodes(e3, a1,ce3_a1);
@@ -124,7 +144,8 @@ public class TestCommit {
 			e.printStackTrace();
 		}
 		
-		m.newMld(manager);
+		MCD mcd=manager.getMCD();
+		m.newMld(mcd);
 		mld=m.getMLD();
 		
 		
