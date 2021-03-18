@@ -765,8 +765,7 @@ public class GUI extends JFrame {
 
 	class OpenAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// Test
-			JFileChooser opening;
+			
 			jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 			jfc.setDialogTitle("Ouvrir un fichier .stdd");
 			jfc.setAcceptAllFileFilterUsed(false);
