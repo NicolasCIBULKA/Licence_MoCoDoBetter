@@ -71,12 +71,12 @@ public class CardinalityPanel extends JPanel {
 
 		TableColumn typeColumn = mainTable.getColumnModel().getColumn(1);
 
-		String[] cardinalityLowValueList = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "N" };
+		String[] cardinalityLowValueList = new String[] { "0", "1", "N" };
 		JComboBox<String> cardinalityLowValueChooser = new JComboBox<String>(cardinalityLowValueList);
 		typeColumn.setCellEditor(new DefaultCellEditor(cardinalityLowValueChooser));
 
 		typeColumn = mainTable.getColumnModel().getColumn(2);
-		String[] cardinalityHighValueList = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "N" };
+		String[] cardinalityHighValueList = new String[] { "0", "1", "N" };
 		JComboBox<String> cardinalityHighValueChooser = new JComboBox<String>(cardinalityHighValueList);
 		typeColumn.setCellEditor(new DefaultCellEditor(cardinalityHighValueChooser));
 

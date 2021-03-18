@@ -78,6 +78,7 @@ public class GUI extends JFrame {
 	private ClickManager clickManager = new ClickManager();
 
 	private int uniqueSuffix = 0;
+	private boolean isDisplayingMCD = true;
 
 	FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("stdd Files", "stdd");
 	private JFileChooser jfc = new JFileChooser();
@@ -308,6 +309,9 @@ public class GUI extends JFrame {
 
 		zoomButton.addActionListener(new ZoomAction());
 		dezoomButton.addActionListener(new DezoomAction());
+		
+		mcdView.addActionListener(new MCDAction());
+		mldView.addActionListener(new MLDAction());
 
 		applyConfigButton.addActionListener(new ApplyConfigAction());
 		cancelConfigButton.addActionListener(new CancelConfigAction());
@@ -387,7 +391,7 @@ public class GUI extends JFrame {
 				// Connecting nodes, Jgraph part
 				mcdManager.connectNodes(shapePanel.getComponentMap().get(shapesToBeConnected.get(0)),
 						shapePanel.getComponentMap().get(shapesToBeConnected.get(1)),
-						new Cardinality("1", "0", shapesToBeConnected.get(1).getGroupName()));
+						new Cardinality("0", "1", shapesToBeConnected.get(1).getGroupName()));
 				System.out.println("[GUI]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
 						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
 
@@ -532,7 +536,6 @@ public class GUI extends JFrame {
 
 						case "deleteL":
 							// If the deleting link tool is selected
-							// TODO : ça marche pas putain
 							if (shapesToDisconnect.size() < 2) {
 								// Ensuring that the fisrt object in the list is an association
 								if (selectedComponent.isAnEntity()) {
@@ -557,7 +560,7 @@ public class GUI extends JFrame {
 									} catch (NullNodeException | EdgesNotLinkedException e1) {
 										e1.printStackTrace();
 									}
-//									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
+									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
 									shapePanel.disconnectShapes(shapesToDisconnect);
 									repaint();
 
@@ -571,12 +574,15 @@ public class GUI extends JFrame {
 							}
 
 							break;
+							
+						case "deleteC":
+							
+							break;
+							
 						}
-
 					}
 				}
 			}
-
 		}
 		
 
@@ -618,41 +624,33 @@ public class GUI extends JFrame {
 		}
 	}
 
-	/**
-	 * Modifie la taille du rectangle selon le mouvement de la molette
-	 *
-	 */
-	class ScaleHandler implements MouseWheelListener {
-		public void mouseWheelMoved(MouseWheelEvent e) {
-
-			int x = e.getX();
-			int y = e.getY();
-
-			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
-			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-
-				// Le curseur est-il dans le rectangle ?
-				if (selectedComponent.getMainShape().contains(x, y)) {
-
-					// Récupérer la quantité de rotation
-					float amount = e.getWheelRotation() * 5f;
-					float w = selectedComponent.getWidth();
-					float h = selectedComponent.getHeight();
-					// Modifier les dimension du rectangle en conséquence
-					selectedComponent.setWidth(w + amount);
-					selectedComponent.setHeight(h + amount);
-					repaint();
-				}
-			}
-		}
-	}
-
-
 	public class ZoomAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			shapePanel.zoom();
 			iconPanel.repaint();
+
+		}
+	}
+	
+	public class MCDAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(!isDisplayingMCD) {
+				isDisplayingMCD = true;
+				System.out.println("[GUI]  Displaying MCD");
+			}
+
+		}
+	}
+	
+	public class MLDAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(isDisplayingMCD) {
+				isDisplayingMCD = false;
+				System.out.println("[GUI]  Displaying MLD");
+			}
 
 		}
 	}

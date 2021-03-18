@@ -99,7 +99,7 @@ public class ShapePanel extends JPanel {
 		// Painting entities, associations, links and cardinalities
 		System.out.println("[ShapePanel]  ---- " + componentMap.size() + " component(s)");
 
-//		System.out.println(linkMapToString());
+		System.out.println(linkMapToString());
 		drawLinks();
 
 		for (ShapeGroup component : componentMap.keySet()) {
@@ -148,7 +148,7 @@ public class ShapePanel extends JPanel {
 				component.getHeadShape().getBounds2D().getY() - 1,
 				component.getHeadShape().getBounds2D().getWidth() + 1,
 				component.getHeadShape().getBounds2D().getHeight() + 1));
-		
+
 		// Entity bound
 		BasicStroke boundStroke = new BasicStroke(3);
 		g2d.setColor(entityBoundColor);
@@ -929,17 +929,32 @@ public class ShapePanel extends JPanel {
 					((Association) componentMap.get(shapeList.get(0))).getCardinalityList().clear();
 
 				} else {
+					// Removing entity from linkMap
 					linkMap.get(shapeList.get(0)).remove(shapeList.get(1));
-					int index = 0, range = 0;
-					for(Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0))).getCardinalityList()) {
-						if(cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
-							index = range;
-							System.out.println("--- Cardinality founded in " + shapeList.get(0).getGroupName() + " for " + cardinality.getNomEntity());
-						}
-						range++;
-					}
 
-					((Association) componentMap.get(shapeList.get(0))).getCardinalityList().remove(index);
+					ArrayList<Cardinality> newCardinalityList = new ArrayList<Cardinality>();
+					for (Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0))).getCardinalityList()) {
+						if(!cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
+							newCardinalityList.add(cardinality);
+						}
+					}
+					
+//					int index = 0, range = 0;
+//					for (Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0)))
+//							.getCardinalityList()) {
+//						System.out.println("--- index : " + index + " range : " + range);
+//						System.out.println("--- cardName : " + cardinality.getNomEntity() + " shapeList : "
+//								+ shapeList.get(1).getGroupName());
+//						if (cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
+//							index = range;
+//							System.out.println("--- Cardinality founded in " + shapeList.get(0).getGroupName() + " for "
+//									+ cardinality.getNomEntity());
+//						}
+//						range++;
+//					}
+
+//					((Association) componentMap.get(shapeList.get(0))).getCardinalityList().remove(index);
+					((Association) componentMap.get(shapeList.get(0))).setCardinalityList(newCardinalityList);
 					System.out.println("--- removing value");
 				}
 
