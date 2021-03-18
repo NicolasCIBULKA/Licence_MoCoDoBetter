@@ -35,13 +35,13 @@ public class MLDDisplay extends JPanel{
     }
     
     
-    
+   
     
     
     public void init(MLD mld) throws BadLocationException {
     	JTextPane textPane = new JTextPane();
-        textPane.setOpaque(false);
-        
+       
+    	textPane.setOpaque(false);
           SimpleAttributeSet attributeSet = new SimpleAttributeSet();
           textPane.setCharacterAttributes(attributeSet, true);
           Font font = new Font("Serif", Font.PLAIN, 18);
