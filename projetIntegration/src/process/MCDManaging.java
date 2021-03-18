@@ -47,7 +47,7 @@ public class MCDManaging {
 	public void connectNodes(Node firstNode, Node secondNode, Cardinality cardinality)
 			throws NullNodeException, ExistingEdgeException, InvalidNodeLinkException {
 		if (mcd.getMCDGraph().containsVertex(firstNode) && mcd.getMCDGraph().containsVertex(secondNode)) {
-			if (/*mcd.getMCDGraph().containsEdge(firstNode, secondNode)*/ mcd.getMCDGraph().getAllEdges(firstNode,secondNode).size() > 1) {
+			if (/*mcd.getMCDGraph().containsEdge(firstNode, secondNode)*/ mcd.getMCDGraph().getAllEdges(firstNode,secondNode).size() > 2) {
 				// Error - Edge already exists
 				throw new ExistingEdgeException("Error - maximum number of Edges already exists between those two Nodes");
 			}
@@ -76,7 +76,7 @@ public class MCDManaging {
 			if (!mcd.getMCDGraph().containsEdge(firstNode, secondNode)) {
 				throw new EdgesNotLinkedException("Error - No Edge between those two Nodes");
 			}
-			mcd.getMCDGraph().removeEdge(firstNode, secondNode);
+			mcd.getMCDGraph().removeAllEdges(firstNode, secondNode);
 			Cardinality card = null;
 			if (secondNode instanceof Association) {
 
