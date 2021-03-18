@@ -130,8 +130,6 @@ public class MLDPanel extends JPanel{
 			}
 			doc.insertString(doc.getLength(), ")\n", attributeSet);
           }
-          JScrollPane scrollPane = new JScrollPane(textPane);
-          add(scrollPane, BorderLayout.CENTER);
     }
     
 /**    

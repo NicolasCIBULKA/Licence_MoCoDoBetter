@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,9 +32,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.BadLocationException;
 
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
@@ -55,6 +55,7 @@ import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
 import process.Loading;
 import process.MCDManaging;
+import process.MLDManaging;
 import process.Saving;
 
 /**
@@ -97,6 +98,7 @@ public class GUI extends JFrame {
 	private JPanel topConfigPanel = new JPanel();
 	private JPanel bodyConfigPanel = new JPanel();
 	private JPanel bottomConfigPanel = new JPanel();
+	private JPanel sqlPanel = new JPanel();
 
 	private JTabbedPane associationTabbedPane = new JTabbedPane();
 
@@ -188,7 +190,6 @@ public class GUI extends JFrame {
 		dezoomButton.setToolTipText("Dézoomer");
 
 		
-
 
 		headPanel.add(iconPanel);
 		headPanel.add(zoomButton);
@@ -638,7 +639,15 @@ public class GUI extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if(!isDisplayingMCD) {
 				isDisplayingMCD = true;
-				System.out.println("[GUI]  Displaying MCD");
+				Container contentPane = getContentPane();
+				contentPane.removeAll();
+				contentPane.validate();
+				
+				contentPane.add(headPanel, BorderLayout.NORTH);
+				contentPane.add(jsp, BorderLayout.CENTER);
+				
+				contentPane.revalidate();
+				contentPane.repaint();
 			}
 
 		}
@@ -649,7 +658,35 @@ public class GUI extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if(isDisplayingMCD) {
 				isDisplayingMCD = false;
-				System.out.println("[GUI]  Displaying MLD");
+				
+				MLDManaging mldManager = new MLDManaging();
+				mldManager.newMld(mcdManager.getMCD());
+				
+				
+				try {
+					MLDPanel mldPanel = new MLDPanel(mldManager.getMLD());
+					Container contentPane = getContentPane();
+					
+					JScrollPane jspMLD = new JScrollPane(mldPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+					
+					JSplitPane documentSplitPane = new JSplitPane(
+			                JSplitPane.HORIZONTAL_SPLIT, jspMLD, sqlPanel );
+					
+					contentPane.removeAll();
+					contentPane.validate();
+					
+					contentPane.add(headPanel, BorderLayout.NORTH);
+					contentPane.add(documentSplitPane, BorderLayout.CENTER);
+					
+					contentPane.revalidate();
+					contentPane.repaint();
+					
+				} catch (BadLocationException e1) {
+					e1.printStackTrace();
+				}
+				
+				
 			}
 
 		}
