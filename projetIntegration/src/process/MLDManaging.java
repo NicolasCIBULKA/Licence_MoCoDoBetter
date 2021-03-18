@@ -17,18 +17,22 @@ public class MLDManaging {
 	private MLD mld;
 	private MCDManaging mcdM;
 	//private ArrayList<Entity> entityListToMld;
-	private MCD mcd;
+	private MCD changeMcd;
 
 
 	public MLDManaging() {
-		this.mcdM = new MCDManaging();
+		//this.mcdM = new MCDManaging();
 		this.mld = new MLD();
 		//this.entityListToMld = new ArrayList<Entity>();
-		this.mcd = new MCD();
+		this.changeMcd = new MCD();
 	}
 	
 	public MLDManaging(MLD mld) {
 		this.mld = mld;
+	}
+	
+	public MLDManaging(MCD mcd) {
+		this.changeMcd = mcd;
 	}
 		
 	
@@ -76,8 +80,26 @@ public class MLDManaging {
 									MLDAttribute mldA = new MLDAttribute(attpk.getName(),
 											attpk.getType(), attpk.isNullable(), false,
 											attpk.isUnique(), true, e2, attpk);	
-									for(Attribute l :liste1) {
-										if(l.getName().equals(mldA.getName())) {newAtt=false;break;}
+									ArrayList<Attribute> att= liste1;
+									for(int i=0;i<att.size();i++) {
+										if (att.get(i) instanceof MLDAttribute) {
+											if((att.get(i).getName().equals(mldA.getName()))
+												&&	(att.get(i).getType().equals(mldA.getType()))
+												&&	(((MLDAttribute) att.get(i)).isForeignKey()==(mldA.isForeignKey()))
+												&&	(((MLDAttribute) att.get(i)).getReferenceNode().equals(mldA.getReferenceNode()))
+												&&	(((MLDAttribute) att.get(i)).getReferenceAttribute().equals(mldA.getReferenceAttribute()))
+											) {
+												newAtt=false;break;
+											}
+											//System.out.println("--"+att.get(i).getName());
+											//System.out.println("--"+((MLDAttribute) att.get(i)).isForeignKey());
+										}
+										else {
+											if(att.get(i).getName().equals(mldA.getName())) {
+												newAtt=false;break;
+											}
+										}
+										
 									}
 									if(newAtt==true){currentNode.getListAttribute().add(mldA);}
 								}
@@ -93,9 +115,27 @@ public class MLDManaging {
 									boolean newAtt = true;
 									MLDAttribute mldA = new MLDAttribute(attpk.getName(),
 											attpk.getType(), attpk.isNullable(), false,
-											attpk.isUnique(), true, e2, attpk);	
-									for(Attribute l :liste1) {
-										if(l.getName().equals(mldA.getName())) {newAtt=false;break;}
+											attpk.isUnique(), true, e2, attpk);
+									ArrayList<Attribute> att= liste1;
+									for(int i=0;i<att.size();i++) {
+										if (att.get(i) instanceof MLDAttribute) {
+											if((att.get(i).getName().equals(mldA.getName()))
+												&&	(att.get(i).getType().equals(mldA.getType()))
+												&&	(((MLDAttribute) att.get(i)).isForeignKey()==(mldA.isForeignKey()))
+												&&	(((MLDAttribute) att.get(i)).getReferenceNode().equals(mldA.getReferenceNode()))
+												&&	(((MLDAttribute) att.get(i)).getReferenceAttribute().equals(mldA.getReferenceAttribute()))
+											) {
+												newAtt=false;break;
+											}
+											//System.out.println("--"+att.get(i).getName());
+											//System.out.println("--"+((MLDAttribute) att.get(i)).isForeignKey());
+										}
+										else {
+											if(att.get(i).getName().equals(mldA.getName())) {
+												newAtt=false;break;
+											}
+										}
+										
 									}
 									if(newAtt==true){currentNode.getListAttribute().add(mldA);}
 								}
@@ -204,18 +244,17 @@ public class MLDManaging {
 	
 	
 	
-	public MCD newMCD(MCDManaging mcdM) {
-		MCD mcd=mcdM.getMCD();
+	public MCD newMCD(MCD mcd) {
 		MCD firstMCD=newtoMCD(mcd);
 		MCD secondMCD=newtoMCD(firstMCD);
 		MCD finalMCD=newAssociation(secondMCD);
+		changeMcd=mcd;
 		return mcd;
 	}
 	
 
 	
-	public ArrayList<Entity>  addEntityToMLD(MCDManaging mcdM) {
-		MCD mcd=newMCD(mcdM);
+	public ArrayList<Entity>  addEntityToMLD(MCD mcd) {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while(iterator.hasNext()) {
@@ -229,8 +268,7 @@ public class MLDManaging {
 	}
 	
 	
-	public ArrayList<Entity>  addAssociationToMLD(MCDManaging mcdM) {
-		MCD mcd=newMCD(mcdM);
+	public ArrayList<Entity>  addAssociationToMLD(MCD mcd) {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while(iterator.hasNext()) {
@@ -271,13 +309,14 @@ public class MLDManaging {
 	
 	
 	
-	public ArrayList<Entity> ListForMld(MCDManaging mcdM){
+	public ArrayList<Entity> ListForMld(MCD mcd){
 		MLD data = new MLD();
+		newMCD(mcd);
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
 		ArrayList<Entity> ListOfAllAssociation = new ArrayList<Entity>();
 		ArrayList<Entity> ListOf2Entities = new ArrayList<Entity>();
-		ListOf2Entities=addEntityToMLD(mcdM);
-		ListOfAllAssociation=addAssociationToMLD(mcdM);
+		ListOf2Entities=addEntityToMLD(changeMcd);
+		ListOfAllAssociation=addAssociationToMLD(changeMcd);
 		entityListToMld.addAll(ListOf2Entities);
 		entityListToMld.addAll(ListOfAllAssociation);
 		data.setEntityList(entityListToMld);
@@ -286,9 +325,9 @@ public class MLDManaging {
 	}
 	
 	
-	public void newMld(MCDManaging mcdM){
+	public void newMld(MCD mcd){
 		ArrayList<Entity> AllEntities = new ArrayList<Entity>();
-		AllEntities =ListForMld(mcdM);
+		AllEntities =ListForMld(mcd);
 		mld = new MLD(AllEntities);
 	}
 	
