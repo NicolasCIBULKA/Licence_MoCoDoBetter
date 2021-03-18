@@ -883,7 +883,30 @@ public class GUI extends JFrame {
 			}
 		}
 
-		
+		private void LoadLinks(Loading loader) {
+			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(loader.getMcd().getMCD().getMCDGraph());
+			ArrayList<ShapeGroup> cardinality= new ArrayList<ShapeGroup>();
+			ShapeGroup asso = null;
+			while (iterator.hasNext()) {
+				Node currentNode = iterator.next();
+				if (currentNode instanceof Association) {
+					for (Cardinality card : ((Association) currentNode).getCardinalityList()) {
+						for(ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
+							if(shape.getGroupName().equals(card.getNomEntity())) {
+								cardinality.add(shape);
+							}
+						}
+					}
+					for(ShapeGroup assoshape : shapePanel.getComponentMap().keySet()) {
+						if(assoshape.getGroupName().equals(currentNode.getName())) {
+							asso= assoshape;
+							shapePanel.getLinkMap().put(asso, (ArrayList<ShapeGroup>) cardinality.clone());
+						}
+					}
+					cardinality.clear();
+				}
+			}
+		}
 	}
 
 	class ActionSave implements ActionListener {
