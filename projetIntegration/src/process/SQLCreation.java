@@ -100,9 +100,9 @@ public class SQLCreation {
 				// Creating constraints for Foreign Keys
 				for (int i = 0; i < fklist.size(); i++) {
 					
-					String bufconst = "\nALTER TABLE "+entity.getName()+" ADD CONSTRAINT " + entity.getName() + "_FK_"
+					String bufconst = "\nALTER TABLE "+entity.getName() +" ADD CONSTRAINT " + entity.getName() + "_FK_"
 							+ fklist.get(i).getReferenceAttribute().getName() + " FOREIGN KEY ("
-							+ fklist.get(i).getName() + ") REFERENCE " + fklist.get(i).getReferenceNode().getName()
+							+ fklist.get(i).getName() + ") REFERENCES " + fklist.get(i).getReferenceNode().getName()
 							+ " (" + fklist.get(i).getReferenceAttribute().getName() + ");" ;
 					bufferConstraint.add(bufconst);
 					/*writer.write("\n ALTER TABLE "+entity.getName()+" ADD CONSTRAINT " + entity.getName() + "_FK_"

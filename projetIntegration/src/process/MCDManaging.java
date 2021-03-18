@@ -76,10 +76,9 @@ public class MCDManaging {
 			if (!mcd.getMCDGraph().containsEdge(firstNode, secondNode)) {
 				throw new EdgesNotLinkedException("Error - No Edge between those two Nodes");
 			}
-			mcd.getMCDGraph().removeEdge(firstNode, secondNode);
+			mcd.getMCDGraph().removeAllEdges(firstNode, secondNode);
 			Cardinality card = null;
 			if (secondNode instanceof Association) {
-
 				for (Cardinality cardinality : ((Association) secondNode).getCardinalityList()) {
 					if (cardinality.getNomEntity() == firstNode.getName()) {
 						card = cardinality;
@@ -96,9 +95,11 @@ public class MCDManaging {
 			}
 		} else {
 			// Error - nodes aren't in the MCD Graph
-			throw new NullNodeException("Error - One of the Nodes called for connecting does not exists");
+			throw new NullNodeException("Error - One of the Nodes called for disconnecting does not exists");
 		}
 	}
+	
+	
 
 	// get a Node from the name
 	public Node getNodeFromName(String name) {
