@@ -817,7 +817,7 @@ public class GUI extends JFrame {
 				mcdManager = loader.getMcd();
 
 				setSP(coordinatesMap, loader);
-
+				LoadLinks(loader);
 //				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
 //
 //			}
