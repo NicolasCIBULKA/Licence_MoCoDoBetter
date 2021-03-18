@@ -4,6 +4,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
+import javax.swing.text.BadLocationException;
+
 import data.Association;
 import data.Attribute;
 import data.Cardinality;
@@ -19,7 +22,7 @@ import process.SQLCreation;
 
 public class TestCommit {
 	
-	public static void main(String[] args) throws InvalidNodeLinkException {
+	public static void main(String[] args) throws InvalidNodeLinkException, BadLocationException {
 		
 		MCDManaging manager = new MCDManaging();
 		MLDManaging m = new MLDManaging();
@@ -163,7 +166,11 @@ public class TestCommit {
 		}**/
 		
 		
-		
+		JFrame frame = new JFrame();
+        frame.getContentPane().add(new TestMLD(mld));
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 400);
+        frame.setVisible(true);
 		
 		
 
