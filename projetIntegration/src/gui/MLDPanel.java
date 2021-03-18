@@ -27,10 +27,10 @@ import data.MLD;
 import data.MLDAttribute;
 
 
-public class MLDDisplay extends JPanel{
+public class MLDPanel extends JPanel{
 	
 	
-    MLDDisplay(MLD mld) throws BadLocationException{
+    MLDPanel(MLD mld) throws BadLocationException{
     	init(mld);
     }
     
