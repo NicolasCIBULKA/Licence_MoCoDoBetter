@@ -181,6 +181,7 @@ public class Saving {
 	// Finaly i write each cardinality by getting them from the association list
 	private void writeCard(String path) throws SaveWasInteruptedException {
 		try {
+			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".xml", true));
 			writer.write("<Cardinalities>\n");
 			// null pointer probablement une lecture � vide
