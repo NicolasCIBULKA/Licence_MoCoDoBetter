@@ -1,8 +1,9 @@
 package data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class Node {
+public abstract class Node implements Serializable{
 	/*
 	 * Node is the general type for the nodes of the graph contained in 
 	 * 
