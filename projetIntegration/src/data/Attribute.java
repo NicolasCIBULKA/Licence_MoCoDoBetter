@@ -1,8 +1,9 @@
 package data;
 
+import java.io.Serializable;
 import java.util.Vector;
 
-public class Attribute {
+public class Attribute implements Serializable{
 	/*
 	 * Data class of the attributes, ie the columns in the tables resulting of the
 	 * queries on databases

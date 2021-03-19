@@ -183,16 +183,18 @@ public class Saving {
 			// null pointer probablement une lecture � vide
 			if (!listAssociation.isEmpty()) {
 				for (Association association : listAssociation) {
-					writer.write("<Cardinality>\n");
+					
 					if (!association.getCardinalityList().isEmpty()) {
 						for (Cardinality card : association.getCardinalityList()) {
+							writer.write("<Cardinality>\n");
 							writer.write(association.getName() + "," + card.getNomEntity() + "," + card.getLowValue()
 									+ "," + card.getHighValue() + "\n");
+							writer.write("</Cardinality>\n");
 						}
 					} else {
 						System.out.println("\n\n\n empty cardinatlity\n\n");
 					}
-					writer.write("</Cardinality>\n");
+					
 				}
 			} else {
 				System.out.println("\n\n\n empty association\n\n");

@@ -1,30 +1,28 @@
 package process;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.jgrapht.Graphs;
-import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
-
 import data.*;
 
 public class MLDManaging {
 
 	private MLD mld;
-	private MCDManaging mcdM;
 	//private ArrayList<Entity> entityListToMld;
-	private MCD changeMcd;
+	//private MCD changeMcd;
 
 
 	public MLDManaging() {
 		//this.mcdM = new MCDManaging();
 		this.mld = new MLD();
 		//this.entityListToMld = new ArrayList<Entity>();
-		this.changeMcd = new MCD();
+		//this.changeMcd = new MCD();
 	}
 	
 	public MLDManaging(MLD mld) {
@@ -32,7 +30,7 @@ public class MLDManaging {
 	}
 	
 	public MLDManaging(MCD mcd) {
-		this.changeMcd = mcd;
+		//this.changeMcd = mcd;
 	}
 		
 	
@@ -152,9 +150,7 @@ public class MLDManaging {
 	
 	public MCD  newAssociation(MCD mcd) {
 		MLDAttribute mldA;
-		UndirectedGraph<Node, DefaultEdge> graph=mcd.getMCDGraph();
 		String high;
-		Entity e1,e2;
 		ArrayList<Entity> ListOfAllEntities = new ArrayList<Entity>();
 		Association association;
 		List<Cardinality> Card;
@@ -194,7 +190,6 @@ public class MLDManaging {
 			else if ((currentNode instanceof Association)&&(nb_neighbor==2)) {
 				association=(Association)currentNode;
 				Card=association.getCardinalityList();
-				ListIterator<Cardinality> lItr = Card.listIterator();
 				int it=0;
 				String h1=null,l1=null,h2=null,l2=null;
 				for(Cardinality c:Card) {
@@ -248,7 +243,6 @@ public class MLDManaging {
 		MCD firstMCD=newtoMCD(mcd);
 		MCD secondMCD=newtoMCD(firstMCD);
 		MCD finalMCD=newAssociation(secondMCD);
-		changeMcd=mcd;
 		return mcd;
 	}
 	
@@ -281,7 +275,6 @@ public class MLDManaging {
 				ArrayList<Attribute> curentNodeAttribute=currentNode.getListAttribute();
 				
 				for(int i=0;i<curentNodeAttribute.size();i++) {
-					MLDAttribute cat = new MLDAttribute(null, null, false, false, false, false, null, null);
 					
 					if (curentNodeAttribute.get(i) instanceof MLDAttribute) {
 						newAttribute.add(curentNodeAttribute.get(i));
@@ -305,8 +298,12 @@ public class MLDManaging {
 		return entityListToMld;
 		
 	}
-	
-	
+	/**
+	  protected Object clone() throws CloneNotSupportedException{
+	      StudentData student = (StudentData) super.clone();
+	      student.contact = (Contact) contact.clone();
+	      return student;
+	   }**/
 	
 	
 	public ArrayList<Entity> ListForMld(MCD mcd){
@@ -315,8 +312,8 @@ public class MLDManaging {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
 		ArrayList<Entity> ListOfAllAssociation = new ArrayList<Entity>();
 		ArrayList<Entity> ListOf2Entities = new ArrayList<Entity>();
-		ListOf2Entities=addEntityToMLD(changeMcd);
-		ListOfAllAssociation=addAssociationToMLD(changeMcd);
+		ListOf2Entities=addEntityToMLD(mcd);
+		ListOfAllAssociation=addAssociationToMLD(mcd);
 		entityListToMld.addAll(ListOf2Entities);
 		entityListToMld.addAll(ListOfAllAssociation);
 		data.setEntityList(entityListToMld);
@@ -325,12 +322,46 @@ public class MLDManaging {
 	}
 	
 	
-	public void newMld(MCD mcd){
-		ArrayList<Entity> AllEntities = new ArrayList<Entity>();
-		AllEntities =ListForMld(mcd);
-		mld = new MLD(AllEntities);
-	}
+
 	
+	public void newMld(MCD mcd) throws  ClassNotFoundException, IOException{
+		
+		MCD clonedEmp = mcd.deepClone();
+		
+		System.out.println(mcd==null);
+		
+		
+
+		ArrayList<Entity> AllEntities = new ArrayList<Entity>();
+		AllEntities =ListForMld(clonedEmp);
+		mld = new MLD(AllEntities);
+		
+		//test pour voir si le clonage fonctionne
+/**
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		while(iterator.hasNext()) {
+			Node currentNode = iterator.next();
+			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
+			if ((currentNode instanceof Association)) {
+				System.out.println(currentNode.getListAttribute().size());
+			}
+		}
+		
+		
+		AbstractGraphIterator<Node, DefaultEdge> it = new BreadthFirstIterator<>(clonedEmp.getMCDGraph());
+		while(it.hasNext()) {
+			Node currentNode = it.next();
+			List<Node> connectedNodes = Graphs.neighborListOf(clonedEmp.getMCDGraph(), currentNode);
+			if ((currentNode instanceof Association)) {
+				System.out.println(currentNode.getListAttribute().size());
+			}
+		}**/
+		
+		
+		
+		
+		
+	}
 	
 	public MLD getMLD(){
 		return mld;

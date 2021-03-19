@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,9 +32,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.BadLocationException;
 
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
@@ -55,6 +55,7 @@ import exceptions.NullNodeException;
 import exceptions.SaveWasInteruptedException;
 import process.Loading;
 import process.MCDManaging;
+import process.MLDManaging;
 import process.Saving;
 
 /**
@@ -78,6 +79,7 @@ public class GUI extends JFrame {
 	private ClickManager clickManager = new ClickManager();
 
 	private int uniqueSuffix = 0;
+	private boolean isDisplayingMCD = true;
 
 	FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("stdd Files", "stdd");
 	private JFileChooser jfc = new JFileChooser();
@@ -96,6 +98,7 @@ public class GUI extends JFrame {
 	private JPanel topConfigPanel = new JPanel();
 	private JPanel bodyConfigPanel = new JPanel();
 	private JPanel bottomConfigPanel = new JPanel();
+	private JPanel sqlPanel = new JPanel();
 
 	private JTabbedPane associationTabbedPane = new JTabbedPane();
 
@@ -187,7 +190,6 @@ public class GUI extends JFrame {
 		dezoomButton.setToolTipText("Dézoomer");
 
 		
-
 
 		headPanel.add(iconPanel);
 		headPanel.add(zoomButton);
@@ -308,6 +310,9 @@ public class GUI extends JFrame {
 
 		zoomButton.addActionListener(new ZoomAction());
 		dezoomButton.addActionListener(new DezoomAction());
+		
+		mcdView.addActionListener(new MCDAction());
+		mldView.addActionListener(new MLDAction());
 
 		applyConfigButton.addActionListener(new ApplyConfigAction());
 		cancelConfigButton.addActionListener(new CancelConfigAction());
@@ -387,7 +392,7 @@ public class GUI extends JFrame {
 				// Connecting nodes, Jgraph part
 				mcdManager.connectNodes(shapePanel.getComponentMap().get(shapesToBeConnected.get(0)),
 						shapePanel.getComponentMap().get(shapesToBeConnected.get(1)),
-						new Cardinality("1", "0", shapesToBeConnected.get(1).getGroupName()));
+						new Cardinality("0", "1", shapesToBeConnected.get(1).getGroupName()));
 				System.out.println("[GUI]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
 						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
 
@@ -532,7 +537,6 @@ public class GUI extends JFrame {
 
 						case "deleteL":
 							// If the deleting link tool is selected
-							// TODO : ça marche pas putain
 							if (shapesToDisconnect.size() < 2) {
 								// Ensuring that the fisrt object in the list is an association
 								if (selectedComponent.isAnEntity()) {
@@ -557,7 +561,7 @@ public class GUI extends JFrame {
 									} catch (NullNodeException | EdgesNotLinkedException e1) {
 										e1.printStackTrace();
 									}
-//									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
+									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
 									shapePanel.disconnectShapes(shapesToDisconnect);
 									repaint();
 
@@ -571,12 +575,15 @@ public class GUI extends JFrame {
 							}
 
 							break;
+							
+						case "deleteC":
+							
+							break;
+							
 						}
-
 					}
 				}
 			}
-
 		}
 		
 
@@ -618,41 +625,77 @@ public class GUI extends JFrame {
 		}
 	}
 
-	/**
-	 * Modifie la taille du rectangle selon le mouvement de la molette
-	 *
-	 */
-	class ScaleHandler implements MouseWheelListener {
-		public void mouseWheelMoved(MouseWheelEvent e) {
-
-			int x = e.getX();
-			int y = e.getY();
-
-			// Le défilement est-il de type unitaire ? (flèches clavier ou molette)
-			if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-
-				// Le curseur est-il dans le rectangle ?
-				if (selectedComponent.getMainShape().contains(x, y)) {
-
-					// Récupérer la quantité de rotation
-					float amount = e.getWheelRotation() * 5f;
-					float w = selectedComponent.getWidth();
-					float h = selectedComponent.getHeight();
-					// Modifier les dimension du rectangle en conséquence
-					selectedComponent.setWidth(w + amount);
-					selectedComponent.setHeight(h + amount);
-					repaint();
-				}
-			}
-		}
-	}
-
-
 	public class ZoomAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			shapePanel.zoom();
 			iconPanel.repaint();
+
+		}
+	}
+	
+	public class MCDAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(!isDisplayingMCD) {
+				isDisplayingMCD = true;
+				Container contentPane = getContentPane();
+				contentPane.removeAll();
+				contentPane.validate();
+				
+				contentPane.add(headPanel, BorderLayout.NORTH);
+				contentPane.add(jsp, BorderLayout.CENTER);
+				
+				contentPane.revalidate();
+				contentPane.repaint();
+			}
+
+		}
+	}
+	
+	public class MLDAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(isDisplayingMCD) {
+				isDisplayingMCD = false;
+				
+				MLDManaging mldManager = new MLDManaging();
+				try {
+					mldManager.newMld(mcdManager.getMCD());
+				} catch (ClassNotFoundException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				} catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				
+				
+				try {
+					MLDPanel mldPanel = new MLDPanel(mldManager.getMLD());
+					Container contentPane = getContentPane();
+					
+					JScrollPane jspMLD = new JScrollPane(mldPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+					
+					JSplitPane documentSplitPane = new JSplitPane(
+			                JSplitPane.HORIZONTAL_SPLIT, jspMLD, sqlPanel );
+					
+					contentPane.removeAll();
+					contentPane.validate();
+					
+					contentPane.add(headPanel, BorderLayout.NORTH);
+					contentPane.add(documentSplitPane, BorderLayout.CENTER);
+					
+					contentPane.revalidate();
+					contentPane.repaint();
+					
+				} catch (BadLocationException e1) {
+					e1.printStackTrace();
+				}
+				
+				
+			}
 
 		}
 	}
@@ -782,7 +825,7 @@ public class GUI extends JFrame {
 				mcdManager = loader.getMcd();
 
 				setSP(coordinatesMap, loader);
-
+				LoadLinks(loader);
 //				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
 //
 //			}
@@ -848,7 +891,30 @@ public class GUI extends JFrame {
 			}
 		}
 
-		
+		private void LoadLinks(Loading loader) {
+			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(loader.getMcd().getMCD().getMCDGraph());
+			ArrayList<ShapeGroup> cardinality= new ArrayList<ShapeGroup>();
+			ShapeGroup asso = null;
+			while (iterator.hasNext()) {
+				Node currentNode = iterator.next();
+				if (currentNode instanceof Association) {
+					for (Cardinality card : ((Association) currentNode).getCardinalityList()) {
+						for(ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
+							if(shape.getGroupName().equals(card.getNomEntity())) {
+								cardinality.add(shape);
+							}
+						}
+					}
+					for(ShapeGroup assoshape : shapePanel.getComponentMap().keySet()) {
+						if(assoshape.getGroupName().equals(currentNode.getName())) {
+							asso= assoshape;
+							shapePanel.getLinkMap().put(asso, (ArrayList<ShapeGroup>) cardinality.clone());
+						}
+					}
+					cardinality.clear();
+				}
+			}
+		}
 	}
 
 	class ActionSave implements ActionListener {

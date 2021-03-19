@@ -21,12 +21,12 @@ public class Loading {
 
 	private MCDManaging mcd;
 	private HashMap<String, Node> listNode;
-	private HashMap<String, Cardinality> listCard;
+	private HashMap<String,ArrayList<Cardinality>> listCard;
 
 	public Loading(String path) {
 		this.mcd = new MCDManaging();
 		this.listNode = new HashMap<String, Node>();
-		this.listCard = new HashMap<String, Cardinality>();
+		this.listCard = new HashMap<String,ArrayList<Cardinality>>();
 		extract(path);
 		addNodes();
 		addCardinality();
@@ -40,9 +40,13 @@ public class Loading {
 
 	private void addCardinality() {
 		try {
-			for (HashMap.Entry<String, Cardinality> set : listCard.entrySet()) {
-				mcd.connectNodes(listNode.get(set.getKey()), listNode.get(set.getValue().getNomEntity()),
-						set.getValue());
+			for (Entry<String, ArrayList<Cardinality>> set : listCard.entrySet()) {
+				for(Cardinality set2 : set.getValue()) {
+					
+					mcd.connectNodes(listNode.get(set.getKey()), listNode.get(set2.getNomEntity()),set2);
+				}
+				
+				
 			}
 		} catch (NullNodeException e) {
 			e.printStackTrace();
@@ -134,18 +138,23 @@ public class Loading {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private void extractCardinality(BufferedReader br) {
 		try {
 			String str;
+			ArrayList<Cardinality> card = new ArrayList<Cardinality>();
 			while (!(str = br.readLine()).equals("</Cardinalities>")) {
 				if (str.equals("<Cardinality>")) {
-
+					
 					str = br.readLine();
 					String[] tmpStr = str.split(",");
-					listCard.put(tmpStr[0], new Cardinality(tmpStr[2], tmpStr[3], tmpStr[1]));
+					if(!listCard.containsKey(tmpStr[0])) {
+						listCard.put(tmpStr[0], (ArrayList<Cardinality>) card.clone());
+					}
+					
+					Cardinality help =new Cardinality(tmpStr[2],tmpStr[3],tmpStr[1]);
+					listCard.get(tmpStr[0]).add(help);
 				}
 			}
 		} catch (IOException e) {
@@ -178,7 +187,7 @@ public class Loading {
 	/**
 	 * @return the listCard
 	 */
-	public HashMap<String, Cardinality> getListCard() {
-		return listCard;
+	public HashMap<String, ArrayList<Cardinality>> getListCard() {
+		return (HashMap<String, ArrayList<Cardinality>>) listCard;
 	}
 }
