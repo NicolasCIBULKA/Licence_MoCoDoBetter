@@ -660,7 +660,15 @@ public class GUI extends JFrame {
 				isDisplayingMCD = false;
 				
 				MLDManaging mldManager = new MLDManaging();
-				mldManager.newMld(mcdManager.getMCD());
+				try {
+					mldManager.newMld(mcdManager.getMCD());
+				} catch (ClassNotFoundException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				} catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
 				
 				
 				try {

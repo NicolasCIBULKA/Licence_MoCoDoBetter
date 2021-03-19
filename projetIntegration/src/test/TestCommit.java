@@ -1,11 +1,18 @@
 package test;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
+
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.AbstractGraphIterator;
+import org.jgrapht.traverse.BreadthFirstIterator;
 
 import data.Association;
 import data.Attribute;
@@ -13,6 +20,7 @@ import data.Cardinality;
 import data.Entity;
 import data.MCD;
 import data.MLD;
+import data.Node;
 import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
@@ -23,7 +31,7 @@ import process.SQLCreation;
 
 public class TestCommit {
 	
-	public static void main(String[] args) throws InvalidNodeLinkException, BadLocationException {
+	public static void main(String[] args) throws Exception {
 		
 		MCDManaging manager = new MCDManaging();
 		MLDManaging m = new MLDManaging();
@@ -76,7 +84,7 @@ public class TestCommit {
 		
 		
 		Cardinality ce1_a3= new Cardinality("0","1",e1.getName());
-		Cardinality ce5_a3= new Cardinality("1","1",e5.getName());
+		Cardinality ce5_a3= new Cardinality("0","1",e5.getName());
 		
 		
 		
@@ -108,15 +116,15 @@ public class TestCommit {
 		manager.addNode(a2);
 		manager.addNode(a3);
 		manager.addNode(e5);
-		/**
-		Attribute at1 = new Attribute("Attribute1","String",false,true,false);
+		
+		/**Attribute at1 = new Attribute("Attribute1","String",false,true,false);
 		Attribute at2 = new Attribute("Attribute2","int",false,false,false);
 		ArrayList<Attribute> liste1 = new ArrayList<Attribute>();
 		liste1.add(at1);
 		liste1.add(at2);
 		Entity e1 = new Entity("Entite1", liste1);
-		Cardinality ce1_a1= new Cardinality("0","N",e1.getName());
-		Cardinality ce2_a1= new Cardinality("0","1",e1.getName());
+		Cardinality ce1_a1= new Cardinality("a","b",e1.getName());
+		Cardinality ce2_a1= new Cardinality("c","d",e1.getName());
 		ArrayList< Cardinality> card = new ArrayList< Cardinality>();
 		card.add(ce1_a1);
 		card.add(ce2_a1);
@@ -126,8 +134,8 @@ public class TestCommit {
 		//m.addkeytoAssociation(manager);
 		//System.out.println(mld.getEntityList().isEmpty());
 		try {
-			/**
-			manager.connectNodes(e1, a1,ce1_a1);
+			
+			/**manager.connectNodes(e1, a1,ce1_a1);
 			manager.connectNodes(e1, a1,ce2_a1);**/
 			
 			manager.connectNodes(e1, a1,ce1_a1);
@@ -143,25 +151,79 @@ public class TestCommit {
 			
 			e.printStackTrace();
 		}
-		
 		MCD mcd=manager.getMCD();
 		m.newMld(mcd);
 		mld=m.getMLD();
 		
 		
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		
+		
+		
+	/**	
 		try {
 			SQLCreation.SQLConverter(mld, "sqltest", Path.of("./"));
 		} catch (SQLTranscriptionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		
+		}**/
+		/**
+		String high1 = null;String low1 = null;String high2= null;String low2= null;
+		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
+		while(iterator.hasNext()) {
+			Node currentNode = iterator.next();
+			List<Node> connectedNodes = Graphs.neighborListOf(mcd.getMCDGraph(), currentNode);
+			if ((currentNode instanceof Entity)) {
+				Entity actualEntity=(Entity)currentNode;
+				for (Node actualNode : connectedNodes) {
+					Association actualAssociation=(Association)actualNode;
+					List<Node> connectedToAssociation = Graphs.neighborListOf(mcd.getMCDGraph(), actualAssociation);			
+					if(connectedToAssociation.size()==3) {}
+					else if(connectedToAssociation.size()==2) {
+						Entity e2 = null;
+						for (Node j:connectedToAssociation) {
+							Entity k=(Entity)j;
+							if(!actualEntity.equals(k)) {
+								e2=k;
+							}
+						}
+						ArrayList<Cardinality> listCard = actualAssociation.getCardinalityList();
+						System.out.println(listCard.size());
+						for (int i = 0;i<listCard.size();i++) {
+							if(listCard.get(i).getNomEntity().equals(actualEntity.getName())) {
+								high1=listCard.get(i).getHighValue();
+								low1=listCard.get(i).getLowValue();
+								System.out.println("11111111111");
+								System.out.println(high1);
+								System.out.println(low1);
+							}
+							else {
+								high2=listCard.get(i).getHighValue();
+								low2=listCard.get(i).getLowValue();
+								System.out.println("2222222222");
+								System.out.println(high2);
+								System.out.println(low2);
+							}
+
+						}
+						if ((high2!=null)){
+							
+						}
+					}
+				}
+			}
+		}**/
 		
 		
 		
 //How to use MLD Managing		
 /**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
 		System.out.println(manager.isCorrectlyBuild());
 		ArrayList<Entity> ListOfAllEntities= new ArrayList<Entity>();
 		m.newMld(manager);

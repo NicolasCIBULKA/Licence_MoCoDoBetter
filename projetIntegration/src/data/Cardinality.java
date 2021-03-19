@@ -1,6 +1,8 @@
 package data;
 
-public class Cardinality {
+import java.io.Serializable;
+
+public class Cardinality implements Serializable{
 	/*
 	 * Cardinality is the class that contains the cardinalities of the different
 	 * associations
