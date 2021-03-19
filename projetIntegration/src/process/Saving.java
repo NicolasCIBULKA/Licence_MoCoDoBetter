@@ -106,6 +106,9 @@ public class Saving {
 			throws SaveWasInteruptedException {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd"));
+			
+			writer.write("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+			writer.write("<MCD>\n");
 			writer.write("<Entities>\n");
 			if (!listEntity.isEmpty()) {
 				for (Node entity : listEntity) {
@@ -178,7 +181,7 @@ public class Saving {
 	// Finaly i write each cardinality by getting them from the association list
 	private void writeCard(String path) throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd", true));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".xml", true));
 			writer.write("<Cardinalities>\n");
 			// null pointer probablement une lecture � vide
 			if (!listAssociation.isEmpty()) {
@@ -201,6 +204,7 @@ public class Saving {
 
 			}
 			writer.write("</Cardinalities>\n");
+			writer.write("</MCD>\n");
 			writer.close();
 		} catch (IOException e) {
 			throw new SaveWasInteruptedException("Can't write the cardinality part of the file");
