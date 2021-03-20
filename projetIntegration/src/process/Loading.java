@@ -41,7 +41,8 @@ public class Loading {
 	private void addCardinality() {
 		try {
 			for (Entry<String, ArrayList<Cardinality>> set : listCard.entrySet()) {
-				for(Cardinality set2 : set.getValue()) {
+				ArrayList<Cardinality> tempList = set.getValue();
+				for(Cardinality set2 : tempList) {
 					
 					mcd.connectNodes(listNode.get(set.getKey()), listNode.get(set2.getNomEntity()),set2);
 				}
