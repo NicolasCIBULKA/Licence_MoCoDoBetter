@@ -30,8 +30,6 @@ import data.Attribute;
  * AttributePanel is a JPanel containing the dynamic JTable which reprensents
  * all attributes of an entity or association
  * 
- * TODO : [AttributePanel] 
- * 
  * @author Yann Barrachina
  *
  */
@@ -46,7 +44,7 @@ public class AttributePanel extends JPanel {
 	private JTable mainTable;
 	private DefaultTableModel model;
 	private JScrollPane jsp;
-	private Dimension d = new Dimension(500, 400);
+	private Dimension d = new Dimension(500, 350);
 
 	private int index = 0;
 
@@ -56,17 +54,17 @@ public class AttributePanel extends JPanel {
 		mainPanel = this;
 		attributeList = new ArrayList<Attribute>();
 
+		initEntityTable();
+
+		initActions();
+		
+	}
+
+	private void initEntityTable() {
 		String columnHeader[] = { "Nom", "Type", "is Null", "Primary Key", "is Unique" };
 		Object[][] data = {};
 		model = new DefaultTableModel(data, columnHeader);
-		initActions();
 
-//		for (String field : columnHeader) {
-//			model.addColumn(field);
-//		}
-
-		JPanel jpTable = new JPanel();
-		JPanel buttonPanel = new JPanel();
 		mainTable = new JTable(model) {
 			@Override
 			public Class<? extends Object> getColumnClass(int column) {
@@ -88,16 +86,16 @@ public class AttributePanel extends JPanel {
 			}
 		};
 
-		TableColumn typeColumn = mainTable.getColumnModel().getColumn(1);
-
-//		String[] attributeTypeList = new String[] { "int", "varchar" };
-//		JComboBox<String> attributeTypeChooser = new JComboBox<String>(attributeTypeList);
-//		typeColumn.setCellEditor(new DefaultCellEditor(attributeTypeChooser));
-
-		typeColumn = mainTable.getColumnModel().getColumn(3);
+		TableColumn typeColumn = mainTable.getColumnModel().getColumn(3);
 		typeColumn.setCellRenderer(new RadioButtonRenderer());
 		typeColumn.setCellEditor(new RadioButtonEditor(new JCheckBox()));
-
+		
+		JPanel jpTable = new JPanel();
+		JPanel buttonPanel = new JPanel();
+		
+		mainPanel.removeAll();
+		mainPanel.validate();
+		
 		jsp = new JScrollPane(mainTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		jsp.setPreferredSize(d);
 		jpTable.add(jsp);
@@ -111,11 +109,74 @@ public class AttributePanel extends JPanel {
 		buttonPanel.add(deleteButton);
 
 		mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
+		
+		mainPanel.revalidate();
+		mainPanel.repaint();
+		
+		System.out.println("entity table column count : " + model.getColumnCount());
+	}
+
+	private void initAssociationTable() {
+		String columnHeader[] = { "Nom", "Type", "is Null", "is Unique" };
+		Object[][] data = {};
+		model = new DefaultTableModel(data, columnHeader);
+
+		mainTable = new JTable(model) {
+			@Override
+			public Class<? extends Object> getColumnClass(int column) {
+				switch (column) {
+				case 0:
+					return String.class;
+				case 1:
+					return String.class;
+				case 2:
+					return Boolean.class;
+				case 3:
+					return Boolean.class;
+				default:
+					return null;
+				}
+
+			}
+		};
+		
+		JPanel jpTable = new JPanel();
+		JPanel buttonPanel = new JPanel();
+		
+		mainPanel.removeAll();
+		mainPanel.validate();
+		
+		jsp = new JScrollPane(mainTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		jsp.setPreferredSize(d);
+		jpTable.add(jsp);
+		mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		jpTable.setBorder(BorderFactory.createTitledBorder("Attributs"));
+		mainPanel.setLayout(new BorderLayout());
+		mainPanel.add(jpTable, BorderLayout.CENTER);
+
+		buttonPanel.setLayout(new FlowLayout());
+		buttonPanel.add(addButton);
+		buttonPanel.add(deleteButton);
+
+		mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
+		
+		mainPanel.revalidate();
+		mainPanel.repaint();
+		
+		System.out.println("asso table column count : " + model.getColumnCount());
 	}
 
 	private void initActions() {
 		addButton.addActionListener(new AddAttributeAction());
 		deleteButton.addActionListener(new DeleteAttributeAction());
+	}
+
+	public void setPanelState(Boolean isEntity) {
+		if (isEntity) {
+			initEntityTable();
+		} else {
+			initAssociationTable();
+		}
 	}
 
 	/**
@@ -125,12 +186,19 @@ public class AttributePanel extends JPanel {
 	public void updateAttributeList() {
 		int rowCount = model.getRowCount();
 		ArrayList<Attribute> newAttributeList = new ArrayList<Attribute>();
-
-		for (int index = 0; index < rowCount; index++) {
-			newAttributeList.add(new Attribute((String) model.getValueAt(index, 0), (String) model.getValueAt(index, 1),
-					(Boolean) model.getValueAt(index, 2),
-					(Boolean) ((JRadioButton) model.getValueAt(index, 3)).isSelected(),
-					(Boolean) model.getValueAt(index, 4)));
+		if (model.getColumnCount() == 4) {
+			for (int index = 0; index < rowCount; index++) {
+				newAttributeList.add(new Attribute((String) model.getValueAt(index, 0),
+						(String) model.getValueAt(index, 1), (Boolean) model.getValueAt(index, 2), (Boolean) false,
+						(Boolean) model.getValueAt(index, 3)));
+			}
+		} else {
+			for (int index = 0; index < rowCount; index++) {
+				newAttributeList.add(new Attribute((String) model.getValueAt(index, 0),
+						(String) model.getValueAt(index, 1), (Boolean) model.getValueAt(index, 2),
+						(Boolean) ((JRadioButton) model.getValueAt(index, 3)).isSelected(),
+						(Boolean) model.getValueAt(index, 4)));
+			}
 		}
 
 		attributeList = newAttributeList;
@@ -141,32 +209,46 @@ public class AttributePanel extends JPanel {
 	 */
 	public void setAttributeList(ArrayList<Attribute> attributeList) {
 		this.attributeList = attributeList;
-
-		radioGroupPK = new ButtonGroup();
-
 		model.setRowCount(0);
-		for (Attribute attribute : attributeList) {
-			Vector<Object> attributeVector = new Vector<Object>();
-			attributeVector.add(attribute.getName());
-			attributeVector.add(attribute.getType());
-			attributeVector.add(attribute.isNullable());
 
-			JRadioButton rb = new JRadioButton();
-			if (attribute.isPrimaryKey()) {
-				rb.setSelected(true);
-			} else {
-				rb.setSelected(false);
+		if (model.getColumnCount() == 4) {
+			for (Attribute attribute : attributeList) {
+				Vector<Object> attributeVector = new Vector<Object>();
+				attributeVector.add(attribute.getName());
+				attributeVector.add(attribute.getType());
+				attributeVector.add(attribute.isNullable());
+				attributeVector.add(attribute.isUnique());
+
+				model.addRow(attributeVector);
 			}
-			radioGroupPK.add(rb);
-			attributeVector.add(rb);
-			attributeVector.add(attribute.isUnique());
+			
+		} else {
+			radioGroupPK = new ButtonGroup();
 
-			model.addRow(attributeVector);
+			for (Attribute attribute : attributeList) {
+				Vector<Object> attributeVector = new Vector<Object>();
+				attributeVector.add(attribute.getName());
+				attributeVector.add(attribute.getType());
+				attributeVector.add(attribute.isNullable());
+
+				JRadioButton rb = new JRadioButton();
+				if (attribute.isPrimaryKey()) {
+					rb.setSelected(true);
+				} else {
+					rb.setSelected(false);
+				}
+				radioGroupPK.add(rb);
+				attributeVector.add(rb);
+				attributeVector.add(attribute.isUnique());
+
+				model.addRow(attributeVector);
+			}
 		}
+
 		// Notifying table that datas are uploaded into the table's model
 		model.fireTableDataChanged();
 	}
-	
+
 	/**
 	 * @return the addButton
 	 */
@@ -199,21 +281,32 @@ public class AttributePanel extends JPanel {
 			Attribute newAttribute;
 			Vector<Object> attributeVector = new Vector<Object>();
 
-			attributeVector.add(newName);
-			attributeVector.add("int");
-			attributeVector.add(false);
-
-			JRadioButton rb = new JRadioButton();
-			if (attributeList.size() == 0) {
-				newAttribute = new Attribute(newName, "int", false, true, false);
-				rb.setSelected(true);
-			} else {
+			if (model.getColumnCount() == 4) {
+				attributeVector.add(newName);
+				attributeVector.add("int");
+				attributeVector.add(false);
+				attributeVector.add(false);
+				
 				newAttribute = new Attribute(newName, "int", false, false, false);
-				rb.setSelected(false);
+				
+			}else {
+				attributeVector.add(newName);
+				attributeVector.add("int");
+				attributeVector.add(false);
+
+				JRadioButton rb = new JRadioButton();
+				if (attributeList.size() == 0) {
+					newAttribute = new Attribute(newName, "int", false, true, false);
+					rb.setSelected(true);
+				} else {
+					newAttribute = new Attribute(newName, "int", false, false, false);
+					rb.setSelected(false);
+				}
+				radioGroupPK.add(rb);
+				attributeVector.add(rb);
+				attributeVector.add(false);
 			}
-			radioGroupPK.add(rb);
-			attributeVector.add(rb);
-			attributeVector.add(false);
+		
 
 			attributeList.add(newAttribute);
 
@@ -271,5 +364,5 @@ public class AttributePanel extends JPanel {
 			super.fireEditingStopped();
 		}
 	}
-	
+
 }

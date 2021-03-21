@@ -9,8 +9,11 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,6 +40,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 
@@ -48,6 +52,7 @@ import data.Association;
 import data.Attribute;
 import data.Cardinality;
 import data.Entity;
+import data.MCD;
 import data.Node;
 import exceptions.EdgesNotLinkedException;
 import exceptions.ExistingEdgeException;
@@ -63,20 +68,21 @@ import process.SQLCreation;
 import process.Saving;
 
 /**
- * Main GUI class after many crash tests
+ * Main GUIMacOs class after many crash tests
+ * beautiful macOS version, dedicated shortcuts
  * 
  * @author Yann Barrachina
  *
  */
-public class GUI extends JFrame {
+public class GUIMacOs extends JFrame {
 
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
 
 	private ShapeGroup selectedComponent;
 	private IconPanel iconPanel;
 	private ShapePanel shapePanel;
-	private AttributePanel ap = new AttributePanel();
-	private CardinalityPanel cp = new CardinalityPanel();
+	private AttributePanel attributePanel = new AttributePanel();
+	private CardinalityPanel cardinalityPanel = new CardinalityPanel();
 
 	private MCDManaging mcdManager = new MCDManaging();
 
@@ -148,7 +154,6 @@ public class GUI extends JFrame {
 
 	private JMenu window = new JMenu("Fenêtre");
 	private JMenuItem minimize = new JMenuItem("Réduire");
-	private JMenuItem fullScreen = new JMenuItem("Plein écran");
 	private JMenu views = new JMenu("Vues");
 	private JMenuItem mcdView = new JMenuItem("Schéma conceptuel");
 	private JMenuItem mldView = new JMenuItem("Schéma relationnel");
@@ -156,7 +161,7 @@ public class GUI extends JFrame {
 	private JMenu help = new JMenu("Aide");
 	private JMenuItem userGuide = new JMenuItem("Manuel de l'utilisateur");
 
-	public GUI() {
+	public GUIMacOs() {
 		theFrame = this;
 
 		initLayout();
@@ -200,10 +205,12 @@ public class GUI extends JFrame {
 		contentPane.add(headPanel, BorderLayout.NORTH);
 		contentPane.add(jsp, BorderLayout.CENTER);
 
-		// JMenuBar settings
+		// JMenuBar settings, making menus and shortcuts displays
 		options.add(about);
 		options.addSeparator();
 		options.add(quit);
+		
+		quit.setAccelerator(KeyStroke.getKeyStroke(81, InputEvent.META_DOWN_MASK));
 
 		file.add(newFile);
 		file.add(openFile);
@@ -211,16 +218,24 @@ public class GUI extends JFrame {
 		file.add(saveFileAs);
 		file.addSeparator();
 		file.add(exportFile);
+		
+		newFile.setAccelerator(KeyStroke.getKeyStroke(78, InputEvent.META_DOWN_MASK));
+		openFile.setAccelerator(KeyStroke.getKeyStroke(79, InputEvent.META_DOWN_MASK));
+		saveFile.setAccelerator(KeyStroke.getKeyStroke(83, InputEvent.META_DOWN_MASK));
+		saveFileAs.setAccelerator(KeyStroke.getKeyStroke(83, InputEvent.META_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
+		exportFile.setAccelerator(KeyStroke.getKeyStroke(69, InputEvent.META_DOWN_MASK));
 
 		edit.add(undo);
 		edit.add(redo);
 
 		window.add(minimize);
-		window.add(fullScreen);
 		window.addSeparator();
 		views.add(mcdView);
 		views.add(mldView);
 		window.add(views);
+		
+		mcdView.setAccelerator(KeyStroke.getKeyStroke(87, InputEvent.META_DOWN_MASK));
+		mldView.setAccelerator(KeyStroke.getKeyStroke(88, InputEvent.META_DOWN_MASK));
 
 		help.add(userGuide);
 
@@ -258,7 +273,7 @@ public class GUI extends JFrame {
 
 		jfa.getContentPane().setLayout(new GridLayout(8, 1));
 
-		// GUI Name
+		// GUIMacOs Name
 		a1.setSize(200, 30);
 		a1.setLayout(new FlowLayout(FlowLayout.CENTER));
 		jlaSoftwareName.setFont(APP_FONT);
@@ -301,18 +316,18 @@ public class GUI extends JFrame {
 	}
 
 	/**
-	 * Initialize the GUI actions
+	 * Initialize the GUIMacOs actions
 	 */
 	public void initActions() {
 		// Menu actions
 		about.addActionListener(new ActionAbout());
+		newFile.addActionListener(new NewAction());
 		openFile.addActionListener(new OpenAction());
 		saveFile.addActionListener(new ActionSave());
 		saveFileAs.addActionListener(new ActionSave());
 		exportFile.addActionListener(new ExportAction());
 		quit.addActionListener(new QuitAction());
 		minimize.addActionListener(new MinimizeAction());
-		fullScreen.addActionListener(new FullScreenAction());
 
 		zoomButton.addActionListener(new ZoomAction());
 		dezoomButton.addActionListener(new DezoomAction());
@@ -349,25 +364,32 @@ public class GUI extends JFrame {
 		bodyConfigPanel.removeAll();
 		bodyConfigPanel.validate();
 
-		ap.setAttributeList(shapePanel.getComponentMap().get(selectedComponent).getListAttribute());
+		
 
 		if (selectedComponent.isAnEntity()) {
 			configFrame = new JFrame("Paramètres de l'entité");
 
-			bodyConfigPanel.add(ap);
+			attributePanel.setPanelState(true);
+			attributePanel.setAttributeList(shapePanel.getComponentMap().get(selectedComponent).getListAttribute());
+			
+			bodyConfigPanel.add(attributePanel);
 		} else {
 			configFrame = new JFrame("Paramètres de l'association");
 
-			cp.setCardinalityList(
+			attributePanel.setPanelState(false);
+			attributePanel.setAttributeList(shapePanel.getComponentMap().get(selectedComponent).getListAttribute());
+			
+			cardinalityPanel.setCardinalityList(
 					((Association) shapePanel.getComponentMap().get(selectedComponent)).getCardinalityList());
 
-			associationTabbedPane.addTab("Attributs", null, ap, "");
-			associationTabbedPane.addTab("Cardinalités", null, cp, "");
+			associationTabbedPane.addTab("Attributs", null, attributePanel, "Modifier les attributs particuliers");
+			associationTabbedPane.addTab("Cardinalités", null, cardinalityPanel, "Modifier les cardinalités");
 
 			bodyConfigPanel.add(associationTabbedPane);
 		}
 
 		bodyConfigPanel.revalidate();
+		bodyConfigPanel.repaint();
 
 		Container contentPane = configFrame.getContentPane();
 		contentPane.setLayout(new BorderLayout());
@@ -375,11 +397,11 @@ public class GUI extends JFrame {
 		contentPane.add(topConfigPanel, BorderLayout.PAGE_START);
 		contentPane.add(bodyConfigPanel, BorderLayout.CENTER);
 		contentPane.add(bottomConfigPanel, BorderLayout.PAGE_END);
-
+		configFrame.addWindowListener(new WindowCloser());
 		configFrame.setSize(520, 600);
 		configFrame.setResizable(false);
 		configFrame.setLocationRelativeTo(null);
-		configFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+//		configFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		configFrame.setVisible(true);
 	}
 
@@ -399,18 +421,18 @@ public class GUI extends JFrame {
 				mcdManager.connectNodes(shapePanel.getComponentMap().get(shapesToBeConnected.get(0)),
 						shapePanel.getComponentMap().get(shapesToBeConnected.get(1)),
 						new Cardinality("0", "1", shapesToBeConnected.get(1).getGroupName()));
-				System.out.println("[GUI]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
+				System.out.println("[GUIMacOs]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
 						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
 
 				// Connecting objects, graphical part
 				// Depends on existing entries in the linkMap
 				if (shapePanel.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
 
-					System.out.println("[GUI] linkTwoShapes()  Added a shape");
+					System.out.println("[GUIMacOs] linkTwoShapes()  Added a shape");
 					shapePanel.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
 
 				} else {
-					System.out.println("[GUI] linkTwoShapes()  Added a couple key-value");
+					System.out.println("[GUIMacOs] linkTwoShapes()  Added a couple key-value");
 
 					List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
 					newLinkList.add(shapesToBeConnected.get(1));
@@ -420,7 +442,7 @@ public class GUI extends JFrame {
 				e1.printStackTrace();
 			}
 		}
-		System.out.println("[GUI]  Asso after MCDConnect : "
+		System.out.println("[GUIMacOs]  Asso after MCDConnect : "
 				+ ((Association) mcdManager.getNodeFromName(shapesToBeConnected.get(0).getGroupName())).toString());
 	}
 
@@ -445,7 +467,7 @@ public class GUI extends JFrame {
 			 */
 //			y = e.getY() - HEIGHT_DIFFERENCE;
 			y = e.getY();
-//			System.out.println("[GUI]  X : " + x + " Y : " + y);
+//			System.out.println("[GUIMacOs]  X : " + x + " Y : " + y);
 //			System.out.println("shapePanel X : " + shapePanel.getX() + " shapePanel Y : " + shapePanel.getY());
 
 			// Determining action to perform according to cursorState
@@ -490,8 +512,8 @@ public class GUI extends JFrame {
 
 						if (component.getMainShape().contains(x, y)) {
 							selectedComponent = component;
-//							System.out.println("[GUI]  pointing another component");
-//							System.out.println("[GUI]  Component entity type ? " + selectedComponent.isAnEntity());
+//							System.out.println("[GUIMacOs]  pointing another component");
+//							System.out.println("[GUIMacOs]  Component entity type ? " + selectedComponent.isAnEntity());
 							jlaR1.setText(">>> " + selectedComponent.getGroupName() + " <<<");
 							jlaXR1.setText("X : " + selectedComponent.getX());
 							jlaYR1.setText("Y : " + selectedComponent.getY());
@@ -566,7 +588,7 @@ public class GUI extends JFrame {
 									} catch (NullNodeException | EdgesNotLinkedException e1) {
 										e1.printStackTrace();
 									}
-									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager
+									System.out.println("[GUIMacOs]  Asso after MCDdisconnet : " + ((Association) mcdManager
 											.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
 									shapePanel.disconnectShapes(shapesToDisconnect);
 									repaint();
@@ -583,7 +605,15 @@ public class GUI extends JFrame {
 							break;
 
 						case "deleteC":
-
+							try {
+								mcdManager.removeNode(shapePanel.getComponentMap().get(selectedComponent));
+							} catch (NullNodeException e1) {
+								e1.printStackTrace();
+							}
+							
+							shapePanel.removeShape(selectedComponent);
+							repaint();
+							
 							break;
 
 						}
@@ -629,12 +659,30 @@ public class GUI extends JFrame {
 		}
 	}
 
+	
+	public class WindowCloser extends WindowAdapter{
+		@Override
+		public void windowClosing(WindowEvent e) {
+			configFrame.dispose();
+			iconPanel.setCursorState("selection");
+			iconPanel.repaint();
+		}
+	}
+	
 	public class ZoomAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			shapePanel.zoom();
 			iconPanel.repaint();
 
+		}
+	}
+	
+	public class DezoomAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			shapePanel.dezoom(theFrame.getSize());
+			iconPanel.repaint();
 		}
 	}
 
@@ -657,12 +705,13 @@ public class GUI extends JFrame {
 		}
 	}
 
+	// TODO [GUIMacOS] Fatia doit terminer l'implémentation des associations réflexives, ça fait cracher le mld
 	public class MLDAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (isDisplayingMCD) {
 				isDisplayingMCD = false;
-
+				
 				MLDManaging mldManager = new MLDManaging();
 				try {
 					mldManager.newMld(mcdManager.getMCD());
@@ -709,13 +758,6 @@ public class GUI extends JFrame {
 		}
 	}
 
-	public class DezoomAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			shapePanel.dezoom(theFrame.getSize());
-			iconPanel.repaint();
-		}
-	}
 
 	public class ApplyConfigAction implements ActionListener {
 		@Override
@@ -763,9 +805,9 @@ public class GUI extends JFrame {
 
 			// Applying changes to MCD and graphical component
 			if (!nameExist && !isDefaultName) {
-				ap.updateAttributeList();
+				attributePanel.updateAttributeList();
 
-				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(ap.getAttributeList());
+				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setListAttribute(attributePanel.getAttributeList());
 
 				// If it's an entity, updating its references in cardinalities
 				if (selectedComponent.isAnEntity()) {
@@ -773,18 +815,18 @@ public class GUI extends JFrame {
 							jtfConfigName.getText());
 
 				} else { // Otherwise, custom updating for association
-					cp.updateCardinalityList();
+					cardinalityPanel.updateCardinalityList();
 					((Association) mcdManager.getNodeFromName(selectedComponent.getGroupName()))
-							.setCardinalityList(cp.getCardinalityList());
+							.setCardinalityList(cardinalityPanel.getCardinalityList());
 					((Association) shapePanel.getComponentMap().get(selectedComponent))
-							.setCardinalityList(cp.getCardinalityList());
+							.setCardinalityList(cardinalityPanel.getCardinalityList());
 				}
 
 				mcdManager.getNodeFromName(selectedComponent.getGroupName()).setName(jtfConfigName.getText());
 
 				// Updating datas in graphical componentMap
 				shapePanel.getComponentMap().get(selectedComponent).setName(jtfConfigName.getText());
-				shapePanel.getComponentMap().get(selectedComponent).setListAttribute(ap.getAttributeList());
+				shapePanel.getComponentMap().get(selectedComponent).setListAttribute(attributePanel.getAttributeList());
 				selectedComponent.setGroupName(jtfConfigName.getText());
 
 				configFrame.dispose();
@@ -814,6 +856,18 @@ public class GUI extends JFrame {
 			initAbout();
 		}
 	}
+	
+	class NewAction implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			int rep = JOptionPane.showConfirmDialog(theFrame,"Voulez-vous créer un nouveau schéma conceptuel ?\nLe schéma actuel sera effacé.", "Nouveau schéma conceptuel",
+					JOptionPane.CANCEL_OPTION);
+					if(rep == JOptionPane.YES_OPTION) {
+						shapePanel.clear();
+						mcdManager = new MCDManaging();
+						// TODO : [GUIMacOS] y'a t-il bon ?
+					}
+		}
+	}
 
 	class OpenAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
@@ -826,7 +880,7 @@ public class GUI extends JFrame {
 			jfc.setAcceptAllFileFilterUsed(false);
 			jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-			int returnVal = jfc.showOpenDialog(GUI.this);
+			int returnVal = jfc.showOpenDialog(GUIMacOs.this);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = jfc.getSelectedFile();
@@ -957,7 +1011,7 @@ public class GUI extends JFrame {
 				
 				jfc.setDialogTitle("Enregistrer sous");
 				
-				int returnVal = jfc.showSaveDialog(GUI.this);
+				int returnVal = jfc.showSaveDialog(GUIMacOs.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = jfc.getSelectedFile();
@@ -976,7 +1030,7 @@ public class GUI extends JFrame {
 					
 			}else {	// Save
 				jfc.setDialogTitle("Enregistrer");
-				int returnVal = jfc.showSaveDialog(GUI.this);
+				int returnVal = jfc.showSaveDialog(GUIMacOs.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = jfc.getSelectedFile();
@@ -1011,7 +1065,7 @@ public class GUI extends JFrame {
 			jfc.setAcceptAllFileFilterUsed(false);
 			jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-			int returnVal = jfc.showSaveDialog(GUI.this);
+			int returnVal = jfc.showSaveDialog(GUIMacOs.this);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = jfc.getSelectedFile();
@@ -1040,14 +1094,6 @@ public class GUI extends JFrame {
 		}
 	}
 
-	public class FullScreenAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO : fullscreen
-
-		}
-	}
-
 	/**
 	 * action of a button to quit
 	 *
@@ -1061,6 +1107,6 @@ public class GUI extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		new GUI();
+		new GUIMacOs();
 	}
 }

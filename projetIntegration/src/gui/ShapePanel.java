@@ -529,15 +529,17 @@ public class ShapePanel extends JPanel {
 		// if the slope is infinite, x coordinates are aligned
 		if (associationCenterX == entityCenterX) {
 			float intersectionY;
-			g2d.setColor(Color.GREEN);
+			g2d.setColor(Color.BLACK);
 
 			// If association is under entity
 			if (associationCenterY > entityCenterY) {
 				intersectionY = entityCenterY + linkedShape.getHeight() / 2;
-				g2d.drawOval((int) (entityCenterX - 2.5), (int) (intersectionY - 2.5), 5, 5);
+//				g2d.drawOval((int) (entityCenterX - 2.5), (int) (intersectionY - 2.5), 5, 5);
+				g2d.drawString(cardinalityValues, entityCenterX + 12, (int) (intersectionY + 22));
 			} else {
 				intersectionY = entityCenterY - linkedShape.getHeight() / 2;
-				g2d.drawOval((int) (entityCenterX - 2.5), (int) (intersectionY - 2.5), 5, 5);
+//				g2d.drawOval((int) (entityCenterX - 2.5), (int) (intersectionY - 2.5), 5, 5);
+				g2d.drawString(cardinalityValues, entityCenterX + 13, (int) (intersectionY - 12));
 			}
 
 		} else { // Else it calculates as usual
@@ -933,12 +935,13 @@ public class ShapePanel extends JPanel {
 					linkMap.get(shapeList.get(0)).remove(shapeList.get(1));
 
 					ArrayList<Cardinality> newCardinalityList = new ArrayList<Cardinality>();
-					for (Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0))).getCardinalityList()) {
-						if(!cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
+					for (Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0)))
+							.getCardinalityList()) {
+						if (!cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
 							newCardinalityList.add(cardinality);
 						}
 					}
-					
+
 //					int index = 0, range = 0;
 //					for (Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0)))
 //							.getCardinalityList()) {
@@ -962,6 +965,27 @@ public class ShapePanel extends JPanel {
 		}
 
 		System.out.println("[ShapePanel]  " + linkMap.containsKey(shapeList.get(0)));
+	}
+
+	public void removeShape(ShapeGroup shape) {
+		if (shape.isAnEntity()) {
+
+			// for each association linked to the entity to be removed
+			for (ShapeGroup keyShape : linkMap.keySet()) {
+
+				if (linkMap.get(keyShape).contains(shape)) {
+
+					List<ShapeGroup> shapeList = new ArrayList<ShapeGroup>();
+					shapeList.add(keyShape);
+					shapeList.add(shape);
+					disconnectShapes(shapeList);
+				}
+			}
+
+		} else {
+			linkMap.remove(shape);
+		}
+		componentMap.remove(shape);
 	}
 
 	/**
