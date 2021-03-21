@@ -261,7 +261,28 @@ public class MLDManaging {
 							}
 					    }
 					    else   if (input==twoOfThem) {
-					    	
+					    	ArrayList<Entity> ListOfAllEntities = new ArrayList<Entity>();
+					    	ArrayList<Attribute> newAttribute=new ArrayList<Attribute>();
+							for(int i = 0 ; i < connectedNodes.size(); i++) {
+								ArrayList<Attribute> liste = new ArrayList<Attribute>();
+								Node n=connectedNodes.get(i);
+								liste=n.getListAttribute();
+								ArrayList<Attribute> liste1=currentNode.getListAttribute();
+								for (Attribute attpk : liste) {
+									if(attpk.isPrimaryKey()) {
+										MLDAttribute mldA = new MLDAttribute(attpk.getName(),
+												attpk.getType(), attpk.isNullable(), attpk.isPrimaryKey(),
+												attpk.isUnique(), true, n, attpk);	
+										boolean newAtt = true;
+										for(Attribute l :liste1) {
+											if(l.getName().equals(mldA.getName())) {newAtt=false;break;}
+										}
+										if(newAtt==true){currentNode.getListAttribute().add(mldA);}
+									}
+								}
+							}
+							Entity e = new Entity(currentNode.getName(),newAttribute);
+							ListOfAllEntities.add(e);
 					    }
 					    
 					}
