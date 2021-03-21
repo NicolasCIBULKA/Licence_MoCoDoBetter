@@ -97,6 +97,7 @@ public class Saving {
 	 * This method will start the xml file and write the information relative to each entities
 	 * @param path
 	 * @throws SaveWasInteruptedException
+	 * 
 	 */
 	private void writeEntity(String path)
 			throws SaveWasInteruptedException {

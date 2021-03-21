@@ -79,7 +79,6 @@ public class Loading {
 							System.out.println("L'association : "+currentNode.getName());
 							for (Cardinality card : ((Association) currentNode).getCardinalityList()) {
 								System.out.println("\n passage : "+card.toString()+"\n");
-
 								if(!card.getNomEntity().equalsIgnoreCase(set2.getNomEntity())) {
 									try {
 										mcd.disconnectNodes(mcd.getNodeFromName(currentNode.getName()), mcd.getNodeFromName(set2.getNomEntity()));
