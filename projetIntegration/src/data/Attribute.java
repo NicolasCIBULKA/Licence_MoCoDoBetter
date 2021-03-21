@@ -85,5 +85,14 @@ public class Attribute implements Serializable{
 		return attributeVector;
 	}
 	
-	
+	@Override
+	public String toString() {
+		String result = name;
+		result += " " + type;
+		result += " " + isNullable ;
+		result += " " + isPrimaryKey ;
+		result += " " + isUnique ;
+		
+		return result;
+	}
 }

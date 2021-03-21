@@ -52,7 +52,6 @@ import data.Association;
 import data.Attribute;
 import data.Cardinality;
 import data.Entity;
-import data.MCD;
 import data.Node;
 import exceptions.EdgesNotLinkedException;
 import exceptions.ExistingEdgeException;
@@ -68,13 +67,13 @@ import process.SQLCreation;
 import process.Saving;
 
 /**
- * Main GUIMacOs class after many crash tests
+ * Main GUIMacOS class after many crash tests
  * beautiful macOS version, dedicated shortcuts
  * 
  * @author Yann Barrachina
  *
  */
-public class GUIMacOs extends JFrame {
+public class GUIOtherOS extends JFrame {
 
 	private Rectangle2D.Float myRect2 = new Rectangle2D.Float(200.0f, 200.0f, 50.0f, 50.0f);
 
@@ -161,7 +160,7 @@ public class GUIMacOs extends JFrame {
 	private JMenu help = new JMenu("Aide");
 	private JMenuItem userGuide = new JMenuItem("Manuel de l'utilisateur");
 
-	public GUIMacOs() {
+	public GUIOtherOS() {
 		theFrame = this;
 
 		initLayout();
@@ -210,7 +209,7 @@ public class GUIMacOs extends JFrame {
 		options.addSeparator();
 		options.add(quit);
 		
-		quit.setAccelerator(KeyStroke.getKeyStroke(81, InputEvent.META_DOWN_MASK));
+		quit.setAccelerator(KeyStroke.getKeyStroke(81, InputEvent.CTRL_DOWN_MASK));
 
 		file.add(newFile);
 		file.add(openFile);
@@ -219,11 +218,11 @@ public class GUIMacOs extends JFrame {
 		file.addSeparator();
 		file.add(exportFile);
 		
-		newFile.setAccelerator(KeyStroke.getKeyStroke(78, InputEvent.META_DOWN_MASK));
-		openFile.setAccelerator(KeyStroke.getKeyStroke(79, InputEvent.META_DOWN_MASK));
-		saveFile.setAccelerator(KeyStroke.getKeyStroke(83, InputEvent.META_DOWN_MASK));
-		saveFileAs.setAccelerator(KeyStroke.getKeyStroke(83, InputEvent.META_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
-		exportFile.setAccelerator(KeyStroke.getKeyStroke(69, InputEvent.META_DOWN_MASK));
+		newFile.setAccelerator(KeyStroke.getKeyStroke(78, InputEvent.CTRL_DOWN_MASK));
+		openFile.setAccelerator(KeyStroke.getKeyStroke(79, InputEvent.CTRL_DOWN_MASK));
+		saveFile.setAccelerator(KeyStroke.getKeyStroke(83, InputEvent.CTRL_DOWN_MASK));
+		saveFileAs.setAccelerator(KeyStroke.getKeyStroke(83, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
+		exportFile.setAccelerator(KeyStroke.getKeyStroke(69, InputEvent.CTRL_DOWN_MASK));
 
 		edit.add(undo);
 		edit.add(redo);
@@ -234,8 +233,8 @@ public class GUIMacOs extends JFrame {
 		views.add(mldView);
 		window.add(views);
 		
-		mcdView.setAccelerator(KeyStroke.getKeyStroke(87, InputEvent.META_DOWN_MASK));
-		mldView.setAccelerator(KeyStroke.getKeyStroke(88, InputEvent.META_DOWN_MASK));
+		mcdView.setAccelerator(KeyStroke.getKeyStroke(87, InputEvent.CTRL_DOWN_MASK));
+		mldView.setAccelerator(KeyStroke.getKeyStroke(88, InputEvent.CTRL_DOWN_MASK));
 
 		help.add(userGuide);
 
@@ -273,7 +272,7 @@ public class GUIMacOs extends JFrame {
 
 		jfa.getContentPane().setLayout(new GridLayout(8, 1));
 
-		// GUIMacOs Name
+		// GUIMacOS Name
 		a1.setSize(200, 30);
 		a1.setLayout(new FlowLayout(FlowLayout.CENTER));
 		jlaSoftwareName.setFont(APP_FONT);
@@ -316,7 +315,7 @@ public class GUIMacOs extends JFrame {
 	}
 
 	/**
-	 * Initialize the GUIMacOs actions
+	 * Initialize the GUIMacOS actions
 	 */
 	public void initActions() {
 		// Menu actions
@@ -421,18 +420,18 @@ public class GUIMacOs extends JFrame {
 				mcdManager.connectNodes(shapePanel.getComponentMap().get(shapesToBeConnected.get(0)),
 						shapePanel.getComponentMap().get(shapesToBeConnected.get(1)),
 						new Cardinality("0", "1", shapesToBeConnected.get(1).getGroupName()));
-				System.out.println("[GUIMacOs]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
+				System.out.println("[GUIMacOS]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
 						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
 
 				// Connecting objects, graphical part
 				// Depends on existing entries in the linkMap
 				if (shapePanel.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
 
-					System.out.println("[GUIMacOs] linkTwoShapes()  Added a shape");
+					System.out.println("[GUIMacOS] linkTwoShapes()  Added a shape");
 					shapePanel.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
 
 				} else {
-					System.out.println("[GUIMacOs] linkTwoShapes()  Added a couple key-value");
+					System.out.println("[GUIMacOS] linkTwoShapes()  Added a couple key-value");
 
 					List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
 					newLinkList.add(shapesToBeConnected.get(1));
@@ -442,7 +441,7 @@ public class GUIMacOs extends JFrame {
 				e1.printStackTrace();
 			}
 		}
-		System.out.println("[GUIMacOs]  Asso after MCDConnect : "
+		System.out.println("[GUIMacOS]  Asso after MCDConnect : "
 				+ ((Association) mcdManager.getNodeFromName(shapesToBeConnected.get(0).getGroupName())).toString());
 	}
 
@@ -467,7 +466,7 @@ public class GUIMacOs extends JFrame {
 			 */
 //			y = e.getY() - HEIGHT_DIFFERENCE;
 			y = e.getY();
-//			System.out.println("[GUIMacOs]  X : " + x + " Y : " + y);
+//			System.out.println("[GUIMacOS]  X : " + x + " Y : " + y);
 //			System.out.println("shapePanel X : " + shapePanel.getX() + " shapePanel Y : " + shapePanel.getY());
 
 			// Determining action to perform according to cursorState
@@ -512,8 +511,8 @@ public class GUIMacOs extends JFrame {
 
 						if (component.getMainShape().contains(x, y)) {
 							selectedComponent = component;
-//							System.out.println("[GUIMacOs]  pointing another component");
-//							System.out.println("[GUIMacOs]  Component entity type ? " + selectedComponent.isAnEntity());
+//							System.out.println("[GUIMacOS]  pointing another component");
+//							System.out.println("[GUIMacOS]  Component entity type ? " + selectedComponent.isAnEntity());
 							jlaR1.setText(">>> " + selectedComponent.getGroupName() + " <<<");
 							jlaXR1.setText("X : " + selectedComponent.getX());
 							jlaYR1.setText("Y : " + selectedComponent.getY());
@@ -588,7 +587,7 @@ public class GUIMacOs extends JFrame {
 									} catch (NullNodeException | EdgesNotLinkedException e1) {
 										e1.printStackTrace();
 									}
-									System.out.println("[GUIMacOs]  Asso after MCDdisconnet : " + ((Association) mcdManager
+									System.out.println("[GUIMacOS]  Asso after MCDdisconnet : " + ((Association) mcdManager
 											.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
 									shapePanel.disconnectShapes(shapesToDisconnect);
 									repaint();
@@ -705,7 +704,6 @@ public class GUIMacOs extends JFrame {
 		}
 	}
 
-	// TODO [GUIMacOS] Fatia doit terminer l'implémentation des associations réflexives, ça fait cracher le mld ??
 	public class MLDAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -864,7 +862,7 @@ public class GUIMacOs extends JFrame {
 					if(rep == JOptionPane.YES_OPTION) {
 						shapePanel.clear();
 						mcdManager = new MCDManaging();
-						// TODO : [GUIMacOS] y'a t-il bon ?
+						uniqueSuffix = 0;
 					}
 		}
 	}
@@ -880,7 +878,7 @@ public class GUIMacOs extends JFrame {
 			jfc.setAcceptAllFileFilterUsed(false);
 			jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-			int returnVal = jfc.showOpenDialog(GUIMacOs.this);
+			int returnVal = jfc.showOpenDialog(theFrame);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = jfc.getSelectedFile();
@@ -1011,7 +1009,7 @@ public class GUIMacOs extends JFrame {
 				
 				jfc.setDialogTitle("Enregistrer sous");
 				
-				int returnVal = jfc.showSaveDialog(GUIMacOs.this);
+				int returnVal = jfc.showSaveDialog(theFrame);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = jfc.getSelectedFile();
@@ -1030,7 +1028,7 @@ public class GUIMacOs extends JFrame {
 					
 			}else {	// Save
 				jfc.setDialogTitle("Enregistrer");
-				int returnVal = jfc.showSaveDialog(GUIMacOs.this);
+				int returnVal = jfc.showSaveDialog(theFrame);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = jfc.getSelectedFile();
@@ -1065,7 +1063,7 @@ public class GUIMacOs extends JFrame {
 			jfc.setAcceptAllFileFilterUsed(false);
 			jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-			int returnVal = jfc.showSaveDialog(GUIMacOs.this);
+			int returnVal = jfc.showSaveDialog(theFrame);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = jfc.getSelectedFile();
@@ -1107,6 +1105,6 @@ public class GUIMacOs extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		new GUIMacOs();
+		new GUIOtherOS();
 	}
 }

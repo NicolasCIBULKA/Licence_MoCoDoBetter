@@ -79,10 +79,10 @@ public class MLDPanel extends JPanel{
 				else {
 					if ((att.get(i))!=null) {
 						if((att.get(i)).isPrimaryKey()){
-							//StyleConstants.setUnderline(attributeSet, true);
-							//doc.insertString(doc.getLength(), att.get(i).getName(), attributeSet);
-							//StyleConstants.setUnderline(attributeSet, false);
-							//a++;
+							StyleConstants.setUnderline(attributeSet, true);
+							doc.insertString(doc.getLength(), att.get(i).getName(), attributeSet);
+							StyleConstants.setUnderline(attributeSet, false);
+							a++;
 						}
 						else {}
 					}

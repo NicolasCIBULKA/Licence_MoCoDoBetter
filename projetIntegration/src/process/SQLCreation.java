@@ -198,32 +198,37 @@ public class SQLCreation {
 				// creating the attributes
 				String coma = ",";
 				int index = 0;
+				
 				for (Attribute attribute : entity.getListAttribute()) {
-					System.out.println(attribute.getName() +" "+ attribute.isPrimaryKey() );
-					System.out.println(attribute.getName());
-					// possible parameter for the attribute
-					String isnull = " NOT NULL";
-					String isunique = " UNIQUE";
-					// setting the parameters
-					if (attribute.isNullable()) {
-						isnull = "";
+//					System.out.println(attribute.getName() +" "+ attribute.isPrimaryKey() );
+					
+					// When 
+					if(attribute != null) {
+						// possible parameter for the attribute
+						String isnull = " NOT NULL";
+						String isunique = " UNIQUE";
+						// setting the parameters
+						if (attribute.isNullable()) {
+							isnull = "";
+						}
+						if (!attribute.isUnique()) {
+							isunique = "";
+						}
+						if (attribute.isPrimaryKey()) {
+							//System.out.println("pk" + attribute.getType());
+							pklist.add(attribute);
+						}
+						if (attribute instanceof MLDAttribute && (((MLDAttribute) attribute).isForeignKey())) {
+							fklist.add((MLDAttribute) attribute);
+						}
+						if(index == entity.getListAttribute().size() - 1) {
+							coma = "";
+						}
+						index++;
+						// adding the attribute to the file
+						prevString+=("\t" + attribute.getName() + " " + attribute.getType() + isnull + isunique + coma + "\n");
 					}
-					if (!attribute.isUnique()) {
-						isunique = "";
-					}
-					if (attribute.isPrimaryKey()) {
-						//System.out.println("pk" + attribute.getType());
-						pklist.add(attribute);
-					}
-					if (attribute instanceof MLDAttribute && (((MLDAttribute) attribute).isForeignKey())) {
-						fklist.add((MLDAttribute) attribute);
-					}
-					if(index == entity.getListAttribute().size() - 1) {
-						coma = "";
-					}
-					index++;
-					// adding the attribute to the file
-					prevString+=("\t" + attribute.getName() + " " + attribute.getType() + isnull + isunique + coma + "\n");
+					
 					
 				}
 				System.out.println("pklist " + pklist.size());
