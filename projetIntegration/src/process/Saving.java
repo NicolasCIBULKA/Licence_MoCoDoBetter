@@ -19,7 +19,12 @@ import data.MCD;
 import data.Node;
 import exceptions.FileAlreadyExistException;
 import exceptions.SaveWasInteruptedException;
-
+/**
+ * This class will generate a xml file with all the information related to the MCD and the graphical placement
+ * 
+ * @author Etienne Coutenceau
+ *
+ */
 public class Saving {
 
 	// keeping in memory the list of entity and association to treat them separatly
@@ -41,7 +46,10 @@ public class Saving {
 		}
 	}
 
-	// we read the mcd graph and separate entities and associations
+	/**
+	 * This method will store in ArrayList the MCD and separating association and entities
+	 * @param mcd
+	 */
 	private void storeMCD(MCD mcd) {
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while (iterator.hasNext()) {
@@ -56,9 +64,6 @@ public class Saving {
 		
 	}
 
-	//
-	//
-	//
 
 	/**
 	 * I create a new file if it doesn't exist if already exist depending on save as
@@ -88,7 +93,11 @@ public class Saving {
 		return true;
 	}
 
-	// In a first time i write the entities
+	/**
+	 * This method will start the xml file and write the information relative to each entities
+	 * @param path
+	 * @throws SaveWasInteruptedException
+	 */
 	private void writeEntity(String path)
 			throws SaveWasInteruptedException {
 		try {
@@ -128,7 +137,11 @@ public class Saving {
 		}
 	}
 
-	// Then i write the association in the file
+	/**
+	 * This method will write the information relative to each association
+	 * @param path
+	 * @throws SaveWasInteruptedException
+	 */
 	private void writeAssociation(String path)
 			throws SaveWasInteruptedException {
 		try {
@@ -165,7 +178,11 @@ public class Saving {
 		}
 	}
 
-	// Finaly i write each cardinality by getting them from the association list
+	/**
+	 * Finally this method will write the cardinality information and will close the xml document
+	 * @param path
+	 * @throws SaveWasInteruptedException
+	 */
 	private void writeCard(String path) throws SaveWasInteruptedException {
 		try {
 			

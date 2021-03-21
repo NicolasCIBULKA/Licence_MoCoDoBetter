@@ -8,15 +8,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.AbstractGraphIterator;
+import org.jgrapht.traverse.BreadthFirstIterator;
+
+import java.util.Set;
+
 import data.Association;
 import data.Attribute;
 import data.Cardinality;
 import data.Entity;
 import data.Node;
+import exceptions.EdgesNotLinkedException;
 import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
-
+/**
+ * 
+ * @author Etienne Coutenceau
+ *
+ */
 public class Loading {
 
 	private MCDManaging mcd;
@@ -40,14 +51,47 @@ public class Loading {
 
 	private void addCardinality() {
 		try {
-			for (Entry<String, ArrayList<Cardinality>> set : listCard.entrySet()) {
+			Set<Entry<String, ArrayList<Cardinality>>> tempNode = listCard.entrySet();
+			for (Entry<String, ArrayList<Cardinality>> set : tempNode) {
 				ArrayList<Cardinality> tempList = set.getValue();
 				for(Cardinality set2 : tempList) {
-					
-					mcd.connectNodes(listNode.get(set.getKey()), listNode.get(set2.getNomEntity()),set2);
+					Association asso = (Association) mcd.getNodeFromName(set.getKey());
+					Entity entity = (Entity) mcd.getNodeFromName(set2.getNomEntity());
+					mcd.connectNodes(asso,entity ,set2);
+
+				
 				}
 				
 				
+			}
+			Set<Entry<String, ArrayList<Cardinality>>> tempNode2 = listCard.entrySet();
+			for (Entry<String, ArrayList<Cardinality>> set : tempNode2) {
+				
+				ArrayList<Cardinality> tempList = set.getValue();
+				for(Cardinality set2 : tempList) {
+					System.out.println("\n\n\n\n3");
+					System.out.println("\n"+set2.toString()+"\n");
+					AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCD().getMCDGraph());
+					while (iterator.hasNext()) {
+						Node currentNode = iterator.next();
+						if (currentNode instanceof Association) {
+							System.out.println("la taille de la liste de card : "+((Association) currentNode).getCardinalityList().size());
+							System.out.println("L'association : "+currentNode.getName());
+							for (Cardinality card : ((Association) currentNode).getCardinalityList()) {
+								System.out.println("\n passage : "+card.toString()+"\n");
+
+								if(!card.getNomEntity().equalsIgnoreCase(set2.getNomEntity())) {
+									try {
+										mcd.disconnectNodes(mcd.getNodeFromName(currentNode.getName()), mcd.getNodeFromName(set2.getNomEntity()));
+									} catch (EdgesNotLinkedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		} catch (NullNodeException e) {
 			e.printStackTrace();
@@ -147,13 +191,12 @@ public class Loading {
 			ArrayList<Cardinality> card = new ArrayList<Cardinality>();
 			while (!(str = br.readLine()).equals("</Cardinalities>")) {
 				if (str.equals("<Cardinality>")) {
-					
 					str = br.readLine();
 					String[] tmpStr = str.split(",");
 					if(!listCard.containsKey(tmpStr[0])) {
+						card = new ArrayList<Cardinality>();
 						listCard.put(tmpStr[0], (ArrayList<Cardinality>) card.clone());
 					}
-					
 					Cardinality help =new Cardinality(tmpStr[2],tmpStr[3],tmpStr[1]);
 					listCard.get(tmpStr[0]).add(help);
 				}
