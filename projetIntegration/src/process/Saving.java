@@ -27,25 +27,12 @@ public class Saving {
 	private ArrayList<Association> listAssociation;
 	private Map<String, ArrayList<Float>> coordinatesMap;
 
-	// constructor save
-	public Saving(String path, MCD mcd, Map<String, ArrayList<Float>> coordinatesMap)
-			throws SaveWasInteruptedException, FileAlreadyExistException {
-		listEntity = new ArrayList<Entity>();
-		listAssociation = new ArrayList<Association>();
-		this.coordinatesMap = coordinatesMap;
-		storeMCD(mcd);
-		if (creaFile(path, false)) {
-			writeEntity(path);
-			writeAssociation(path);
-			writeCard(path);
-		}
-	}
-
-	// constructor save as
+	// constructor for both "save" and "save as"
 	public Saving(String path, MCD mcd, Map<String, ArrayList<Float>> coordinatesMap, boolean saveAs)
 			throws SaveWasInteruptedException, FileAlreadyExistException {
 		listEntity = new ArrayList<Entity>();
 		listAssociation = new ArrayList<Association>();
+		this.coordinatesMap = coordinatesMap;
 		storeMCD(mcd);
 		if (creaFile(path, saveAs)) {
 			writeEntity(path);
@@ -86,7 +73,7 @@ public class Saving {
 	 */
 	private boolean creaFile(String path, Boolean saveAs) throws SaveWasInteruptedException, FileAlreadyExistException {
 		try {
-			File initfile = new File(path + ".stdd");
+			File initfile = new File(path + ".xml");
 			if (initfile.createNewFile()) {
 				System.out.println("File created: " + initfile.getName());
 			} else {
@@ -105,7 +92,7 @@ public class Saving {
 	private void writeEntity(String path)
 			throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".xml"));
 			
 			writer.write("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
 			writer.write("<MCD>\n");
@@ -145,7 +132,7 @@ public class Saving {
 	private void writeAssociation(String path)
 			throws SaveWasInteruptedException {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".stdd", true));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".xml", true));
 			writer.write("<Associations>\n");
 			// null pointer probablement une lecture � vide
 			if (!listAssociation.isEmpty()) {
