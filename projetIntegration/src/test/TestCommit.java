@@ -102,11 +102,11 @@ public class TestCommit {
 		Cardinality ce1_a3= new Cardinality("1","1",e1.getName());
 		Cardinality ce5_a3= new Cardinality("1","1",e5.getName());
 		
-		Cardinality ce6_a4= new Cardinality("e","N",e1.getName());
-		Cardinality ce61_a4= new Cardinality("g","N",e5.getName());
+		Cardinality ce6_a4= new Cardinality("e","N",e6.getName());
+		Cardinality ce61_a4= new Cardinality("g","N",e6.getName());
 		
-		Cardinality ce7_a5= new Cardinality("1","1",e1.getName());
-		Cardinality ce71_a5= new Cardinality("1","1",e5.getName());
+		Cardinality ce7_a5= new Cardinality("0","1",e7.getName());
+		Cardinality ce71_a5= new Cardinality("0","1",e7.getName());
 		
 		
 		
@@ -141,7 +141,7 @@ public class TestCommit {
 		
 		
 		
-		manager.addNode(e1);
+		/**manager.addNode(e1);
 		manager.addNode(e2);
 		manager.addNode(e3);
 		manager.addNode(a1);
@@ -151,8 +151,10 @@ public class TestCommit {
 		manager.addNode(e5);
 		
 		manager.addNode(e6);
+		manager.addNode(a4);**/
+		
+	
 		manager.addNode(e7);
-		manager.addNode(a4);
 		manager.addNode(a5);
 		
 		/**Attribute at1 = new Attribute("Attribute1","String",false,true,false);
@@ -175,7 +177,7 @@ public class TestCommit {
 			
 			/**manager.connectNodes(e1, a1,ce1_a1);
 			manager.connectNodes(e1, a1,ce2_a1);**/
-			
+			/**
 			manager.connectNodes(e1, a1,ce1_a1);
 			manager.connectNodes(e2, a1,ce2_a1);
 			manager.connectNodes(e3, a1,ce3_a1);
@@ -187,7 +189,7 @@ public class TestCommit {
 			manager.connectNodes(e5, a3,ce5_a3);
 			
 			manager.connectNodes(e6, a4,ce6_a4);
-			manager.connectNodes(e6, a4,ce61_a4);
+			manager.connectNodes(e6, a4,ce61_a4);**/
 			
 			manager.connectNodes(e7, a5,ce7_a5);
 			manager.connectNodes(e7, a5,ce71_a5);

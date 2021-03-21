@@ -87,17 +87,23 @@ public class MLDPanel extends JPanel{
 					}
 				}
 				else {
-					if((att.get(i)).isPrimaryKey()){
-						StyleConstants.setUnderline(attributeSet, true);
-						doc.insertString(doc.getLength(), att.get(i).getName(), attributeSet);
-						StyleConstants.setUnderline(attributeSet, false);
-						a++;
+					if ((att.get(i))!=null) {
+						if((att.get(i)).isPrimaryKey()){
+							//StyleConstants.setUnderline(attributeSet, true);
+							//doc.insertString(doc.getLength(), att.get(i).getName(), attributeSet);
+							//StyleConstants.setUnderline(attributeSet, false);
+							//a++;
+						}
+						else {}
 					}
+					else {}
 				}
 				
 				for(int k=0;k<att.size();k++) {
-					if(!(att.get(k)).isPrimaryKey()){
+					if((att.get(k))!=null) {
+						if(!(att.get(k)).isPrimaryKey()){
 							containsNonpk=true;
+						}
 					}
 
 				}
@@ -127,10 +133,12 @@ public class MLDPanel extends JPanel{
 					}
 				}
 				else {
-					if(!(att.get(j)).isPrimaryKey()){
-						doc.insertString(doc.getLength(), att.get(j).getName(), attributeSet);
-						a++;
-					}
+					if ((att.get(j))!=null) {
+						if(!(att.get(j)).isPrimaryKey()){
+							doc.insertString(doc.getLength(), att.get(j).getName(), attributeSet);
+							a++;
+						}
+					}	
 				}
 				if(((j+1)<att.size())&&(a!=0)&&(!(att.get(j+1)).isPrimaryKey())) {
 					doc.insertString(doc.getLength(), ",", attributeSet);

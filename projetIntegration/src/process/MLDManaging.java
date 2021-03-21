@@ -27,7 +27,6 @@ public class MLDManaging {
 	
 	private MLD mld;
 
-
 	public MLDManaging() {
 		this.mld = new MLD();
 	}
@@ -38,7 +37,12 @@ public class MLDManaging {
 
 		
 	
-	
+	/*
+	 * With this method we're going to add foreign keys in the Entity that are supposed to receive some
+	 * There is different case where we can add foreign keys which are:
+	 * 	[*,n]/[*,1]
+	 * 	[0,1]/[1,1]
+	 */
 	public MCD  newtoMCD(MCD mcd) {
 		ArrayList<Attribute> liste,liste1;
 		String high1 = null;String low1 = null;String high2= null;String low2= null;
@@ -51,7 +55,7 @@ public class MLDManaging {
 				for (Node actualNode : connectedNodes) {
 					Association actualAssociation=(Association)actualNode;
 					List<Node> connectedToAssociation = Graphs.neighborListOf(mcd.getMCDGraph(), actualAssociation);			
-					if(connectedToAssociation.size()==3) {/*ne rien faire*/}
+					if(connectedToAssociation.size()==3) {}
 					else if(connectedToAssociation.size()==2) {
 						Entity e2 = null;
 						for (Node j:connectedToAssociation) {
@@ -94,8 +98,6 @@ public class MLDManaging {
 												) {
 													newAtt=false;break;
 												}
-												//System.out.println("--"+att.get(i).getName());
-												//System.out.println("--"+((MLDAttribute) att.get(i)).isForeignKey());
 											}
 											else {
 												if(att.get(i).getName().equals(mldA.getName())) {
@@ -150,8 +152,12 @@ public class MLDManaging {
 		}
 		return mcd;
 	}
-		
 	
+	
+	/*
+	 *Here we treat the case where the association is [1,1]/[1,1]
+	 * In this case we ask to the user how he would like to treat it
+	 */
 	public MCD Adding11(MCD mcd) {
 		Association association;
 		List<Cardinality> Card;
@@ -177,7 +183,8 @@ public class MLDManaging {
 					if (((h1.equals("1"))&&(h2.equals("1"))&&(l1.equals("1"))&&(l2.equals("1")))) {
 						String firstEntity=e1.getName();
 						String secondEntity=e2.getName();
-						String[] choices = {firstEntity , secondEntity};
+						String twoOfThem="Les deux";
+						String[] choices = {firstEntity , secondEntity,twoOfThem};
 					    String input = (String) JOptionPane.showInputDialog(null, "Choose now...",
 					        "Quelle Entité a le fonctionnement le plus important? ", JOptionPane.QUESTION_MESSAGE, null,choices,
 					        choices[1]); // Initial choice
@@ -253,6 +260,9 @@ public class MLDManaging {
 								}
 							}
 					    }
+					    else   if (input==twoOfThem) {
+					    	
+					    }
 					    
 					}
 				}
@@ -267,7 +277,13 @@ public class MLDManaging {
 
 	
 	
-	
+	/*
+	 * With this method we're going to add foreign keys in the Associations that are supposed to receive some
+	 * There is different case where we can add foreign keys which are:
+	 * 	Association that are connected to 3 entities
+	 * 	[*,N]/[*,N]
+	 * [0,1]/[0,1]
+	 */
 	public MCD  newAssociation(MCD mcd) {
 		MLDAttribute mldA;
 		String high;
@@ -328,28 +344,34 @@ public class MLDManaging {
 				for(String str:listCard) {
 					if(str.equals("N")) {addfk=true;}
 					else {addfk=false;break;}
-				}if ((addfk==true)||((h1.equals("1"))&&(h2.equals("1"))&&(l1.equals("0"))&&(l2.equals("0")))) {
-					ArrayList<Attribute> newAttribute=new ArrayList<Attribute>();
-					for(int i = 0 ; i < connectedNodes.size(); i++) {
-						ArrayList<Attribute> liste = new ArrayList<Attribute>();
-						Node n=connectedNodes.get(i);
-						liste=n.getListAttribute();
-						ArrayList<Attribute> liste1=currentNode.getListAttribute();
-						for (Attribute attpk : liste) {
-							if(attpk.isPrimaryKey()) {
-								mldA = new MLDAttribute(attpk.getName(),
-										attpk.getType(), attpk.isNullable(), attpk.isPrimaryKey(),
-										attpk.isUnique(), true, n, attpk);	
-								boolean newAtt = true;
-								for(Attribute l :liste1) {
-									if(l.getName().equals(mldA.getName())) {newAtt=false;break;}
+				}
+				Entity e1=(Entity) connectedNodes.get(0);
+				Entity e2=(Entity) connectedNodes.get(1);
+				if(e1!=e2) {
+					if (((addfk==true)||((h1.equals("1"))&&(h2.equals("1"))&&(l1.equals("0"))&&(l2.equals("0"))))
+							&&((connectedNodes.get(0)!=null)&&(connectedNodes.get(1)!=null)&&(h2!=null)&&(l2!=null))) {
+						ArrayList<Attribute> newAttribute=new ArrayList<Attribute>();
+						for(int i = 0 ; i < connectedNodes.size(); i++) {
+							ArrayList<Attribute> liste = new ArrayList<Attribute>();
+							Node n=connectedNodes.get(i);
+							liste=n.getListAttribute();
+							ArrayList<Attribute> liste1=currentNode.getListAttribute();
+							for (Attribute attpk : liste) {
+								if(attpk.isPrimaryKey()) {
+									mldA = new MLDAttribute(attpk.getName(),
+											attpk.getType(), attpk.isNullable(), attpk.isPrimaryKey(),
+											attpk.isUnique(), true, n, attpk);	
+									boolean newAtt = true;
+									for(Attribute l :liste1) {
+										if(l.getName().equals(mldA.getName())) {newAtt=false;break;}
+									}
+									if(newAtt==true){currentNode.getListAttribute().add(mldA);}
 								}
-								if(newAtt==true){currentNode.getListAttribute().add(mldA);}
 							}
 						}
+						Entity e = new Entity(currentNode.getName(),newAttribute);
+						ListOfAllEntities.add(e);
 					}
-					Entity e = new Entity(currentNode.getName(),newAttribute);
-					ListOfAllEntities.add(e);
 				}
 			}
 		}
@@ -357,6 +379,11 @@ public class MLDManaging {
 	}
 	
 	
+	
+	
+	/*
+	 * With this function treat the case of reflexive association
+	 */
 	public MCD  reAssociation(MCD mcd) {
 		boolean newAtt = true;
 		MLDAttribute mldA = null;
@@ -454,7 +481,9 @@ public class MLDManaging {
 	
 	
 	
-	
+	/*
+	 * With this function we take an initial mcd that we modify through different function
+	 */
 	public MCD newMCD(MCD mcd) {
 		MCD firstMCD=newtoMCD(mcd);
 		MCD reMCD=reAssociation(firstMCD);
@@ -466,19 +495,30 @@ public class MLDManaging {
 	
 
 	
+	
+	
+	
+	/*
+	 * Here we take all the Enties of the mcd that we modify
+	 */
 	public ArrayList<Entity>  addEntityToMLD(MCD mcd) {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
 		while(iterator.hasNext()) {
 			Node currentNode = iterator.next();
 			if ((currentNode instanceof Entity)) {
+				if (!(currentNode.getListAttribute().isEmpty())) {
+				
 				entityListToMld.add((Entity) currentNode);
+				}
 			}
 		}
 		return entityListToMld;
-	}
-	
-	
+	}	
+	/*
+	 * Here we take all the Association that are not empty from the modified mcd , convert them into Entities that 
+	 * we add to the mld
+	 */
 	public ArrayList<Entity>  addAssociationToMLD(MCD mcd) {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
 		AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCDGraph());
@@ -507,14 +547,13 @@ public class MLDManaging {
 		return entityListToMld;
 		
 	}
-	/**
-	  protected Object clone() throws CloneNotSupportedException{
-	      StudentData student = (StudentData) super.clone();
-	      student.contact = (Contact) contact.clone();
-	      return student;
-	   }**/
+
 	
 	
+	
+	
+	
+	//Here we join the two mld that we creat before
 	public ArrayList<Entity> ListForMld(MCD mcd){
 		MLD data = new MLD();
 		newMCD(mcd);
@@ -532,8 +571,11 @@ public class MLDManaging {
 	
 	
 
-	
+	/*
+	 * This this the method we call to convert the mcd to an mld
+	 */	
 	public void newMld(MCD mcd) throws  ClassNotFoundException, IOException{
+		//Here we decided to modify a clone of the initial mcd, because we don't wan't the inital mcd to be modify
 		MCD clonedEmp = mcd.deepClone();
 		ArrayList<Entity> AllEntities = new ArrayList<Entity>();
 		AllEntities =ListForMld(clonedEmp);
