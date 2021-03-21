@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
@@ -32,6 +33,7 @@ public class MLDPanel extends JPanel{
 	
     MLDPanel(MLD mld) throws BadLocationException{
     	init(mld);
+    	setBackground(Color.white);
     }
     
     
@@ -44,10 +46,10 @@ public class MLDPanel extends JPanel{
     	textPane.setOpaque(false);
           SimpleAttributeSet attributeSet = new SimpleAttributeSet();
           textPane.setCharacterAttributes(attributeSet, true);
-          Font font = new Font("Serif", Font.PLAIN, 18);
+          Font font = new Font("Times New Roman", Font.PLAIN, 18);
           textPane.setFont(font);
           StyledDocument doc = textPane.getStyledDocument();
-          Style style = textPane.addStyle("", null);
+          
           //JScrollPane scrollPane = new JScrollPane(textPane);
           textPane.setEditable(false);
           add(textPane);
@@ -62,6 +64,7 @@ public class MLDPanel extends JPanel{
         	  doc.insertString(doc.getLength(), "(", attributeSet);
         	ArrayList<Attribute> att= e.getListAttribute();
 			for(int i=0;i<att.size();i++) {
+				boolean containsNonpk=false;
 				a=0;
 				
 				if (att.get(i) instanceof MLDAttribute) {
@@ -91,14 +94,19 @@ public class MLDPanel extends JPanel{
 						a++;
 					}
 				}
-				if(((i+1)<att.size())&&(a!=0)&&((att.get(i)).isPrimaryKey())) {
-					doc.insertString(doc.getLength(), ",", attributeSet);
-				}	
-				else if ((att.get(i)).isPrimaryKey()&&((att.get(i-1)).isPrimaryKey())&&(a!=0)){
-					//doc.insertString(doc.getLength(), "!", attributeSet);
-					//ne rien mettre
+				
+				for(int k=0;k<att.size();k++) {
+					if(!(att.get(k)).isPrimaryKey()){
+							containsNonpk=true;
+					}
+
 				}
-				else if ((att.get(i)).isPrimaryKey()) {
+				
+				
+				if ((a!=0)&&(containsNonpk==true)) {
+					doc.insertString(doc.getLength(), ",", attributeSet);
+				}
+				else if(((a!=0)&&((i+1)<att.size()))) {
 					doc.insertString(doc.getLength(), ",", attributeSet);
 				}
 			}
