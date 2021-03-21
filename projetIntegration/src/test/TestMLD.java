@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
@@ -41,6 +42,7 @@ public class TestMLD extends JPanel{
     public void init(MLD mld) throws BadLocationException {
     	JTextPane textPane = new JTextPane();
         textPane.setOpaque(false);
+       
         
           SimpleAttributeSet attributeSet = new SimpleAttributeSet();
           textPane.setCharacterAttributes(attributeSet, true);
@@ -62,6 +64,7 @@ public class TestMLD extends JPanel{
         	  doc.insertString(doc.getLength(), "(", attributeSet);
         	ArrayList<Attribute> att= e.getListAttribute();
 			for(int i=0;i<att.size();i++) {
+				boolean containsNonpk=false;
 				a=0;
 				
 				if (att.get(i) instanceof MLDAttribute) {
@@ -91,16 +94,28 @@ public class TestMLD extends JPanel{
 						a++;
 					}
 				}
-				if(((i+1)<att.size())&&(a!=0)&&((att.get(i)).isPrimaryKey())) {
+				
+				for(int k=0;k<att.size();k++) {
+					if(!(att.get(k)).isPrimaryKey()){
+							containsNonpk=true;
+					}
+
+				}
+				
+				
+				if ((a!=0)&&(containsNonpk==true)) {
 					doc.insertString(doc.getLength(), ",", attributeSet);
-				}	
+				}
+				else if(((a!=0)&&((i+1)<att.size()))) {
+					doc.insertString(doc.getLength(), ",", attributeSet);
+				}
+
+				/**	
 				else if ((att.get(i)).isPrimaryKey()&&((att.get(i-1)).isPrimaryKey())&&(a!=0)){
 					//doc.insertString(doc.getLength(), "!", attributeSet);
 					//ne rien mettre
-				}
-				else if ((att.get(i)).isPrimaryKey()) {
-					doc.insertString(doc.getLength(), ",", attributeSet);
-				}
+				}**/
+				
 			}
 			for(int j=0;j<att.size();j++) {
 				a=0;

@@ -42,13 +42,9 @@ public class MCD implements Serializable{
 	}
 	
     public MCD deepClone() throws IOException, ClassNotFoundException {
-        // First serializing the object and its state to memory using ByteArrayOutputStream instead of FileOutputStream.
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bos);
         out.writeObject(this);
-
-        // And then deserializing it from memory using ByteArrayOutputStream instead of FileInputStream.
-        // Deserialization process will create a new object with the same state as in the serialized object,
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
         ObjectInputStream in = new ObjectInputStream(bis);
         return (MCD) in.readObject();

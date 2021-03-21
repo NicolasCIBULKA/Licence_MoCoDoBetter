@@ -115,17 +115,28 @@ public class MCDManaging {
 
 	// Remove a Node of the MCD
 	public void removeNode(Node node) throws NullNodeException {
+		List<DefaultEdge> toBeRemovedEdge = new ArrayList<>();
+		List<Node> toBeRemovedNode = new ArrayList<>();
 		if (mcd.getMCDGraph().containsVertex(node)) {
 			Set<DefaultEdge> edgeSet = mcd.getMCDGraph().edgesOf(node);
 			for (DefaultEdge edge : edgeSet) {
-				mcd.getMCDGraph().removeEdge(edge);
+				toBeRemovedEdge.add(edge);
+				//mcd.getMCDGraph().removeEdge(edge);
 			}
-			mcd.getMCDGraph().removeVertex(node);
+			toBeRemovedNode.add(node);
+			//mcd.getMCDGraph().removeVertex(node);
 		} else {
 			// Error - Node is not ine the Graph
 			throw new NullNodeException("Error - The node is not in the MCD");
 		}
-
+		
+		// removing elements
+		for(DefaultEdge edge1 : toBeRemovedEdge) {
+			mcd.getMCDGraph().removeEdge(edge1);
+		}
+		for(Node node1 : toBeRemovedNode) {
+			mcd.getMCDGraph().removeVertex(node1);
+		}
 	}
 
 	// Testing the existence of all the entities in the list

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.text.BadLocationException;
 
 import org.jgrapht.Graphs;
@@ -50,6 +51,11 @@ public class TestCommit {
 		Attribute at8 = new Attribute("Attribute8","int",false,true,false);
 		Attribute at9 = new Attribute("Attribute9","float",false,true,false);
 		Attribute at10 = new Attribute("Attribute10","int",false,false,false);
+		Attribute at11 = new Attribute("Attribute11","float",false,true,false);
+		Attribute at12 = new Attribute("Attribute12","int",false,false,false);
+		Attribute at13 = new Attribute("Attribute13","float",false,true,false);
+		Attribute at14 = new Attribute("Attribute14","int",false,false,false);
+		
 		
 		ArrayList<Attribute> liste1 = new ArrayList<Attribute>();
 		liste1.add(at1);
@@ -66,6 +72,13 @@ public class TestCommit {
 		ArrayList<Attribute> liste5 = new ArrayList<Attribute>();
 		liste5.add(at9);
 		liste5.add(at10);
+		ArrayList<Attribute> liste6 = new ArrayList<Attribute>();
+		liste6.add(at11);
+		liste6.add(at12);
+		ArrayList<Attribute> liste7 = new ArrayList<Attribute>();
+		liste7.add(at13);
+		liste7.add(at14);
+		
 		
 		
 		Entity e1 = new Entity("Entite1", liste1);
@@ -73,6 +86,9 @@ public class TestCommit {
 		Entity e3 = new Entity("Entite3", liste3);
 		Entity e4 = new Entity("Entite4", liste4);
 		Entity e5 = new Entity("Entite5", liste5);
+		Entity e6 = new Entity("Entite6", liste6);
+		Entity e7 = new Entity("Entite7", liste7);
+		
 		
 		
 		Cardinality ce1_a1= new Cardinality("0","N",e1.getName());
@@ -83,8 +99,15 @@ public class TestCommit {
 		Cardinality ce4_a2= new Cardinality("0","1",e4.getName());
 		
 		
-		Cardinality ce1_a3= new Cardinality("0","1",e1.getName());
-		Cardinality ce5_a3= new Cardinality("0","1",e5.getName());
+		Cardinality ce1_a3= new Cardinality("1","1",e1.getName());
+		Cardinality ce5_a3= new Cardinality("1","1",e5.getName());
+		
+		Cardinality ce6_a4= new Cardinality("e","N",e1.getName());
+		Cardinality ce61_a4= new Cardinality("g","N",e5.getName());
+		
+		Cardinality ce7_a5= new Cardinality("1","1",e1.getName());
+		Cardinality ce71_a5= new Cardinality("1","1",e5.getName());
+		
 		
 		
 		
@@ -101,10 +124,20 @@ public class TestCommit {
 		card3.add(ce1_a3);
 		card3.add(ce5_a3);
 		
+		ArrayList< Cardinality> card4 = new ArrayList< Cardinality>();
+		card4.add(ce6_a4);
+		card4.add(ce61_a4);
+		
+		ArrayList< Cardinality> card5 = new ArrayList< Cardinality>();
+		card5.add(ce7_a5);
+		card5.add(ce71_a5);
+		
 		
 		Association a1 = new Association("Association1", new ArrayList<Attribute>(), card);
 		Association a2 = new Association("Association2", new ArrayList<Attribute>(), card2);
 		Association a3 = new Association("Association3", new ArrayList<Attribute>(), card3);
+		Association a4 = new Association("Association4", new ArrayList<Attribute>(), card4);
+		Association a5 = new Association("Association5", new ArrayList<Attribute>(), card5);
 		
 		
 		
@@ -116,6 +149,11 @@ public class TestCommit {
 		manager.addNode(a2);
 		manager.addNode(a3);
 		manager.addNode(e5);
+		
+		manager.addNode(e6);
+		manager.addNode(e7);
+		manager.addNode(a4);
+		manager.addNode(a5);
 		
 		/**Attribute at1 = new Attribute("Attribute1","String",false,true,false);
 		Attribute at2 = new Attribute("Attribute2","int",false,false,false);
@@ -147,11 +185,19 @@ public class TestCommit {
 			
 			manager.connectNodes(e1, a3,ce1_a3);
 			manager.connectNodes(e5, a3,ce5_a3);
+			
+			manager.connectNodes(e6, a4,ce6_a4);
+			manager.connectNodes(e6, a4,ce61_a4);
+			
+			manager.connectNodes(e7, a5,ce7_a5);
+			manager.connectNodes(e7, a5,ce71_a5);
 		} catch (NullNodeException | ExistingEdgeException e) {
 			
 			e.printStackTrace();
 		}
 		MCD mcd=manager.getMCD();
+
+			
 		m.newMld(mcd);
 		mld=m.getMLD();
 		
