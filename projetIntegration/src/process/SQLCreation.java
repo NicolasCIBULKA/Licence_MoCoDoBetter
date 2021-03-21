@@ -23,12 +23,12 @@ public class SQLCreation {
 	 * @param path
 	 * @throws SQLTranscriptionException 
 	 */
-	public static void SQLConverter(MLD mld, String filename, Path path) throws SQLTranscriptionException {
+	public static void SQLConverter(MLD mld, Path path) throws SQLTranscriptionException {
 		// create the file
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path.toString()+"/"+filename+".sql"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path.toString() + ".sql"));
 			// print some comments 
-			writer.write("-- This is an autogenerate SQL file for PostgreSQL created by BetterThanMoCoDo\n");
+			writer.write("-- This is an autogenerate SQL file for PostgreSQL created by MoCoDo Better\n");
 			writer.write("-- To use it, you just have to copy/paste the code below in your Postgres DB manager to create your database\n");
 			
 			/*
@@ -173,7 +173,7 @@ public class SQLCreation {
 	public static String SQLPrevisualiser(MLD mld) {
 			String prevString = "";
 			// print some comments 
-			prevString+= "-- This is an autogenerate SQL file for PostgreSQL created by BetterThanMoCoDo\n";
+			prevString+= "-- This is an autogenerate SQL file for PostgreSQL created by MoCoDo Better\n";
 			prevString+=("-- To use it, you just have to copy/paste the code below in your Postgres DB manager to create your database\n");
 			
 			/*

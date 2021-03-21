@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -34,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
@@ -52,10 +54,12 @@ import exceptions.ExistingEdgeException;
 import exceptions.FileAlreadyExistException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
+import exceptions.SQLTranscriptionException;
 import exceptions.SaveWasInteruptedException;
 import process.Loading;
 import process.MCDManaging;
 import process.MLDManaging;
+import process.SQLCreation;
 import process.Saving;
 
 /**
@@ -80,8 +84,8 @@ public class GUI extends JFrame {
 
 	private int uniqueSuffix = 0;
 	private boolean isDisplayingMCD = true;
+	private String workingPath = null;
 
-	FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("stdd Files", "stdd");
 	private JFileChooser jfc = new JFileChooser();
 
 	private static final Dimension PANEL_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
@@ -98,7 +102,6 @@ public class GUI extends JFrame {
 	private JPanel topConfigPanel = new JPanel();
 	private JPanel bodyConfigPanel = new JPanel();
 	private JPanel bottomConfigPanel = new JPanel();
-	private JPanel sqlPanel = new JPanel();
 
 	private JTabbedPane associationTabbedPane = new JTabbedPane();
 
@@ -135,7 +138,8 @@ public class GUI extends JFrame {
 	private JMenu file = new JMenu("Fichier");
 	private JMenuItem newFile = new JMenuItem("Nouveau...");
 	private JMenuItem openFile = new JMenuItem("Ouvrir...");
-	private JMenuItem saveFile = new JMenuItem("Enregistrer...");
+	private JMenuItem saveFile = new JMenuItem("Enregistrer");
+	private JMenuItem saveFileAs = new JMenuItem("Enregistrer Sous...");
 	private JMenuItem exportFile = new JMenuItem("Exporter au format SQL...");
 
 	private JMenu edit = new JMenu("Edition");
@@ -157,14 +161,14 @@ public class GUI extends JFrame {
 
 		initLayout();
 		initActions();
-		jfc.setFileFilter(extensionFilter);
+
 	}
 
 	/**
 	 * Initialize the main frame
 	 */
 	public void initLayout() {
-		setTitle("Mocodo Better");
+		setTitle("MoCoDo Better");
 
 		selectedComponent = null;
 		Container contentPane = getContentPane();
@@ -173,7 +177,7 @@ public class GUI extends JFrame {
 		shapePanel = new ShapePanel();
 		shapePanel.addMouseMotionListener(clickManager);
 		shapePanel.addMouseListener(clickManager);
-		
+
 		iconPanel = new IconPanel();
 
 		jsp = new JScrollPane(shapePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -188,8 +192,6 @@ public class GUI extends JFrame {
 		zoomButton.setToolTipText("Zoomer");
 		dezoomButton.setPreferredSize(ICONBUTTON_SIZE);
 		dezoomButton.setToolTipText("Dézoomer");
-
-		
 
 		headPanel.add(iconPanel);
 		headPanel.add(zoomButton);
@@ -206,6 +208,7 @@ public class GUI extends JFrame {
 		file.add(newFile);
 		file.add(openFile);
 		file.add(saveFile);
+		file.add(saveFileAs);
 		file.addSeparator();
 		file.add(exportFile);
 
@@ -233,6 +236,7 @@ public class GUI extends JFrame {
 		setMaximumSize(MAX_FRAME_SIZE);
 		setSize(PANEL_SIZE);
 		setResizable(true);
+		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
 		iconPanel.repaint();
@@ -304,13 +308,15 @@ public class GUI extends JFrame {
 		about.addActionListener(new ActionAbout());
 		openFile.addActionListener(new OpenAction());
 		saveFile.addActionListener(new ActionSave());
+		saveFileAs.addActionListener(new ActionSave());
+		exportFile.addActionListener(new ExportAction());
 		quit.addActionListener(new QuitAction());
 		minimize.addActionListener(new MinimizeAction());
 		fullScreen.addActionListener(new FullScreenAction());
 
 		zoomButton.addActionListener(new ZoomAction());
 		dezoomButton.addActionListener(new DezoomAction());
-		
+
 		mcdView.addActionListener(new MCDAction());
 		mldView.addActionListener(new MLDAction());
 
@@ -414,7 +420,8 @@ public class GUI extends JFrame {
 				e1.printStackTrace();
 			}
 		}
-		System.out.println("[GUI]  Asso after MCDConnect : " + ((Association) mcdManager.getNodeFromName(shapesToBeConnected.get(0).getGroupName())).toString());
+		System.out.println("[GUI]  Asso after MCDConnect : "
+				+ ((Association) mcdManager.getNodeFromName(shapesToBeConnected.get(0).getGroupName())).toString());
 	}
 
 	/**
@@ -441,8 +448,6 @@ public class GUI extends JFrame {
 //			System.out.println("[GUI]  X : " + x + " Y : " + y);
 //			System.out.println("shapePanel X : " + shapePanel.getX() + " shapePanel Y : " + shapePanel.getY());
 
-			
-			
 			// Determining action to perform according to cursorState
 			// Only determining when cusrsor is not disabled with "none" status
 			if (!iconPanel.getCursorState().equals("none")) {
@@ -552,8 +557,8 @@ public class GUI extends JFrame {
 								boolean secondObjectType = shapesToDisconnect.get(1).isAnEntity();
 
 								// Braking links...
-								if (fisrtObjectType != secondObjectType
-										&& shapePanel.existLinkBetween(shapesToDisconnect.get(0), shapesToDisconnect.get(1))) {
+								if (fisrtObjectType != secondObjectType && shapePanel
+										.existLinkBetween(shapesToDisconnect.get(0), shapesToDisconnect.get(1))) {
 									try {
 										mcdManager.disconnectNodes(
 												shapePanel.getComponentMap().get(shapesToDisconnect.get(0)),
@@ -561,7 +566,8 @@ public class GUI extends JFrame {
 									} catch (NullNodeException | EdgesNotLinkedException e1) {
 										e1.printStackTrace();
 									}
-									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
+									System.out.println("[GUI]  Asso after MCDdisconnet : " + ((Association) mcdManager
+											.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
 									shapePanel.disconnectShapes(shapesToDisconnect);
 									repaint();
 
@@ -575,18 +581,16 @@ public class GUI extends JFrame {
 							}
 
 							break;
-							
+
 						case "deleteC":
-							
+
 							break;
-							
+
 						}
 					}
 				}
 			}
 		}
-		
-
 
 		public void mouseDragged(MouseEvent e) {
 
@@ -633,68 +637,73 @@ public class GUI extends JFrame {
 
 		}
 	}
-	
+
 	public class MCDAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if(!isDisplayingMCD) {
+			if (!isDisplayingMCD) {
 				isDisplayingMCD = true;
 				Container contentPane = getContentPane();
 				contentPane.removeAll();
 				contentPane.validate();
-				
+
 				contentPane.add(headPanel, BorderLayout.NORTH);
 				contentPane.add(jsp, BorderLayout.CENTER);
-				
+
 				contentPane.revalidate();
 				contentPane.repaint();
 			}
 
 		}
 	}
-	
+
 	public class MLDAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if(isDisplayingMCD) {
+			if (isDisplayingMCD) {
 				isDisplayingMCD = false;
-				
+
 				MLDManaging mldManager = new MLDManaging();
 				try {
 					mldManager.newMld(mcdManager.getMCD());
 				} catch (ClassNotFoundException e2) {
-					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				} catch (IOException e2) {
-					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
-				
-				
+
 				try {
 					MLDPanel mldPanel = new MLDPanel(mldManager.getMLD());
+					JTextArea sqlArea = new JTextArea();
+					sqlArea.setEditable(false);
+					sqlArea.setText(SQLCreation.SQLPrevisualiser(mldManager.getMLD()));
+
 					Container contentPane = getContentPane();
-					
+
 					JScrollPane jspMLD = new JScrollPane(mldPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+					jspMLD.setBorder(BorderFactory.createTitledBorder("Schéma relationnel"));
+					jspMLD.setPreferredSize(new Dimension(400,0));
 					
-					JSplitPane documentSplitPane = new JSplitPane(
-			                JSplitPane.HORIZONTAL_SPLIT, jspMLD, sqlPanel );
-					
+					JScrollPane jspSQL = new JScrollPane(sqlArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+					jspSQL.setBorder(BorderFactory.createTitledBorder("Prévisualisation SQL"));
+
+					JSplitPane documentSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, jspMLD, jspSQL);
+
 					contentPane.removeAll();
 					contentPane.validate();
-					
+
 					contentPane.add(headPanel, BorderLayout.NORTH);
 					contentPane.add(documentSplitPane, BorderLayout.CENTER);
-					
+
 					contentPane.revalidate();
 					contentPane.repaint();
-					
+
 				} catch (BadLocationException e1) {
 					e1.printStackTrace();
 				}
-				
-				
+
 			}
 
 		}
@@ -808,34 +817,38 @@ public class GUI extends JFrame {
 
 	class OpenAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			
+
+			FileNameExtensionFilter extensionFilterXML = new FileNameExtensionFilter("Fichiers xml", "xml");
+
 			jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-			jfc.setDialogTitle("Ouvrir un fichier .stdd");
+			jfc.setDialogTitle("Ouvrir un fichier .xml");
+			jfc.setFileFilter(extensionFilterXML);
 			jfc.setAcceptAllFileFilterUsed(false);
+			jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
 			int returnVal = jfc.showOpenDialog(GUI.this);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = jfc.getSelectedFile();
-				
+				workingPath = file.getPath();
+				theFrame.setTitle(workingPath + " - MoCoDo Better");
 				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
 				loadCoordinates(file, coordinatesMap);
 				Loading loader = new Loading(file.getAbsolutePath());
 				shapePanel.clear();
 				mcdManager = loader.getMcd();
 
-				setSP(coordinatesMap, loader);
-				LoadLinks(loader);
+				setShapePanel(coordinatesMap, loader);
+				loadLinks(loader);
 //				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
 //
 //			}
 				System.out.println(loader.getMcd().toString());
 			}
-			
-			
-			
+
 		}
-		
+
+		@SuppressWarnings("unchecked")
 		private void loadCoordinates(File file, Map<String, ArrayList<Float>> coordinatesMap) {
 			try {
 				BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()));
@@ -843,12 +856,12 @@ public class GUI extends JFrame {
 				String str;
 				ArrayList<Float> graphicalValuestmp = new ArrayList<Float>();
 
-				while (!(str = br.readLine()).equals("</Associations>") ) {
+				while (!(str = br.readLine()).equals("</Associations>")) {
 
 					if (str.equals("</Table>")) {
-						ArrayList<Float> graphicalValues = (ArrayList<Float>)graphicalValuestmp.clone();
-						coordinatesMap.put(name,graphicalValues );
-						
+						ArrayList<Float> graphicalValues = (ArrayList<Float>) graphicalValuestmp.clone();
+						coordinatesMap.put(name, graphicalValues);
+
 						graphicalValuestmp.removeAll(graphicalValuestmp);
 						System.out.println(coordinatesMap.get(name).size());
 
@@ -869,10 +882,12 @@ public class GUI extends JFrame {
 
 			} catch (IOException e) {
 				e.printStackTrace();
-			}			
+			}
 		}
-		private void setSP(Map<String, ArrayList<Float>> coordinatesMap, Loading loader) {
-			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(loader.getMcd().getMCD().getMCDGraph());
+
+		private void setShapePanel(Map<String, ArrayList<Float>> coordinatesMap, Loading loader) {
+			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(
+					loader.getMcd().getMCD().getMCDGraph());
 			while (iterator.hasNext()) {
 				Node currentNode = iterator.next();
 				System.out.println(currentNode.getName());
@@ -880,34 +895,35 @@ public class GUI extends JFrame {
 				Float x = coordinatesMap.get(currentNode.getName()).get(0);
 				Float y = coordinatesMap.get(currentNode.getName()).get(1);
 				if (currentNode instanceof Entity) {
-					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(
-							currentNode.getName(),x , y, true), currentNode);
-				} 
-				else if (currentNode instanceof Association) {
-					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(
-							currentNode.getName(),x , y, false), currentNode);
+					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(currentNode.getName(), x, y, true),
+							currentNode);
+				} else if (currentNode instanceof Association) {
+					shapePanel.getComponentMap().put(shapePanel.addShapeGroup(currentNode.getName(), x, y, false),
+							currentNode);
 				}
 
 			}
 		}
 
-		private void LoadLinks(Loading loader) {
-			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(loader.getMcd().getMCD().getMCDGraph());
-			ArrayList<ShapeGroup> cardinality= new ArrayList<ShapeGroup>();
+		@SuppressWarnings("unchecked")
+		private void loadLinks(Loading loader) {
+			AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(
+					loader.getMcd().getMCD().getMCDGraph());
+			ArrayList<ShapeGroup> cardinality = new ArrayList<ShapeGroup>();
 			ShapeGroup asso = null;
 			while (iterator.hasNext()) {
 				Node currentNode = iterator.next();
 				if (currentNode instanceof Association) {
 					for (Cardinality card : ((Association) currentNode).getCardinalityList()) {
-						for(ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
-							if(shape.getGroupName().equals(card.getNomEntity())) {
+						for (ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
+							if (shape.getGroupName().equals(card.getNomEntity())) {
 								cardinality.add(shape);
 							}
 						}
 					}
-					for(ShapeGroup assoshape : shapePanel.getComponentMap().keySet()) {
-						if(assoshape.getGroupName().equals(currentNode.getName())) {
-							asso= assoshape;
+					for (ShapeGroup assoshape : shapePanel.getComponentMap().keySet()) {
+						if (assoshape.getGroupName().equals(currentNode.getName())) {
+							asso = assoshape;
 							shapePanel.getLinkMap().put(asso, (ArrayList<ShapeGroup>) cardinality.clone());
 						}
 					}
@@ -919,7 +935,8 @@ public class GUI extends JFrame {
 
 	class ActionSave implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-
+			
+			// Preparing the saving by filling
 			Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
 			for (ShapeGroup shape : shapePanel.getComponentMap().keySet()) {
 				ArrayList<Float> position = new ArrayList<Float>();
@@ -930,14 +947,85 @@ public class GUI extends JFrame {
 
 				coordinatesMap.put(shape.getGroupName(), position);
 			}
-			try {
-				new Saving("/Users/ryzentosh/Fac/Cours L3 I/Semestre 6/Projet d'intégration/essai",
-						mcdManager.getMCD(), coordinatesMap);
-			} catch (SaveWasInteruptedException e1) {
-				e1.printStackTrace();
-			} catch (FileAlreadyExistException e1) {
-				e1.printStackTrace();
+			jfc.setDialogType(JFileChooser.SAVE_DIALOG);
+			jfc.setFileFilter(new FileNameExtensionFilter("Fichiers xml", "xml"));
+			jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			jfc.setAcceptAllFileFilterUsed(false);
+			
+			// Save as
+			if(workingPath == null) {
+				
+				jfc.setDialogTitle("Enregistrer sous");
+				
+				int returnVal = jfc.showSaveDialog(GUI.this);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = jfc.getSelectedFile();
+					workingPath = file.getPath();
+					theFrame.setTitle(workingPath + " - MoCoDo Better");
+					try {
+						new Saving(workingPath,
+								mcdManager.getMCD(), coordinatesMap, true);
+					} catch (SaveWasInteruptedException e1) {
+						e1.printStackTrace();
+					} catch (FileAlreadyExistException e1) {
+						e1.printStackTrace();
+					}
+				}
+					
+					
+			}else {	// Save
+				jfc.setDialogTitle("Enregistrer");
+				int returnVal = jfc.showSaveDialog(GUI.this);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = jfc.getSelectedFile();
+					workingPath = file.getPath();
+					theFrame.setTitle(workingPath + " - MoCoDo Better");
+					
+					try {
+						new Saving(workingPath,
+								mcdManager.getMCD(), coordinatesMap, false);
+						
+					} catch (SaveWasInteruptedException e1) {
+						e1.printStackTrace();
+					} catch (FileAlreadyExistException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
 			}
+			
+			
+		}
+	}
+
+	class ExportAction implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+//			FileNameExtensionFilter extensionFilterSQL = new FileNameExtensionFilter("Fichiers sql", "sql");
+
+			jfc.setDialogType(JFileChooser.SAVE_DIALOG);
+			jfc.setDialogTitle("Export SQL");
+			jfc.setFileFilter(new FileNameExtensionFilter("Fichiers sql", "sql"));
+			jfc.setAcceptAllFileFilterUsed(false);
+			jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+			int returnVal = jfc.showSaveDialog(GUI.this);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = jfc.getSelectedFile();
+
+				MLDManaging mldManager = new MLDManaging();
+//				System.out.println("name : " + file.getName() + "\n Path : " + file.toPath());
+
+				try {
+					SQLCreation.SQLConverter(mldManager.getMLD(), file.toPath());
+				} catch (SQLTranscriptionException e1) {
+					e1.printStackTrace();
+				}
+			}
+
 		}
 	}
 
