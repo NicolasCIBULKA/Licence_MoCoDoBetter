@@ -705,7 +705,7 @@ public class GUIMacOs extends JFrame {
 		}
 	}
 
-	// TODO [GUIMacOS] Fatia doit terminer l'implémentation des associations réflexives, ça fait cracher le mld
+	// TODO [GUIMacOS] Fatia doit terminer l'implémentation des associations réflexives, ça fait cracher le mld ??
 	public class MLDAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
