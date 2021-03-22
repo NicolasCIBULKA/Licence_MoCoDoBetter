@@ -57,6 +57,7 @@ import exceptions.EdgesNotLinkedException;
 import exceptions.ExistingEdgeException;
 import exceptions.FileAlreadyExistException;
 import exceptions.InvalidNodeLinkException;
+import exceptions.NotTheRightFileFormatException;
 import exceptions.NullNodeException;
 import exceptions.SQLTranscriptionException;
 import exceptions.SaveWasInteruptedException;
@@ -250,7 +251,6 @@ public class GUIMacOS extends JFrame {
 		setMaximumSize(MAX_FRAME_SIZE);
 		setSize(PANEL_SIZE);
 		setResizable(true);
-		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
 		iconPanel.repaint();
@@ -885,17 +885,18 @@ public class GUIMacOS extends JFrame {
 				workingPath = file.getPath();
 				theFrame.setTitle(workingPath + " - MoCoDo Better");
 				Map<String, ArrayList<Float>> coordinatesMap = new HashMap<String, ArrayList<Float>>();
-				loadCoordinates(file, coordinatesMap);
-				Loading loader = new Loading(file.getAbsolutePath());
-				shapePanel.clear();
-				mcdManager = loader.getMcd();
+				try {
+					loadCoordinates(file, coordinatesMap);
 
-				setShapePanel(coordinatesMap, loader);
-				loadLinks(loader);
-//				mcdManager.getMCD().setMCDGraph((Pseudograph<Node, DefaultEdge>) loader.getMcdManager().getMCD().getMCDGraph());
-//
-//			}
-				System.out.println(loader.getMcd().toString());
+					Loading loader = new Loading(file.getAbsolutePath());
+					shapePanel.clear();
+					mcdManager = loader.getMcd();
+					setShapePanel(coordinatesMap, loader);
+					loadLinks(loader);
+				}catch (NotTheRightFileFormatException e1) {
+					JOptionPane d = new JOptionPane();
+					d.showMessageDialog( null, "This file is not Mocodo Better Compatible");
+				}
 			}
 
 		}

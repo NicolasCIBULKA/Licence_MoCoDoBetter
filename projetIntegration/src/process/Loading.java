@@ -14,6 +14,8 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import data.Association;
 import data.Attribute;
 import data.Cardinality;
@@ -22,74 +24,45 @@ import data.Node;
 import exceptions.EdgesNotLinkedException;
 import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
+import exceptions.NotTheRightFileFormatException;
 import exceptions.NullNodeException;
 /**
- * 
+ * This class load an xml file 
  * @author Etienne Coutenceau
  *
  */
 public class Loading {
 
 	private MCDManaging mcd;
-	private HashMap<String, Node> listNode;
+	private ArrayList<Node> listNode;
 	private HashMap<String,ArrayList<Cardinality>> listCard;
 
-	public Loading(String path) {
+	public Loading(String path) throws NotTheRightFileFormatException {
 		this.mcd = new MCDManaging();
-		this.listNode = new HashMap<String, Node>();
+		this.listNode = new ArrayList<Node>();
 		this.listCard = new HashMap<String,ArrayList<Cardinality>>();
 		extract(path);
 		addNodes();
 		addCardinality();
 	}
-
+	/**
+	 * Add the extracted Nodes in the MCD
+	 */
 	private void addNodes() {
-		for (HashMap.Entry<String, Node> set : listNode.entrySet()) {
-			mcd.addNode(set.getValue());
+		for(Node node : listNode) {
+			mcd.addNode(node);
 		}
 	}
-
+	/**
+	 * Loop through the hashMap listCard and it's cardinality to add each connections
+	 */
 	private void addCardinality() {
 		try {
 			Set<Entry<String, ArrayList<Cardinality>>> tempNode = listCard.entrySet();
 			for (Entry<String, ArrayList<Cardinality>> set : tempNode) {
 				ArrayList<Cardinality> tempList = set.getValue();
 				for(Cardinality set2 : tempList) {
-					Association asso = (Association) mcd.getNodeFromName(set.getKey());
-					Entity entity = (Entity) mcd.getNodeFromName(set2.getNomEntity());
-					mcd.connectNodes(asso,entity ,set2);
-
-				
-				}
-				
-				
-			}
-			Set<Entry<String, ArrayList<Cardinality>>> tempNode2 = listCard.entrySet();
-			for (Entry<String, ArrayList<Cardinality>> set : tempNode2) {
-				
-				ArrayList<Cardinality> tempList = set.getValue();
-				for(Cardinality set2 : tempList) {
-					System.out.println("\n\n\n\n3");
-					System.out.println("\n"+set2.toString()+"\n");
-					AbstractGraphIterator<Node, DefaultEdge> iterator = new BreadthFirstIterator<>(mcd.getMCD().getMCDGraph());
-					while (iterator.hasNext()) {
-						Node currentNode = iterator.next();
-						if (currentNode instanceof Association) {
-							System.out.println("la taille de la liste de card : "+((Association) currentNode).getCardinalityList().size());
-							System.out.println("L'association : "+currentNode.getName());
-							for (Cardinality card : ((Association) currentNode).getCardinalityList()) {
-								System.out.println("\n passage : "+card.toString()+"\n");
-								if(!card.getNomEntity().equalsIgnoreCase(set2.getNomEntity())) {
-									try {
-										mcd.disconnectNodes(mcd.getNodeFromName(currentNode.getName()), mcd.getNodeFromName(set2.getNomEntity()));
-									} catch (EdgesNotLinkedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-								}
-							}
-						}
-					}
+					mcd.connectNodes(mcd.getNodeFromName(set.getKey()),mcd.getNodeFromName(set2.getNomEntity()) ,set2);
 				}
 			}
 		} catch (NullNodeException e) {
@@ -100,20 +73,34 @@ public class Loading {
 			e.printStackTrace();
 		}
 	}
-
-	private void extract(String path) {
+	/**
+	 * Initiate the buffered Reader for extracting the MCD
+	 * @param path
+	 * @throws NotTheRightFileFormatException 
+	 */
+	private void extract(String path) throws NotTheRightFileFormatException {
 		try {
 			BufferedReader br = Files.newBufferedReader(Paths.get(path));
-			extractEntity(br);
-			extractAssociation(br);
-			extractCardinality(br);
+			String str = br.readLine();
+			str = br.readLine();
+			if(str.equals("<MCD>")) {
+				extractEntity(br);
+				extractAssociation(br);
+				extractCardinality(br);
+			}
+			else {
+				throw new NotTheRightFileFormatException("This file is not Mocodo Better Compatible");
+			}
 			br.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		} 
 
 	}
-
+	/**
+	 * Read the xml file and extract the entities
+	 * @param br
+	 */
 	private void extractEntity(BufferedReader br) {
 		try {
 			String name = null;
@@ -125,7 +112,7 @@ public class Loading {
 					ArrayList<Attribute> att2 = (ArrayList<Attribute>) att.clone();
 
 					Entity a = new Entity(name, att2);
-					listNode.put(name, a);
+					listNode.add(a);
 					att.clear();
 				}
 				if (str.equals("<Name>")) {
@@ -148,7 +135,10 @@ public class Loading {
 		}
 
 	}
-
+	/**
+	 * Read the xml file and extract the associations
+	 * @param br
+	 */
 	private void extractAssociation(BufferedReader br) {
 		try {
 			String name = null;
@@ -161,8 +151,9 @@ public class Loading {
 
 				if (str.equals("</Table>")) {
 					ArrayList<Attribute> att2 = (ArrayList<Attribute>) att.clone();
-					Association a = new Association(name, att2, card);
-					listNode.put(name, a);
+					ArrayList<Cardinality> card2 = (ArrayList<Cardinality>) card.clone();
+					Association a = new Association(name, att2, card2);
+					listNode.add(a);
 					att.clear();
 				}
 				if (str.equals("<Name>")) {
@@ -183,7 +174,10 @@ public class Loading {
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 * Read the xml file and extract the cardinality and the association name
+	 * @param br
+	 */
 	private void extractCardinality(BufferedReader br) {
 		try {
 			String str;
@@ -223,7 +217,7 @@ public class Loading {
 	/**
 	 * @return the listNode
 	 */
-	public HashMap<String, Node> getListNode() {
+	public ArrayList<Node> getListNode() {
 		return listNode;
 	}
 
