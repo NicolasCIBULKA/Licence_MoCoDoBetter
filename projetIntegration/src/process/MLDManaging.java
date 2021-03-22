@@ -35,13 +35,16 @@ public class MLDManaging {
 		this.mld = mld;
 	}
 
-		
+
 	
-	/*
+	
+	/**
 	 * With this method we're going to add foreign keys in the Entity that are supposed to receive some
 	 * There is different case where we can add foreign keys which are:
 	 * 	[*,n]/[*,1]
 	 * 	[0,1]/[1,1]
+	 * @param mcd
+	 * @return
 	 */
 	public MCD  newtoMCD(MCD mcd) {
 		ArrayList<Attribute> liste,liste1;
@@ -154,9 +157,15 @@ public class MLDManaging {
 	}
 	
 	
-	/*
+
+	
+	
+	
+	/**
 	 *Here we treat the case where the association is [1,1]/[1,1]
 	 * In this case we ask to the user how he would like to treat it
+	 * @param mcd
+	 * @return
 	 */
 	public MCD Adding11(MCD mcd) {
 		Association association;
@@ -185,8 +194,8 @@ public class MLDManaging {
 						String secondEntity=e2.getName();
 						String twoOfThem="Les deux";
 						String[] choices = {firstEntity , secondEntity,twoOfThem};
-					    String input = (String) JOptionPane.showInputDialog(null, "Choose now...",
-					        "Quelle Entité a le fonctionnement le plus important? ", JOptionPane.QUESTION_MESSAGE, null,choices,
+					    String input = (String) JOptionPane.showInputDialog(null, "Quelle Entité a le fonctionnement le plus important?\nSi n'en choissez aucune, aucune cle ne sera ajoute",
+					        "Votre choix?", JOptionPane.QUESTION_MESSAGE, null,choices,
 					        choices[1]); // Initial choice
 					    System.out.println(input);
 					    if (input==firstEntity) {
@@ -298,12 +307,15 @@ public class MLDManaging {
 
 	
 	
-	/*
+	
+	/**
 	 * With this method we're going to add foreign keys in the Associations that are supposed to receive some
 	 * There is different case where we can add foreign keys which are:
 	 * 	Association that are connected to 3 entities
 	 * 	[*,N]/[*,N]
-	 * [0,1]/[0,1]
+	 * 	[0,1]/[0,1]
+	 * @param mcd
+	 * @return
 	 */
 	public MCD  newAssociation(MCD mcd) {
 		MLDAttribute mldA;
@@ -399,11 +411,12 @@ public class MLDManaging {
 		return mcd;
 	}
 	
+
 	
-	
-	
-	/*
+	/**
 	 * With this function treat the case of reflexive association
+	 * @param mcd
+	 * @return
 	 */
 	public MCD  reAssociation(MCD mcd) {
 		boolean newAtt = true;
@@ -502,8 +515,12 @@ public class MLDManaging {
 	
 	
 	
-	/*
-	 * With this function we take an initial mcd that we modify through different function
+	
+	
+	/**
+	 *  With this function we take an initial mcd that we modify through different function
+	 * @param mcd
+	 * @return
 	 */
 	public MCD newMCD(MCD mcd) {
 		MCD firstMCD=newtoMCD(mcd);
@@ -519,8 +536,11 @@ public class MLDManaging {
 	
 	
 	
-	/*
+	
+	/**
 	 * Here we take all the Enties of the mcd that we modify
+	 * @param mcd
+	 * @return
 	 */
 	public ArrayList<Entity>  addEntityToMLD(MCD mcd) {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
@@ -536,9 +556,13 @@ public class MLDManaging {
 		}
 		return entityListToMld;
 	}	
-	/*
+
+	
+	/**
 	 * Here we take all the Association that are not empty from the modified mcd , convert them into Entities that 
 	 * we add to the mld
+	 * @param mcd
+	 * @return
 	 */
 	public ArrayList<Entity>  addAssociationToMLD(MCD mcd) {
 		ArrayList<Entity> entityListToMld=new ArrayList<Entity>();
@@ -574,7 +598,12 @@ public class MLDManaging {
 	
 	
 	
-	//Here we join the two mld that we creat before
+	
+	/**
+	 * Here we join the two mld that we create before (The one with the initial entities and the other with the associations)
+	 * @param mcd
+	 * @return
+	 */
 	public ArrayList<Entity> ListForMld(MCD mcd){
 		MLD data = new MLD();
 		newMCD(mcd);
@@ -592,9 +621,13 @@ public class MLDManaging {
 	
 	
 
-	/*
+	
+	/**
 	 * This this the method we call to convert the mcd to an mld
-	 */	
+	 * @param mcd
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
 	public void newMld(MCD mcd) throws  ClassNotFoundException, IOException{
 		//Here we decided to modify a clone of the initial mcd, because we don't wan't the inital mcd to be modify
 		MCD clonedEmp = mcd.deepClone();
@@ -603,6 +636,7 @@ public class MLDManaging {
 		mld = new MLD(AllEntities);
 	}
 	
+
 	public MLD getMLD(){
 		return mld;
 	}

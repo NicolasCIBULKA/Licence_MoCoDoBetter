@@ -26,6 +26,7 @@ import exceptions.ExistingEdgeException;
 import exceptions.InvalidNodeLinkException;
 import exceptions.NullNodeException;
 import exceptions.SQLTranscriptionException;
+import process.Loading;
 import process.MCDManaging;
 import process.MLDManaging;
 import process.SQLCreation;
@@ -38,6 +39,8 @@ public class TestCommit {
 		MLDManaging m = new MLDManaging();
 		MLD mld = new MLD();
 		SQLCreation sql = new SQLCreation();
+		String path="/Users/fatiatravaille/Desktop/Desktop.xml";
+		Loading l = new Loading(path);
 		
 		
 		// Entities
@@ -302,6 +305,8 @@ public class TestCommit {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
         frame.setVisible(true);
+        
+        
 		
 		
 
