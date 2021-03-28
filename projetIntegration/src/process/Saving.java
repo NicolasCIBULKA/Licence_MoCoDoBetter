@@ -105,6 +105,17 @@ public class Saving {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(path + ".xml"));
 			
 			writer.write("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+			writer.write("<!DOCTYPE MCD [\n"
+					+ "<!ELEMENT MCD (Entities+, Associations+, Cardinalities+)>\n"
+					+ "<!ELEMENT Entities (Table*)>\n"
+					+ "<!ELEMENT Associations (Table*)>\n"
+					+ "<!ELEMENT Table (Name+, Graphical+, Attribut*)>\n"
+					+ "<!ELEMENT Name (#PCDATA)>\n"
+					+ "<!ELEMENT Graphical (#PCDATA)>\n"
+					+ "<!ELEMENT Attribut (#PCDATA)>\n"
+					+ "<!ELEMENT Cardinalities (Cardinality*)>\n"
+					+ "<!ELEMENT Cardinality (#PCDATA)>\n"
+					+"]>\n");
 			writer.write("<MCD>\n");
 			writer.write("<Entities>\n");
 			if (!listEntity.isEmpty()) {

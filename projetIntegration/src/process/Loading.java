@@ -82,7 +82,10 @@ public class Loading {
 		try {
 			BufferedReader br = Files.newBufferedReader(Paths.get(path));
 			String str = br.readLine();
-			str = br.readLine();
+			for(int i=0; i<12;i++) {
+				str = br.readLine();
+
+			}
 			if(str.equals("<MCD>")) {
 				extractEntity(br);
 				extractAssociation(br);
