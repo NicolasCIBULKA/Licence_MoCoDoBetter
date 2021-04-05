@@ -12,7 +12,6 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 
 /**
  * IconPanel, which inherits from JPanel, manages its iconGroups.
@@ -27,14 +26,6 @@ public class IconPanel extends JPanel {
 	private ClickManager clickManager = new ClickManager();
 
 	private List<IconGroup> componentList = new ArrayList<IconGroup>();
-
-	private JToggleButton selectionButton = new JToggleButton();
-	private JToggleButton handButton = new JToggleButton();
-	private JToggleButton newEntityButton = new JToggleButton();
-	private JToggleButton newAssociationButton = new JToggleButton();
-	private JToggleButton newLinkButton = new JToggleButton();
-	private JToggleButton deleteComponentButton = new JToggleButton();
-	private JToggleButton deleteLinkButton = new JToggleButton();
 	
 	private String cursorState = new String("selection");
 	
@@ -143,13 +134,6 @@ public class IconPanel extends JPanel {
 	}
 
 	/**
-	 * @return the selectionButton
-	 */
-	public JToggleButton getSelectionButton() {
-		return selectionButton;
-	}
-
-	/**
 	 * Setting the right iconGroup at pressed state, unselecting the former selected
 	 * iconGroup. The pressed state of an iconGroup lets it's selectionShape to be
 	 * drawn and it's pressedIcon to be shown. Repaints IconPanel when called.
@@ -176,48 +160,6 @@ public class IconPanel extends JPanel {
 			}
 		}
 		repaint();
-	}
-
-	/**
-	 * @return the handButton
-	 */
-	public JToggleButton getHandButton() {
-		return handButton;
-	}
-
-	/**
-	 * @return the newEntityButton
-	 */
-	public JToggleButton getNewEntityButton() {
-		return newEntityButton;
-	}
-
-	/**
-	 * @return the newAssociationButton
-	 */
-	public JToggleButton getNewAssociationButton() {
-		return newAssociationButton;
-	}
-
-	/**
-	 * @return the newLinkButton
-	 */
-	public JToggleButton getNewLinkButton() {
-		return newLinkButton;
-	}
-
-	/**
-	 * @return the deleteComponentButton
-	 */
-	public JToggleButton getDeleteComponentButton() {
-		return deleteComponentButton;
-	}
-
-	/**
-	 * @return the deleteLinkButton
-	 */
-	public JToggleButton getDeleteLinkButton() {
-		return deleteLinkButton;
 	}
 
 	/**

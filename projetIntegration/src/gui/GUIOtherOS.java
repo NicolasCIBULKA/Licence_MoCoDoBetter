@@ -120,7 +120,7 @@ public class GUIOtherOS extends JFrame {
 	private JLabel jlaXR2 = new JLabel("X : 200");
 	private JLabel jlaYR2 = new JLabel("Y : 200");
 	private JLabel jlaSoftwareName = new JLabel("Mocodo better");
-	private JLabel jlaVersion = new JLabel("Version 0.8-10.03.21");
+	private JLabel jlaVersion = new JLabel("Version 1.0-05.04.21");
 	private JLabel jlaDEV1 = new JLabel("Dev : Barrachina Yann");
 	private JLabel jlaDEV2 = new JLabel("	   Cibulka Nicolas");
 	private JLabel jlaDEV3 = new JLabel("      Coutenceau Etienne");
@@ -420,18 +420,14 @@ public class GUIOtherOS extends JFrame {
 				mcdManager.connectNodes(shapePanel.getComponentMap().get(shapesToBeConnected.get(0)),
 						shapePanel.getComponentMap().get(shapesToBeConnected.get(1)),
 						new Cardinality("0", "1", shapesToBeConnected.get(1).getGroupName()));
-				System.out.println("[GUIMacOS]  shape1 entity : " + shapesToBeConnected.get(0).isAnEntity()
-						+ " ; shape2 entity : " + shapesToBeConnected.get(1).isAnEntity());
 
 				// Connecting objects, graphical part
 				// Depends on existing entries in the linkMap
 				if (shapePanel.getLinkMap().containsKey(shapesToBeConnected.get(0))) {
 
-					System.out.println("[GUIMacOS] linkTwoShapes()  Added a shape");
 					shapePanel.getLinkMap().get(shapesToBeConnected.get(0)).add(shapesToBeConnected.get(1));
 
 				} else {
-					System.out.println("[GUIMacOS] linkTwoShapes()  Added a couple key-value");
 
 					List<ShapeGroup> newLinkList = new ArrayList<ShapeGroup>();
 					newLinkList.add(shapesToBeConnected.get(1));
@@ -441,8 +437,6 @@ public class GUIOtherOS extends JFrame {
 				e1.printStackTrace();
 			}
 		}
-		System.out.println("[GUIMacOS]  Asso after MCDConnect : "
-				+ ((Association) mcdManager.getNodeFromName(shapesToBeConnected.get(0).getGroupName())).toString());
 	}
 
 	/**
@@ -466,8 +460,8 @@ public class GUIOtherOS extends JFrame {
 			 */
 //			y = e.getY() - HEIGHT_DIFFERENCE;
 			y = e.getY();
-//			System.out.println("[GUIMacOS]  X : " + x + " Y : " + y);
-//			System.out.println("shapePanel X : " + shapePanel.getX() + " shapePanel Y : " + shapePanel.getY());
+//			.println("[GUIMacOS]  X : " + x + " Y : " + y);
+//			.println("shapePanel X : " + shapePanel.getX() + " shapePanel Y : " + shapePanel.getY());
 
 			// Determining action to perform according to cursorState
 			// Only determining when cusrsor is not disabled with "none" status
@@ -511,8 +505,8 @@ public class GUIOtherOS extends JFrame {
 
 						if (component.getMainShape().contains(x, y)) {
 							selectedComponent = component;
-//							System.out.println("[GUIMacOS]  pointing another component");
-//							System.out.println("[GUIMacOS]  Component entity type ? " + selectedComponent.isAnEntity());
+//							.println("[GUIMacOS]  pointing another component");
+//							.println("[GUIMacOS]  Component entity type ? " + selectedComponent.isAnEntity());
 							jlaR1.setText(">>> " + selectedComponent.getGroupName() + " <<<");
 							jlaXR1.setText("X : " + selectedComponent.getX());
 							jlaYR1.setText("Y : " + selectedComponent.getY());
@@ -587,8 +581,6 @@ public class GUIOtherOS extends JFrame {
 									} catch (NullNodeException | EdgesNotLinkedException e1) {
 										e1.printStackTrace();
 									}
-									System.out.println("[GUIMacOS]  Asso after MCDdisconnet : " + ((Association) mcdManager
-											.getNodeFromName(shapesToDisconnect.get(0).getGroupName())).toString());
 									shapePanel.disconnectShapes(shapesToDisconnect);
 									repaint();
 
@@ -916,7 +908,6 @@ public class GUIOtherOS extends JFrame {
 						coordinatesMap.put(name, graphicalValues);
 
 						graphicalValuestmp.removeAll(graphicalValuestmp);
-						System.out.println(coordinatesMap.get(name).size());
 
 					}
 					if (str.equals("<Name>")) {
@@ -943,7 +934,6 @@ public class GUIOtherOS extends JFrame {
 					loader.getMcd().getMCD().getMCDGraph());
 			while (iterator.hasNext()) {
 				Node currentNode = iterator.next();
-				System.out.println(currentNode.getName());
 
 				Float x = coordinatesMap.get(currentNode.getName()).get(0);
 				Float y = coordinatesMap.get(currentNode.getName()).get(1);
@@ -1070,7 +1060,6 @@ public class GUIOtherOS extends JFrame {
 				File file = jfc.getSelectedFile();
 
 				MLDManaging mldManager = new MLDManaging();
-//				System.out.println("name : " + file.getName() + "\n Path : " + file.toPath());
 
 				try {
 					SQLCreation.SQLConverter(mldManager.getMLD(), file.toPath());

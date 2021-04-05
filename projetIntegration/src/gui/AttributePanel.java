@@ -113,7 +113,6 @@ public class AttributePanel extends JPanel {
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		
-		System.out.println("entity table column count : " + model.getColumnCount());
 	}
 
 	private void initAssociationTable() {
@@ -163,7 +162,6 @@ public class AttributePanel extends JPanel {
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		
-		System.out.println("asso table column count : " + model.getColumnCount());
 	}
 
 	private void initActions() {

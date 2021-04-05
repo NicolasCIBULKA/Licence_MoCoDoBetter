@@ -97,9 +97,6 @@ public class ShapePanel extends JPanel {
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		// Painting entities, associations, links and cardinalities
-		System.out.println("[ShapePanel]  ---- " + componentMap.size() + " component(s)");
-
-		System.out.println(linkMapToString());
 		drawLinks();
 
 		for (ShapeGroup component : componentMap.keySet()) {
@@ -248,14 +245,12 @@ public class ShapePanel extends JPanel {
 	private void drawLinks() {
 
 		for (ShapeGroup shape : linkMap.keySet()) {
-			System.out.println("[ShapePanel]  Cardinality : " + ((Association) componentMap.get(shape)).toString());
 			float associationCenterX = (float) shape.getMainShape().getBounds2D().getCenterX();
 			float associationCenterY = (float) shape.getMainShape().getBounds2D().getCenterY();
 
 			List<ShapeGroup> testList = new ArrayList<ShapeGroup>();
 			testList = linkMap.get(shape);
 
-			System.out.println("[ShapePanel]  testList.size() : " + testList.size());
 
 			// Case of two links between one Association-Entity couple
 			if (testList.size() == 2 && testList.get(0) == testList.get(1)) {
@@ -275,7 +270,6 @@ public class ShapePanel extends JPanel {
 			} else {
 				// Standard drawing
 				for (ShapeGroup linkedShape : linkMap.get(shape)) {
-					System.out.println("[ShapePanel]  Entity : " + linkedShape.getGroupName());
 
 					float entityCenterX = (float) linkedShape.getMainShape().getBounds2D().getCenterX();
 					float entityCenterY = (float) linkedShape.getMainShape().getBounds2D().getCenterY();
@@ -359,7 +353,7 @@ public class ShapePanel extends JPanel {
 		int arcAngle1;
 		int startAngle2;
 		int arcAngle2;
-//		System.out.println("(1) x = " + x1 + " y = " + y1 + " width = " + width1 + " height = " + height1);
+//		.println("(1) x = " + x1 + " y = " + y1 + " width = " + width1 + " height = " + height1);
 
 		// TODO : problème avec la partie jaune, à voir
 		// If the association and the entity are close to be vertically or horizontally
@@ -463,9 +457,9 @@ public class ShapePanel extends JPanel {
 			}
 			height1 *= 2;
 
-//			System.out.println("Newx = " + x1 + " Newy = " + y1 + " Newwidth = " + width1 + " Newheight = " + height1);
+//			.println("Newx = " + x1 + " Newy = " + y1 + " Newwidth = " + width1 + " Newheight = " + height1);
 
-//			System.out.println("x = " + x2 + " y = " + y2 + " width = " + width2 + " height = " + height2);
+//			.println("x = " + x2 + " y = " + y2 + " width = " + width2 + " height = " + height2);
 
 			// Computing coordinates for second arc
 			height2 *= 2;
@@ -715,7 +709,7 @@ public class ShapePanel extends JPanel {
 			g2d.setColor(Color.BLACK);
 			g2d.drawString(cardinalityValues, newEndX + 2, newEndY);
 //				g2d.drawString("newAngle in degrees = " + Math.toDegrees(newAngle), 200, 100);
-//				System.out.println("newEndX = " + newEndX);
+//				.println("newEndX = " + newEndX);
 //			}
 
 		}
@@ -734,15 +728,12 @@ public class ShapePanel extends JPanel {
 			if (testList.size() == 2) {
 
 				if ((testList.get(0) == testList.get(1)) || testList.contains(shapesToBeLinked.get(1))) {
-					System.out.println("[ShapePanel] canBeLinked()  (2) testList.contains(linkedShape) x2");
-					System.out.println("	OR		  (2) testList.contains(linkedShape) x1");
 					result = false;
 				}
 
 			} else if (testList.size() >= 3) {
 
 				if (testList.contains(shapesToBeLinked.get(1))) {
-					System.out.println("[ShapePanel] canBeLinked()  (3+) testList.contains(linkedShape) already");
 					result = false;
 				}
 			}
@@ -789,7 +780,6 @@ public class ShapePanel extends JPanel {
 
 			float percentWidth = (float) newWidth / mainPanel.getWidth() * 100;
 			float percentHeight = (float) newHeight / mainPanel.getHeight() * 100;
-			System.out.println("[Zoom] propWidth = " + percentWidth + "% ; propHeight = " + percentHeight + "%");
 
 //			int newFontSize = (int) (mainFont.getSize2D() / 100 * percentWidth);
 			int newFontSize = mainFont.getSize() + 1;
@@ -797,8 +787,7 @@ public class ShapePanel extends JPanel {
 			mainFont = new Font(Font.DIALOG, Font.PLAIN, (int) newFontSize);
 			mainPanel.setFont(mainFont);
 
-			System.out.println("[Zoom] Font size = " + mainFont.getSize2D());
-//			System.out.println("[Zoom] Font size not int = " + mf);
+//			.println("[Zoom] Font size not int = " + mf);
 
 			for (ShapeGroup shape : componentMap.keySet()) {
 				float x = shape.getX() / 100 * percentWidth;
@@ -833,22 +822,17 @@ public class ShapePanel extends JPanel {
 			int newWidth = mainPanel.getWidth() - 200;
 			int newHeight = mainPanel.getHeight() - 100;
 
-			System.out.println("[Dezoom]  frameWidth = " + frameCurrentSize.getWidth() + "px ; frameHeight = "
-					+ frameCurrentSize.getHeight() + "px");
-			System.out.println("[Dezoom]  futurWidth = " + newWidth + "px ; futurHeight = " + newHeight + "px");
 			if (newWidth >= frameCurrentSize.getWidth() && newHeight >= frameCurrentSize.getHeight()) {
 
 				float percentWidth = (float) newWidth / mainPanel.getWidth() * 100;
 				float percentHeight = (float) newHeight / mainPanel.getHeight() * 100;
-				System.out.println("[Dezoom]  propWidth = " + percentWidth + "% ; propHeight = " + percentHeight + "%");
 
 //				int newFontSize = (int) (testFont.getSize2D() / 100 * percentWidth);
 				int newFontSize = mainFont.getSize() - 1;
 //				float nfs = testFont.getSize2D() / 100 * percentWidth;
 				mainFont = new Font(Font.DIALOG, Font.PLAIN, (int) newFontSize);
 				mainPanel.setFont(mainFont);
-				System.out.println("[Dezoom] (144) Font size = " + mainFont.getSize2D());
-//				System.out.println("[Dezoom] (145) Font size not int = " + nfs);
+//				.println("[Dezoom] (145) Font size not int = " + nfs);
 
 				for (ShapeGroup shape : componentMap.keySet()) {
 					float x = shape.getX() / 100 * percentWidth;
@@ -891,7 +875,6 @@ public class ShapePanel extends JPanel {
 		if (linkMap.get(association).size() == 2) {
 			if (linkMap.get(association).get(0) == linkMap.get(association).get(1)) {
 				result = true;
-				System.out.println("[ShapePanel]  " + association.getGroupName() + " is a double linked asso");
 			}
 		}
 
@@ -912,8 +895,6 @@ public class ShapePanel extends JPanel {
 		if (linkMap.containsKey(association)) {
 			if (linkMap.get(association).contains(entity)) {
 				result = true;
-				System.out.println(
-						"[ShapePanel]  " + association.getGroupName() + " is linked to " + entity.getGroupName());
 			}
 		}
 
@@ -923,7 +904,6 @@ public class ShapePanel extends JPanel {
 	public void disconnectShapes(List<ShapeGroup> shapeList) {
 
 		if (linkMap.containsKey(shapeList.get(0))) {
-			System.out.println("--- linkMap contain " + shapeList.get(0).getGroupName());
 			if (existLinkBetween(shapeList.get(0), shapeList.get(1))) {
 
 				if (isDoubleLinkedAssociation(shapeList.get(0)) || linkMap.get(shapeList.get(0)).size() == 1) {
@@ -945,12 +925,12 @@ public class ShapePanel extends JPanel {
 //					int index = 0, range = 0;
 //					for (Cardinality cardinality : ((Association) componentMap.get(shapeList.get(0)))
 //							.getCardinalityList()) {
-//						System.out.println("--- index : " + index + " range : " + range);
-//						System.out.println("--- cardName : " + cardinality.getNomEntity() + " shapeList : "
+//						.println("--- index : " + index + " range : " + range);
+//						.println("--- cardName : " + cardinality.getNomEntity() + " shapeList : "
 //								+ shapeList.get(1).getGroupName());
 //						if (cardinality.getNomEntity().equals(shapeList.get(1).getGroupName())) {
 //							index = range;
-//							System.out.println("--- Cardinality founded in " + shapeList.get(0).getGroupName() + " for "
+//							.println("--- Cardinality founded in " + shapeList.get(0).getGroupName() + " for "
 //									+ cardinality.getNomEntity());
 //						}
 //						range++;
@@ -958,13 +938,11 @@ public class ShapePanel extends JPanel {
 
 //					((Association) componentMap.get(shapeList.get(0))).getCardinalityList().remove(index);
 					((Association) componentMap.get(shapeList.get(0))).setCardinalityList(newCardinalityList);
-					System.out.println("--- removing value");
 				}
 
 			}
 		}
 
-		System.out.println("[ShapePanel]  " + linkMap.containsKey(shapeList.get(0)));
 	}
 
 	public void removeShape(ShapeGroup shape) {
